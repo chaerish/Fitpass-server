@@ -1,7 +1,7 @@
 ---
 name: "\U0001F41B [Fix] 수정"
 about: 오류 수정을 위한 이슈 템플릿
-title: "\U0001F41B [Fix]"
+title: "\U0001F41B [Fix] "
 labels: "\U0001F41Bbug"
 assignees: ''
 
