@@ -67,12 +67,15 @@ public class Member extends BaseEntity {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Coin> CoinList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<CoinPaymentHistory> CoinPaymentHistoryList = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberFitness> MemberFitnessList = new ArrayList<>();
 
