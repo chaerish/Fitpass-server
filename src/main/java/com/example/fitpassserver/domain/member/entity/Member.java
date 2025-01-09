@@ -78,4 +78,8 @@ public class Member extends BaseEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberFitness> MemberFitnessList = new ArrayList<>();
 
+    public void encodePassword(String password) {
+        this.password = password;
+    }
+
 }
