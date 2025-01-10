@@ -9,6 +9,7 @@ import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +66,13 @@ public class Member extends BaseEntity {
 
     @Column(name = "profile_image")
     private String profileImage;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(15)")
+    public MemberStatus status;
+
+    @Column(name = "inactive_date")
+    public LocalDateTime inactiveDate;
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)

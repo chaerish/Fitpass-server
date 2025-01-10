@@ -6,7 +6,6 @@ import com.example.fitpassserver.global.jwt.filter.JwtFilter;
 import com.example.fitpassserver.global.jwt.handler.JwtAccessDeniedHandler;
 import com.example.fitpassserver.global.jwt.handler.JwtAuthenticationEntryPoint;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
-import io.jsonwebtoken.Jwt;
 import jakarta.servlet.Filter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;

@@ -9,6 +9,8 @@ import com.example.fitpassserver.domain.member.service.command.MemberCommandServ
 import com.example.fitpassserver.domain.member.validation.validator.CheckLoginIdValidator;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -45,5 +47,15 @@ public class MemberController {
     public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginId request){
         return ApiResponse.onSuccess(null);
     }
+
+    @Operation(summary = "로그인 api", description = "로그인을 위한 api입니다.")
+    @Parameters({
+            @Parameter(name = "dto", description = "로그인을 위한 아이디와 비밀번호 입력 DTO")
+    })
+    @PostMapping("/login")
+    public ApiResponse<MemberResponseDTO.MemberTokenDTO> login(@RequestBody MemberRequestDTO.LoginDTO dto) {
+        return ApiResponse.onSuccess(memberCommandService.login(dto));
+    }
+
 
 }

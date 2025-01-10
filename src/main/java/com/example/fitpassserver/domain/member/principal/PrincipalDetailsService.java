@@ -21,6 +21,10 @@ public class PrincipalDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String loginId) throws UsernameNotFoundException {
         Member member = memberRepository.findByLoginId(loginId).orElseThrow(() ->
                 new MemberException(MemberErrorCode.NOT_FOUND));
-        return new PrincipalDetails(member);
+        return org.springframework.security.core.userdetails.User
+                .withUsername(member.getLoginId())
+                .password(member.getPassword())
+                .roles(member.getRole().name())
+                .build();
     }
 }
