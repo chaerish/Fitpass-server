@@ -35,17 +35,17 @@ public class Member extends BaseEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+//    @Column(name = "email")
+//    private String email;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
 
-    @Column(name = "provider", nullable = false)
+    @Column(name = "provider",nullable = true)
     private String provider;
 
-    @Column(name = "provider_id", nullable = false)
+    @Column(name = "provider_id")
     private String providerId;
 
     @Column(name = "is_agree", nullable = false)

@@ -32,6 +32,11 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
+            "/auth/register",
+            "/auth/phoneNumberCheck",
+            "/auth/verification",
+            "auth/login",
+            "auth/checkLoginId"
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
