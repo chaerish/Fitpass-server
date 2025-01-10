@@ -81,4 +81,19 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 .refreshToken(newRefreshToken)
                 .build();
     }
+
+    /** 회원 탈퇴(soft delete) **/
+    @Transactional
+    @Override
+    public void deactivateAccount(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND)); // 회원이 없으면 예외 발생
+
+        member.deactivateAccount(); // 탈퇴 메서드 호출
+
+        memberRepository.save(member); // 상태 변경된 엔티티 저장
+    }
+
+
+
 }

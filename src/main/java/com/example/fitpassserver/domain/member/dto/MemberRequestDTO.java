@@ -1,8 +1,6 @@
 package com.example.fitpassserver.domain.member.dto;
 
-import com.example.fitpassserver.domain.member.entity.Role;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -76,12 +74,22 @@ public class MemberRequestDTO {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CheckLoginId {
+    public static class CheckLoginIdDTO {
         @NotBlank(message = "아이디는 필수 입력 값입니다.")
         @Pattern( regexp = "^[a-zA-Z0-9]{4,12}$", message="영어와 숫자를 사용하여 4-12자의 아이디를 입력해주세요.")
         String loginId;
     }
-
+    /** 아이디 찾기 dto **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public class FindLoginIdDTO{
+        @NotNull
+        private String name;
+        @NotNull
+        private String phoneNumber;
+    }
 
 
 }

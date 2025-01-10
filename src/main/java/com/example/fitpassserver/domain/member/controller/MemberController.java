@@ -20,7 +20,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +45,7 @@ public class MemberController {
     }
     @Operation(summary = "아이디 중복 확인 api", description = "중복 아이디 확인을 위한 api입니다.")
     @GetMapping("/checkLoginId")
-    public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginId request){
+    public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginIdDTO request){
         return ApiResponse.onSuccess(null);
     }
 
@@ -59,7 +58,7 @@ public class MemberController {
         return ApiResponse.onSuccess(memberCommandService.login(dto));
     }
 
-    @Operation(summary = "리프레시 토큰 갱신 api", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰 발급하는 api입니다..")
+    @Operation(summary = "리프레시 토큰 갱신 api", description = "리프레시 토큰을 사용하여 새로운 액세스 토큰 발급하는 api입니다.")
     @Parameters({
             @Parameter(name = "Refresh-Token", description = "리프레시 토큰")
     })
@@ -84,6 +83,12 @@ public class MemberController {
         // 토큰 재발급
         MemberResponseDTO.MemberTokenDTO tokenResponse = memberCommandService.refreshToken(refreshToken);
         return ApiResponse.onSuccess(tokenResponse);
+    }
+    @Operation(summary = "사용자 탈퇴 api",description = "사용자 탈퇴시 사용하는 api입니다..")
+    @DeleteMapping("/{memberId}")
+    public ApiResponse<Void> deleteMember(@PathVariable Long memberId) {
+        memberCommandService.deactivateAccount(memberId); // 회원 탈퇴 처리
+        return ApiResponse.onSuccess(null); // HTTP 204 No Content 응답
     }
 
 

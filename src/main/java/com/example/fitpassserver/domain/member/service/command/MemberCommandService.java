@@ -8,4 +8,6 @@ public interface MemberCommandService {
     Member joinMember(MemberRequestDTO.JoinDTO request);
     MemberResponseDTO.MemberTokenDTO login(MemberRequestDTO.LoginDTO dto);
     MemberResponseDTO.MemberTokenDTO refreshToken(String refreshToken);
+    void deactivateAccount(Long memberId);
+
 }
