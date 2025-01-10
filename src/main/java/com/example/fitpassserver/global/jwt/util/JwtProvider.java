@@ -1,6 +1,10 @@
 package com.example.fitpassserver.global.jwt.util;
 
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.entity.MemberStatus;
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.jwt.exception.AuthException;
 import com.example.fitpassserver.global.jwt.exception.JwtErrorCode;
 import io.jsonwebtoken.*;
@@ -18,14 +22,16 @@ import java.util.Map;
 @Component
 public class JwtProvider {
 
+    private final MemberRepository memberRepository;
     private SecretKey secret;
     private long accessExpiration;
     private long refreshExpiration;
 
-    public JwtProvider(@Value("${Jwt.secret}") String secret, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
+    public JwtProvider(MemberRepository memberRepository,@Value("${Jwt.secret}") String secret, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.secret = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpiration = accessExpiration;
         this.refreshExpiration = refreshExpiration;
+        this.memberRepository= memberRepository;
     }
 
     public String createAccessToken(Member member) {
@@ -76,6 +82,27 @@ public class JwtProvider {
     //loginId 추출
     public String getLoginId(String token) {
         return getClaims(token).getBody().getSubject();
+    }
+
+    //토큰 만료 확인
+    public boolean validateToken(String token) {
+        try {
+            Jws<Claims> claims = getClaims(token);
+            String loginId = claims.getBody().getSubject();
+
+            // 사용자 상태 확인
+            Member member = memberRepository.findByLoginId(loginId)
+                    .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+            if (member.getStatus() == MemberStatus.INACTIVE) {
+                throw new MemberException(MemberErrorCode.INACTIVE_ACCOUNT);
+            }
+
+            return !claims.getBody().getExpiration().before(new Date());
+        } catch (JwtException e) {
+            log.error("Invalid JWT token: {}", e.getMessage());
+            return false;
+        }
     }
 
 }

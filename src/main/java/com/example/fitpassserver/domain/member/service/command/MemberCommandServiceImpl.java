@@ -57,4 +57,28 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 .refreshToken(jwtProvider.createRefreshToken(member))
                 .build();
     }
+    /** 토큰 재발급 */
+    @Override
+    public MemberResponseDTO.MemberTokenDTO refreshToken(String refreshToken) {
+        // Refresh Token 유효성 검증
+        if (!jwtProvider.validateToken(refreshToken)) {
+            throw new MemberException(MemberErrorCode.INVALID_TOKEN);
+        }
+
+        // Refresh Token에서 이메일 추출
+        String tokenLoginId = jwtProvider.getLoginId(refreshToken);
+
+        // 해당 이메일의 회원 정보 가져오기
+        Member member = memberRepository.findByLoginId(tokenLoginId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        // 새로운 토큰 생성
+        String newAccessToken = jwtProvider.createAccessToken(member);
+        String newRefreshToken = jwtProvider.createRefreshToken(member);
+
+        return MemberResponseDTO.MemberTokenDTO.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken)
+                .build();
+    }
 }

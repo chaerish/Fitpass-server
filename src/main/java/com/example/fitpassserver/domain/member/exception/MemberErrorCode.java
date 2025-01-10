@@ -13,6 +13,7 @@ public enum MemberErrorCode implements BaseErrorCode {
     INCORRECT_PASSWORD(HttpStatus.UNAUTHORIZED, "MEMBER401", "비밀번호가 틀립니다."),
     INACTIVE_ACCOUNT(HttpStatus.FORBIDDEN, "MEMBER403", "비활성화된 계정입니다."),
     INVALID_VERIFICATION_CODE(HttpStatus.NOT_FOUND, "CODE400", "인증번호가 맞지 않습니다."),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN401", "유효하지 않은 토큰입니다."),
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "PHONE409", "이미 가입된 번호입니다.");
     private final HttpStatus status;
     private final String code;

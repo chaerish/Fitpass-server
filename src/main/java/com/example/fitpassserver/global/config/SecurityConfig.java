@@ -35,7 +35,8 @@ public class SecurityConfig {
             "/auth/phoneNumberCheck",
             "/auth/verification",
             "auth/login",
-            "auth/checkLoginId"
+            "auth/checkLoginId",
+            "auth/refresh",
     };
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
