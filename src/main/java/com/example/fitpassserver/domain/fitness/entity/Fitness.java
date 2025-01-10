@@ -55,5 +55,13 @@ public class Fitness extends BaseEntity {
     @Column(name = "distance", nullable = false)
     private Double distance;
 
+    @Column(name = "is_recommand", nullable = false)
+    private Boolean isRecommand;
 
+    public void Id(Long fitnessId) {
+        this.id = fitnessId;
+    }
+    public String getName() {
+        return fitnessName;
+    }
 }
