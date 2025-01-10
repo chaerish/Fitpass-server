@@ -34,4 +34,18 @@ public class Review extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fitness_id", nullable = false)
     private Fitness fitness;
+
+
+    public void setMemberFitness(MemberFitness memberFitness) {
+        this.memberFitness = memberFitness;
+    }
+
+    public void setFitness(Fitness fitness){
+        this.fitness = fitness;
+    }
+
+    public void update(String content, double score){
+        this.content = content;
+        this.score = score;
+    }
 }
