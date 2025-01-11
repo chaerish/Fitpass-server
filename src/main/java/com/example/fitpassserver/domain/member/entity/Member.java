@@ -3,12 +3,17 @@ package com.example.fitpassserver.domain.member.entity;
 import com.example.fitpassserver.domain.CoinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.global.entity.BaseEntity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,6 +22,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@Where(clause = "is_deleted = false")
 @Table(name = "member")
 public class Member extends BaseEntity {
     @Id
@@ -35,17 +42,17 @@ public class Member extends BaseEntity {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(name = "email", nullable = false)
-    private String email;
+//    @Column(name = "email")
+//    private String email;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
 
-    @Column(name = "provider", nullable = false)
+    @Column(name = "provider",nullable = true)
     private String provider;
 
-    @Column(name = "provider_id", nullable = false)
+    @Column(name = "provider_id")
     private String providerId;
 
     @Column(name = "is_agree", nullable = false)
@@ -66,6 +73,16 @@ public class Member extends BaseEntity {
     @Column(name = "profile_image")
     private String profileImage;
 
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(15)")
+    public MemberStatus status;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Coin> CoinList = new ArrayList<>();
@@ -77,5 +94,16 @@ public class Member extends BaseEntity {
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<MemberFitness> MemberFitnessList = new ArrayList<>();
+
+    public void encodePassword(String password) {
+        this.password = password;
+    }
+    //status 변경
+    public void deactivateAccount() {
+        if (this.status == MemberStatus.INACTIVE) {
+            throw new MemberException(MemberErrorCode.ALREADY_DELETED);
+        }
+        this.status = MemberStatus.INACTIVE;
+    }
 
 }
