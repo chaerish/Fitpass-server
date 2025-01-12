@@ -23,7 +23,7 @@ public class Plan extends BaseEntity {
     @Column(name = "plan_name", nullable = false)
     private PlanName planName;
 
-    @Column(name = "plan_date",, nullable = false)
+    @Column(name = "plan_date", nullable = false)
     private LocalDate planDate;
 
     @OneToOne
