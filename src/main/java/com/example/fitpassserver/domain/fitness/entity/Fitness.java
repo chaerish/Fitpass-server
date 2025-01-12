@@ -3,6 +3,7 @@ package com.example.fitpassserver.domain.fitness.entity;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -17,7 +18,7 @@ public class Fitness extends BaseEntity {
     private Long id;
 
     @Column(name = "fitness_name", nullable = false)
-    private String fitnessName;
+    private String name;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -55,13 +56,10 @@ public class Fitness extends BaseEntity {
     @Column(name = "distance", nullable = false)
     private Double distance;
 
-    @Column(name = "is_recommand", nullable = false)
-    private Boolean isRecommand;
+    @Column(name = "is_recommend", nullable = false)
+    private Boolean isRecommend;
 
-    public void Id(Long fitnessId) {
-        this.id = fitnessId;
-    }
-    public String getName() {
-        return fitnessName;
-    }
+    @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Category> categoryList;
+
 }
