@@ -47,7 +47,7 @@ public class JwtProvider {
         Instant expiredAt = issuedAt.plusMillis(expiration);
         return Jwts.builder()
                 .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
-                .setSubject(member.getPhoneNumber())
+                .setSubject(member.getLoginId())
                 .claim("id", member.getId())
                 .setIssuedAt(Date.from(issuedAt))
                 .setExpiration(Date.from(expiredAt))
