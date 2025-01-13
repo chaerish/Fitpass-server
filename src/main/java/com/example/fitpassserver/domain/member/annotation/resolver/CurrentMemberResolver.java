@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.member.annotation.resolver;
 
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.service.query.MemberQueryService;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AuthenticatedMemberResolver implements HandlerMethodArgumentResolver {
+public class CurrentMemberResolver implements HandlerMethodArgumentResolver {
 
     private final JwtProvider jwtProvider;
     private final MemberQueryService memberQueryService;
