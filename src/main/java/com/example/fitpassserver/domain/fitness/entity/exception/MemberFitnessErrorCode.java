@@ -9,7 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum MemberFitnessErrorCode implements BaseErrorCode {
 
     MEMBER_FITNESS_POLICY_NOT_AGREE(HttpStatus.BAD_REQUEST, "PASS400_1", "패스에 대한 정책 동의가 필요합니다."),
-    NOT_ENOUGH_COIN(HttpStatus.BAD_REQUEST, "PASS400_2", "패스 구매에 필요한 코인이 부족합니다.");
+    NOT_ENOUGH_COIN(HttpStatus.BAD_REQUEST, "PASS400_2", "패스 구매에 필요한 코인이 부족합니다."),
+    EXIST_PASS(HttpStatus.BAD_REQUEST, "PASS400_3", "이미 구매한 패스가 존재합니다."),
     ;
 
     private final HttpStatus status;

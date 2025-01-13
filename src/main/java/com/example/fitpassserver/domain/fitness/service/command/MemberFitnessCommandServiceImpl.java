@@ -41,6 +41,11 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         Fitness fitness = fitnessRepository.findById(dto.getFitnessId()).orElseThrow(() ->
                 new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
+        // 이미 구매한 패스가 존재하는 경우 예외 처리
+        memberFitnessRepository.findByMemberIsAndFitnessIs(member, fitness).ifPresent(value -> {
+            throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
+        });
+
         MemberFitness memberFitness = createMemberFitness(member, fitness, dto);
 
         // FitnessPaymentHistory 생성
