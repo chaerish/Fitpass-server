@@ -1,4 +1,4 @@
-package com.example.fitpassserver.domain.fitness.entity.exception;
+package com.example.fitpassserver.domain.fitness.exception;
 
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import com.example.fitpassserver.global.apiPayload.code.BaseErrorCode;
@@ -13,7 +13,13 @@ public enum FitnessErrorCode implements BaseErrorCode {
     PASS_NOT_FOUND(HttpStatus.NOT_FOUND,
             "PASS404_1", "해당 패스가 존재하지 않습니다."),
     INVALID_PASS(HttpStatus.BAD_REQUEST,
-            "PASS400_1", "유효하지 않은 패스입니다.")
+            "PASS400_1", "유효하지 않은 패스입니다."),
+    UNAVAILABLE_PASS(HttpStatus.BAD_REQUEST,
+            "PASS400_2", "사용할 수 없는 패스입니다."),
+    AGREEMENT_NOT_CHECKED(HttpStatus.BAD_REQUEST,
+            "PASS400_3", "동의 항목을 체크해야 합니다."),
+    USER_MISMATCH(HttpStatus.BAD_REQUEST,
+            "PASS400_4", "로그인한 유저와 패스의 유저가 일치하지 않습니다."),
     ;
 
 

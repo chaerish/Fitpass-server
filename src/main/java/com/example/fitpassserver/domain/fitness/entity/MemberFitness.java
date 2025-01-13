@@ -23,7 +23,7 @@ public class MemberFitness extends BaseEntity {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "active_time", nullable = false)
+    @Column(name = "active_time")
     private LocalDateTime activeTime;
 
     @Column(name = "is_agree", nullable = false)
@@ -37,4 +37,8 @@ public class MemberFitness extends BaseEntity {
     @JoinColumn(name = "fitness_id", nullable = false)
     private Fitness fitness;
 
+    public void use(){
+        this.activeTime = LocalDateTime.now();
+        this.status = Status.PROGRESS;
+    }
 }
