@@ -1,9 +1,9 @@
 package com.example.fitpassserver.domain.fitness.Controller.response;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 @Builder
 public class FitnessDetailResponse {
     private Long fitnessId;

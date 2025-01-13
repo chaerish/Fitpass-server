@@ -1,9 +1,6 @@
 package com.example.fitpassserver.domain.fitness.Controller;
 
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessDetailResponse;
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessListResponse;
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessRecommendResponse;
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessSearchResponse;
+import com.example.fitpassserver.domain.fitness.Controller.response.*;
 import com.example.fitpassserver.domain.fitness.Service.FitnessDetailService;
 import com.example.fitpassserver.domain.fitness.Service.FitnessListService;
 import com.example.fitpassserver.domain.fitness.Service.FitnessRecommendService;
@@ -29,17 +26,20 @@ public class FitnessController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<FitnessListResponse>>> getFitnessList(
+    public ResponseEntity<ApiResponse<CursorPaginationResponse<FitnessListResponse>>> getFitnessList(
             @RequestParam String category,
-            @RequestParam String sort,
+            @RequestParam(required = false, defaultValue = "distance") String sort, // 정렬 기준 (distance, lowPrice, highPrice)
             @RequestParam double latitude,
             @RequestParam double longitude,
-            @RequestParam int page,
-            @RequestParam int size
+            @RequestParam(required = false) Long cursor, // 커서 값 (Optional, 처음 요청 시 null)
+            @RequestParam(defaultValue = "10") int size // 페이지 크기 (기본: 10)
     ) {
-        List<FitnessListResponse> result = fitnessListService.getFitnessList(category, sort, latitude, longitude, page, size);
+        CursorPaginationResponse<FitnessListResponse> result = fitnessListService.getFitnessList(
+                category, sort, latitude, longitude, cursor, size
+        );
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
+
     @GetMapping("/recommend")
     public ResponseEntity<ApiResponse<List<FitnessRecommendResponse>>> recommendFitness(
             @RequestParam double latitude,

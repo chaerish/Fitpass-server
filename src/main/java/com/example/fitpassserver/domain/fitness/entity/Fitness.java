@@ -3,6 +3,8 @@ package com.example.fitpassserver.domain.fitness.entity;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -60,6 +62,7 @@ public class Fitness extends BaseEntity {
     private Boolean isRecommend;
 
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Category> categoryList;
+    @Builder.Default
+    private List<Category> categoryList = new ArrayList<>();
 
 }
