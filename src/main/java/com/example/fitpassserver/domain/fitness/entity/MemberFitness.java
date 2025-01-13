@@ -23,7 +23,7 @@ public class MemberFitness extends BaseEntity {
     @Column(name = "status", nullable = false)
     private Status status;
 
-    @Column(name = "active_time", nullable = false)
+    @Column(name = "active_time")
     private LocalDateTime activeTime;
 
     @Column(name = "is_agree", nullable = false)
