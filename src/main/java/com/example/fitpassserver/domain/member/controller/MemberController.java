@@ -7,6 +7,7 @@ import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.service.command.MemberCommandService;
 import com.example.fitpassserver.domain.member.validation.validator.CheckLoginIdValidator;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -20,6 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +34,7 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
     private final CheckLoginIdValidator checkLoginIdValidator; //중복 아이디 체크
 
-    @InitBinder
+    @InitBinder("joinDTO")
     public void validatorBinder(WebDataBinder binder) {
         binder.addValidators(checkLoginIdValidator);
     }
@@ -91,5 +93,10 @@ public class MemberController {
         return ApiResponse.onSuccess(null); // HTTP 204 No Content 응답
     }
 
-
+    @Operation(summary = "소셜 로그인 후 추가 정보 입력받아 회원가입하는 api", description = "소셜 로그인 이후 추가 정보를 입력받아 회원가입하는 api입니다.")
+    @PostMapping("/oauth2/register")
+    public ApiResponse<?> oAuth2Join(@RequestBody @Valid MemberRequestDTO.SocialJoinDTO request, @CookieValue(value = "accessToken") String accessToken) {
+        Member updatedMember = memberCommandService.socialJoinMember(request, accessToken);
+        return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(updatedMember));
+    }
 }

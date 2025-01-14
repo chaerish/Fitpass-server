@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,10 +27,23 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final PrincipalDetailsService principalDetailsService;
+    private final List<String> notJwtPaths = List.of(
+            "/auth/login",
+            "/auth/register",
+            "/auth/oauth2/google",
+            "/auth/oauth2/success"
+    );
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        // 구현할 부분
+        String requestPath = request.getRequestURI();
+
+        // JWT 검증 우회 경로 확인
+        if (isNotJwtPath(requestPath)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         try {
             String header = request.getHeader("Authorization");
             if (header != null && header.startsWith("Bearer ")) {
@@ -57,5 +71,9 @@ public class JwtFilter extends OncePerRequestFilter {
             om.writeValue(response.getOutputStream(), customResponse);
 
         }
+    }
+
+    private boolean isNotJwtPath(String path) {
+        return notJwtPaths.stream().anyMatch(path::startsWith);
     }
 }
