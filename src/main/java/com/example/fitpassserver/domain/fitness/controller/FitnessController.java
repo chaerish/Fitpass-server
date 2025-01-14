@@ -1,10 +1,10 @@
-package com.example.fitpassserver.domain.fitness.Controller;
+package com.example.fitpassserver.domain.fitness.controller;
 
-import com.example.fitpassserver.domain.fitness.Controller.response.*;
-import com.example.fitpassserver.domain.fitness.Service.FitnessDetailService;
-import com.example.fitpassserver.domain.fitness.Service.FitnessListService;
-import com.example.fitpassserver.domain.fitness.Service.FitnessRecommendService;
-import com.example.fitpassserver.domain.fitness.Service.FitnessSearchService;
+import com.example.fitpassserver.domain.fitness.controller.response.*;
+import com.example.fitpassserver.domain.fitness.service.FitnessDetailService;
+import com.example.fitpassserver.domain.fitness.service.FitnessListService;
+import com.example.fitpassserver.domain.fitness.service.FitnessRecommendService;
+import com.example.fitpassserver.domain.fitness.service.FitnessSearchService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

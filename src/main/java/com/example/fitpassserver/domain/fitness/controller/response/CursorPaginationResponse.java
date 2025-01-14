@@ -1,4 +1,4 @@
-package com.example.fitpassserver.domain.fitness.Controller.response;
+package com.example.fitpassserver.domain.fitness.controller.response;
 
 import java.util.List;
 

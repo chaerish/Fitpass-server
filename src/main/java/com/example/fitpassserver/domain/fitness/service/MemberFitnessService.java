@@ -2,9 +2,9 @@ package com.example.fitpassserver.domain.fitness.service;
 
 
 import com.example.fitpassserver.domain.fitness.converter.MemberFitnessConverter;
+import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
-import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.MemberFitnessRepository;

@@ -1,7 +1,7 @@
 package com.example.fitpassserver.domain.fitness.converter;
 
-import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
+import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 
 import java.util.ArrayList;
 import java.util.List;
