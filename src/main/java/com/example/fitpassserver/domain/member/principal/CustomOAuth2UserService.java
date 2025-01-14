@@ -1,11 +1,8 @@
 package com.example.fitpassserver.domain.member.principal;
 
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.oauth.OAuthAttributes;
-import com.example.fitpassserver.global.oauth.provider.GoogleOAuth2UserInfo;
-import com.example.fitpassserver.global.oauth.provider.OAuth2UserInfo;
 import java.util.Collections;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -34,11 +31,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
+
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
         Map<String, Object> attributes = oAuth2User.getAttributes();
 
-        OAuthAttributes extractAttributes = OAuthAttributes.of(userNameAttributeName, attributes);
+        OAuthAttributes extractAttributes = OAuthAttributes.of(registrationId, userNameAttributeName, attributes);
 
         Member createdMember = getMember(extractAttributes);
 
