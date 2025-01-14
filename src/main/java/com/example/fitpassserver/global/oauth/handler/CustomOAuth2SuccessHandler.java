@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -22,10 +23,14 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     private final JwtProvider jwtProvider;
     private final MemberRepository memberRepository;
+    private final long accessExpiration;
+    private final long refreshExpiration;
 
-    public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository) {
+    public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.jwtProvider = jwtProvider;
         this.memberRepository = memberRepository;
+        this.accessExpiration = accessExpiration;
+        this.refreshExpiration = refreshExpiration;
     }
 
     @Override
@@ -41,8 +46,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String refreshToken = jwtProvider.createRefreshToken(member);
 
         // 쿠키 설정
-        addCookie(response, "accessToken", accessToken, 60 * 60 * 24); // 1일
-        addCookie(response, "refreshToken", refreshToken, 60 * 60 * 24); // 1일
+        addCookie(response, "accessToken", accessToken, (int) (accessExpiration / 1000));
+        addCookie(response, "refreshToken", refreshToken, (int) (refreshExpiration / 1000));
 
         if (!member.isAdditionalInfo()) {
             addCookie(response, "status", "additionalInfo", 60 * 5); // 상태 쿠키 설정 (5분)
