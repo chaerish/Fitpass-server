@@ -3,9 +3,9 @@ package com.example.fitpassserver.domain.review.service;
 
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
-import com.example.fitpassserver.domain.fitness.entity.exception.FitnessErrorCode;
-import com.example.fitpassserver.domain.fitness.entity.exception.FitnessException;
-import com.example.fitpassserver.domain.fitness.entity.repository.MemberFitnessRepository;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
+import com.example.fitpassserver.domain.fitness.repository.MemberFitnessRepository;
 import com.example.fitpassserver.domain.review.converter.ReviewConverter;
 import com.example.fitpassserver.domain.review.dto.request.ReviewReqDTO;
 import com.example.fitpassserver.domain.review.dto.response.ReviewResDTO;

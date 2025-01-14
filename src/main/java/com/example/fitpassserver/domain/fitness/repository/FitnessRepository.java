@@ -1,4 +1,4 @@
-package com.example.fitpassserver.domain.fitness.entity.repository;
+package com.example.fitpassserver.domain.fitness.repository;
 
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import org.springframework.data.jpa.repository.JpaRepository;

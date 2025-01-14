@@ -1,4 +1,4 @@
-package com.example.fitpassserver.domain.fitness.entity.exception;
+package com.example.fitpassserver.domain.fitness.exception;
 
 import com.example.fitpassserver.global.apiPayload.exception.GeneralException;
 
