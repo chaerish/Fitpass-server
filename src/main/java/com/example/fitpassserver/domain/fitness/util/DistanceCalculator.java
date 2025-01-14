@@ -1,4 +1,4 @@
-package com.example.fitpassserver.domain.fitness.Util;
+package com.example.fitpassserver.domain.fitness.util;
 import org.springframework.stereotype.Service;
 
 @Service

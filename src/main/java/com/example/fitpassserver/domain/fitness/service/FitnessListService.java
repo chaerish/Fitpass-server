@@ -1,11 +1,11 @@
-package com.example.fitpassserver.domain.fitness.Service;
+package com.example.fitpassserver.domain.fitness.service;
 
-import com.example.fitpassserver.domain.fitness.Controller.response.CursorPaginationResponse;
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessListResponse;
-import com.example.fitpassserver.domain.fitness.Repository.FitnessRepository;
-import com.example.fitpassserver.domain.fitness.Util.DistanceCalculator;
-import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.controller.response.CursorPaginationResponse;
+import com.example.fitpassserver.domain.fitness.controller.response.FitnessListResponse;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
+import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
+import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;

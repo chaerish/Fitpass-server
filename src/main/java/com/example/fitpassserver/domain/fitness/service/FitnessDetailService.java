@@ -1,10 +1,10 @@
-package com.example.fitpassserver.domain.fitness.Service;
+package com.example.fitpassserver.domain.fitness.service;
 
-import com.example.fitpassserver.domain.fitness.Controller.response.FitnessDetailResponse;
-import com.example.fitpassserver.domain.fitness.Repository.FitnessRepository;
-import com.example.fitpassserver.domain.fitness.Util.DistanceCalculator;
-import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.controller.response.FitnessDetailResponse;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
+import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
+import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
