@@ -33,10 +33,11 @@ public enum CoinType {
         return Duration.ofDays(deadLine);
     }
 
-    public static CoinType getCoinType(int price) {
+    public static CoinType getCoinType(int price, int quantity) {
+        int value = price / quantity;
         CoinType unit = null;
         for (CoinType coinType : CoinType.values()) {
-            if (coinType.price % price == 0) {
+            if (coinType.price == value) {
                 unit = coinType;
                 break;
             }
