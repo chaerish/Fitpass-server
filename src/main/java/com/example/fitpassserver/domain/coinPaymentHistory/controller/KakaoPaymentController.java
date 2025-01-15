@@ -41,7 +41,7 @@ public class KakaoPaymentController {
                                                                 @RequestParam("pg_token") String pgToken) {
         CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
         KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, history.getTid());
-
+        coinService.createNewCoin(member, history, dto);
         coinPaymentHistoryService.approve(history);
         return ApiResponse.onSuccess(dto);
     }
