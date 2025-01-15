@@ -37,4 +37,6 @@ out/
 .vscode/
 
 ### yml ###
-application.yml
+application-dev.yml
+application-staging.yml
+application-prod.yml
