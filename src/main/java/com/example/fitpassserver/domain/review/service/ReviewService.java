@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.MemberFitnessRepository;
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.review.converter.ReviewConverter;
 import com.example.fitpassserver.domain.review.dto.request.ReviewReqDTO;
 import com.example.fitpassserver.domain.review.dto.response.ReviewResDTO;
@@ -14,7 +15,6 @@ import com.example.fitpassserver.domain.review.exception.ReviewErrorCode;
 import com.example.fitpassserver.domain.review.exception.ReviewException;
 import com.example.fitpassserver.domain.review.repsotiory.ReviewRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -28,13 +28,18 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberFitnessRepository memberFitnessRepository;
 
-    public Long createReview(Long passId ,ReviewReqDTO.CreateReviewReqDTO dto){
+    public Long createReview(Member member, Long passId , ReviewReqDTO.CreateReviewReqDTO dto){
 
         if(!dto.isAgree()){
             throw new ReviewException(ReviewErrorCode.REVIEW_POLICY_NOT_AGREED);
         }
 
         MemberFitness pass = memberFitnessRepository.findById(passId).orElseThrow(() -> new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
+
+        if(!member.getId().equals(pass.getMember().getId())){
+            throw new FitnessException(FitnessErrorCode.USER_MISMATCH);
+        }
+
         if(!pass.getStatus().equals(Status.DONE)){
             throw new FitnessException(FitnessErrorCode.INVALID_PASS);
         }
@@ -63,14 +68,22 @@ public class ReviewService {
         return ReviewConverter.toPageDto(reviewRepository.findByFitnessId(fitnessId, pageable));
     }
 
-    public void updateReview(Long reviewId, ReviewReqDTO.UpdateReviewReqDTO dto){
+    public void updateReview(Member member, Long reviewId, ReviewReqDTO.UpdateReviewReqDTO dto){
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_NOT_FOUND));
+        validMember(member, review);
         review.update(dto.getContent(), dto.getScore());
     }
 
-    public void deleteReview(Long reviewId){
+    public void deleteReview(Member member, Long reviewId){
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_NOT_FOUND));
+        validMember(member, review);
         reviewRepository.delete(review);
+    }
+
+    private void validMember (Member member, Review review){
+        if(!review.getMemberFitness().getMember().getId().equals(member.getId())){
+            throw new FitnessException(FitnessErrorCode.INVALID_PASS);
+        }
     }
 
 }

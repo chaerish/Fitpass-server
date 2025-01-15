@@ -113,4 +113,12 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         return memberRepository.save(member);
     }
+
+    @Override
+    @Transactional
+    public void setLocation(String loginId, MemberRequestDTO.LocationDTO dto) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        member.setLocation(dto.getLatitude(), dto.getLongitude());
+    }
 }
