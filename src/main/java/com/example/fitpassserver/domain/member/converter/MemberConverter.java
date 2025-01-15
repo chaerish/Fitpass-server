@@ -30,6 +30,7 @@ public class MemberConverter {
                 .isLocationAgreed(request.isLocationAgreed())
                 .isThirdPartyAgreed(request.isThirdPartyAgreed())
                 .isMarketingAgreed(request.isMarketingAgreed())
+                .isAdditionalInfo(false)
                 .build();
     }
 }

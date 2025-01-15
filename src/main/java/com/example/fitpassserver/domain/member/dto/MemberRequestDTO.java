@@ -47,6 +47,39 @@ public class MemberRequestDTO {
 
     }
 
+    /** 소셜 로그인 후 회원가입 dto **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SocialJoinDTO {
+        @NotBlank(message = "전화번호는 필수 입력 값입니다.")
+        private String phoneNumber;
+
+        @NotBlank
+        private String name;
+
+        @NotNull
+        @JsonProperty("agree")
+        private boolean isAgree;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("termsAgreed")
+        private boolean isTermsAgreed;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("locationAgreed")
+        private boolean isLocationAgreed;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("thirdPartyAgreed")
+        private boolean isThirdPartyAgreed;
+
+        @NotNull
+        @JsonProperty("marketingAgreed")
+        private boolean isMarketingAgreed;
+    }
+
 
     /** 로그인 요청 DTO */
     @Getter

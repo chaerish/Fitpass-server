@@ -4,6 +4,9 @@ import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -17,7 +20,7 @@ public class Fitness extends BaseEntity {
     private Long id;
 
     @Column(name = "fitness_name", nullable = false)
-    private String fitnessName;
+    private String name;
 
     @Column(name = "address", nullable = false)
     private String address;
@@ -55,5 +58,11 @@ public class Fitness extends BaseEntity {
     @Column(name = "distance", nullable = false)
     private Double distance;
 
+    @Column(name = "is_recommend", nullable = false)
+    private Boolean isRecommend;
+
+    @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Category> categoryList = new ArrayList<>();
 
 }
