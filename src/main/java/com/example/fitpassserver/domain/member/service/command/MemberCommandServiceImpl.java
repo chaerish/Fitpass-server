@@ -2,14 +2,20 @@ package com.example.fitpassserver.domain.member.service.command;
 
 import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
+import com.example.fitpassserver.domain.member.dto.MemberRequestDTO.SocialJoinDTO;
 import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
+import com.example.fitpassserver.domain.member.dto.MemberResponseDTO.MemberTokenDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.MemberStatus;
+import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,6 +100,25 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         memberRepository.save(member); // 상태 변경된 엔티티 저장
     }
 
+    @Override
+    @Transactional
+    public Member socialJoinMember(MemberRequestDTO.SocialJoinDTO request, String accessToken) {
+        String loginId = jwtProvider.getLoginId(accessToken);
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
+        member.socialJoin(request);
+        member.updateRole(Role.MEMBER);
+        member.updateIsAdditionInfo(true);
 
+        return memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional
+    public void setLocation(String loginId, MemberRequestDTO.LocationDTO dto) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        member.setLocation(dto.getLatitude(), dto.getLongitude());
+    }
 }
