@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/notice")
@@ -20,10 +21,10 @@ public class NoticeController {
         this.noticeService = noticeService;
     }
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<NoticeListResponse>>> getNoticeList(
+    public ResponseEntity<ApiResponse<Map<String, Object>>> getNoticeList(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<NoticeListResponse> noticePage = noticeService.getNoticeList(PageRequest.of(page, size));
+        Map<String, Object> noticePage = noticeService.getNoticeList(PageRequest.of(page, size));
         return ResponseEntity.ok(ApiResponse.onSuccess(noticePage));
     }
 
