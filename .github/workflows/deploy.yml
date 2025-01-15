@@ -42,7 +42,7 @@ jobs:
           sudo docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }} . 
           sudo docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}
 
-      ## Docker compose로 배포
+      ## Docker
       - name: deploy
         uses: appleboy/ssh-action@master
         with:
@@ -51,7 +51,14 @@ jobs:
           key: ${{ secrets.AWS_KEY }}
           envs: GITHUB_SHA
           script: |
-            cd ${{ secrets.DOCKER_COMPOSE_PATH }}
-            sudo docker login -u ${{secrets.DOCKER_HUB_USERNAME}} -p ${{secrets.DOCKER_ACCESS_TOKEN}}
-            sudo docker pull ${{secrets.DOCKER_HUB_USERNAME}}/${{ secrets.DOCKER_REPOSITORY }}
-            sudo docker-compose -f docker-compose.yml up -d
+            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+            sudo docker stop fitpass-app || true
+            sudo docker rm fitpass-app || true
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+            sudo docker run -d \
+              --name fitpass-app \
+              -p 8080:8080 \
+              --network fitpass \
+              --restart always \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
