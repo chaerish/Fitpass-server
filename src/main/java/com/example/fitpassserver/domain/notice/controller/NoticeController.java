@@ -1,11 +1,9 @@
 package com.example.fitpassserver.domain.notice.controller;
 
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
-import com.example.fitpassserver.domain.notice.controller.response.NoticeListResponse;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
