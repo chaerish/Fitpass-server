@@ -20,8 +20,8 @@ public class CoinService {
     //결제 성공시 Coin 엔티티 증가
     public void createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
         int price = dto.amount().total();
-        Long quantity = (long) dto.quantity();
-        CoinType type = CoinType.getCoinType(price);
+        int quantity = dto.quantity();
+        CoinType type = CoinType.getCoinType(price, quantity);
         if (type == null) {
             throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
         }
@@ -30,7 +30,7 @@ public class CoinService {
         }
         coinRepository.save(Coin.builder()
                 .member(member)
-                .count(quantity)
+                .count((long) quantity)
                 .expiredDate(LocalDate.now().plus(type.getDeadLine()))
                 .history(history)
                 .build());
