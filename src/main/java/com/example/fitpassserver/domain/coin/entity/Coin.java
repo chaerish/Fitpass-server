@@ -48,7 +48,12 @@ public class Coin extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+  
     @OneToOne
     @JoinColumn(name = "history_id")
     private CoinPaymentHistory history;
+
+    public void decreaseCount(Long count) {
+        this.count -= count;
+    }
 }
