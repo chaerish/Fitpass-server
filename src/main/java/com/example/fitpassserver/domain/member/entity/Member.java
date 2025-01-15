@@ -3,6 +3,7 @@ package com.example.fitpassserver.domain.member.entity;
 import com.example.fitpassserver.domain.CoinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
+import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.plan.entity.Plan;
@@ -83,6 +84,9 @@ public class Member extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Column(name = "is_additional_info")
+    private boolean isAdditionalInfo;
+
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Coin> CoinList = new ArrayList<>();
@@ -104,6 +108,25 @@ public class Member extends BaseEntity {
             throw new MemberException(MemberErrorCode.ALREADY_DELETED);
         }
         this.status = MemberStatus.INACTIVE;
+    }
+
+    public void updateIsAdditionInfo(boolean isAdditionalInfo) {
+        this.isAdditionalInfo = isAdditionalInfo;
+    }
+
+    public void socialJoin(MemberRequestDTO.SocialJoinDTO request) {
+        this.name = request.getName();
+        this.phoneNumber = request.getPhoneNumber();
+        this.isAgree = request.isAgree();
+        this.isTermsAgreed = request.isTermsAgreed();
+        this.isLocationAgreed = request.isLocationAgreed();
+        this.isThirdPartyAgreed = request.isThirdPartyAgreed();
+        this.isMarketingAgreed = request.isMarketingAgreed();
+        this.isAdditionalInfo = false;
+    }
+
+    public void updateRole(Role role) {
+        this.role = role;
     }
 
 }
