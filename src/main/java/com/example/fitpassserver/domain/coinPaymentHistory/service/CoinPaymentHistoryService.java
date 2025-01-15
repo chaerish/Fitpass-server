@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.service;
 
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayException;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
@@ -22,12 +23,28 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public String getCurrentTid(Member member) {
-        CoinPaymentHistory coinPaymentHistory = coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
+    public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
+        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
                 .orElseThrow(
                         () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
                 );
-        return coinPaymentHistory.getTid();
+    }
+
+    public void approve(CoinPaymentHistory history) {
+        history.changeStatus(PaymentStatus.SUCCESS);
+        coinPaymentRepository.save(history);
+    }
+
+    public void cancel(Member member) {
+        CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
+        history.changeStatus(PaymentStatus.CANCEL);
+        coinPaymentRepository.save(history);
+    }
+
+    public void fail(Member member) {
+        CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
+        history.changeStatus(PaymentStatus.FAIL);
+        coinPaymentRepository.save(history);
     }
 
 

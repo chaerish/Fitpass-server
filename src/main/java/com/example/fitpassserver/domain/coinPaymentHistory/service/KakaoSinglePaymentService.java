@@ -55,7 +55,7 @@ public class KakaoSinglePaymentService {
                 FAIL_URL
         );
         Mono<KakaoPaymentResponseDTO> response = kakao.post()
-                .uri(BASE_URL + "ready")
+                .uri(BASE_URL + "/ready")
                 .bodyValue(request)
                 .retrieve()
                 .bodyToMono(KakaoPaymentResponseDTO.class)
@@ -74,11 +74,11 @@ public class KakaoSinglePaymentService {
                 userId,
                 pgToken
         );
-        Mono<KakaoPaymentResponseDTO> response = kakao.post()
-                .uri(BASE_URL + "approve")
+        Mono<KakaoPaymentApproveDTO> response = kakao.post()
+                .uri(BASE_URL + "/approve")
                 .bodyValue(request)
                 .retrieve()
-                .bodyToMono(KakaoPaymentResponseDTO.class)
+                .bodyToMono(KakaoPaymentApproveDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
                 });

@@ -1,8 +1,10 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.controller;
 
+import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoSinglePaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class KakaoPaymentController {
     private final KakaoSinglePaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
+    private final CoinService coinService;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 코인 단건 결제를 요청합니다.")
     @PostMapping()
@@ -36,6 +39,25 @@ public class KakaoPaymentController {
     @PostMapping("/success")
     public ApiResponse<KakaoPaymentApproveDTO> approveSinglePay(@CurrentMember Member member,
                                                                 @RequestParam("pg_token") String pgToken) {
-        return ApiResponse.onSuccess(paymentService.approve(pgToken, coinPaymentHistoryService.getCurrentTid(member)));
+        CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
+        KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, history.getTid());
+
+        coinPaymentHistoryService.approve(history);
+        return ApiResponse.onSuccess(dto);
     }
+
+    @Operation(summary = "코인 단건 결제 실패", description = "결제 실패시 실행되는 API")
+    @PostMapping("/fail")
+    public ApiResponse<?> failSinglePay(@CurrentMember Member member) {
+        coinPaymentHistoryService.fail(member);
+        return ApiResponse.onSuccess("결제가 실패되었습니다.");
+    }
+
+    @Operation(summary = "코인 단건 결제 취소", description = "결제 취소시 실행되는 API")
+    @PostMapping("/cancel")
+    public ApiResponse<?> cancelSinglePay(@CurrentMember Member member) {
+        coinPaymentHistoryService.cancel(member);
+        return ApiResponse.onSuccess("결제가 취소되었습니다.");
+    }
+
 }

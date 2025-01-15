@@ -4,6 +4,8 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -41,5 +43,11 @@ public class CoinPaymentHistory extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
+    @Enumerated(EnumType.STRING)
+    @JoinColumn(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus;
 
+    public void changeStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 }
