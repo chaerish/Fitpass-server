@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.member.controller;
 
 
+import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
@@ -24,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.xml.stream.Location;
 
 @Slf4j
 @RestController
@@ -98,5 +101,12 @@ public class MemberController {
     public ApiResponse<?> oAuth2Join(@RequestBody @Valid MemberRequestDTO.SocialJoinDTO request, @CookieValue(value = "accessToken") String accessToken) {
         Member updatedMember = memberCommandService.socialJoinMember(request, accessToken);
         return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(updatedMember));
+    }
+
+    @Operation(summary = "사용자 위치 설정 api", description = "위도 경도를 받아 사용자의 위치를 설정합니다.")
+    @PatchMapping("/location")
+    public ApiResponse<String> setLocation(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.LocationDTO dto){
+        memberCommandService.setLocation(member.getLoginId(), dto);
+        return ApiResponse.onSuccess("사용자의 위치가 변경되었습니다.");
     }
 }
