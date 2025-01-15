@@ -30,9 +30,10 @@ jobs:
       ## 스프링부트 yml 파일 생성
       - name: make application-prod.yml
         run: |
+          mkdir -p ./src/main/resources
           cd ./src/main/resources
-          sudo touch ./application-prod.yml
-          sudo echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
 
       ## 도커 빌드 후 도커 허브에 push
       - name: docker build and push to docker hub
