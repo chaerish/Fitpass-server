@@ -6,9 +6,9 @@ import java.time.temporal.TemporalAmount;
 public enum CoinType {
     COIN_1("코인 1개", 550, 30),
     COIN_5("코인 5개", 2750, 30),
-    COIN_10("코인 5개", 5500, 30),
-    COIN_20("코인 5개", 11000, 30),
-    COIN_30("코인 5개", 16500, 30),
+    COIN_10("코인 10개", 5500, 30),
+    COIN_20("코인 20개", 11000, 30),
+    COIN_30("코인 30개", 16500, 30),
     COIN_180("코인 180개", 99000, 90),
     COIN_300("코인 300개", 165000, 180);
     private String description;
@@ -36,7 +36,7 @@ public enum CoinType {
     public static CoinType getCoinType(int price) {
         CoinType unit = null;
         for (CoinType coinType : CoinType.values()) {
-            if (coinType.price / price == 0) {
+            if (coinType.price % price == 0) {
                 unit = coinType;
                 break;
             }
