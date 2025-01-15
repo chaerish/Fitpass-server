@@ -8,6 +8,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymen
 import com.example.fitpassserver.domain.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,17 +31,20 @@ public class CoinPaymentHistoryService {
                 );
     }
 
+    @Transactional
     public void approve(CoinPaymentHistory history) {
         history.changeStatus(PaymentStatus.SUCCESS);
         coinPaymentRepository.save(history);
     }
 
+    @Transactional
     public void cancel(Member member) {
         CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
         history.changeStatus(PaymentStatus.CANCEL);
         coinPaymentRepository.save(history);
     }
-
+    
+    @Transactional
     public void fail(Member member) {
         CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
         history.changeStatus(PaymentStatus.FAIL);
