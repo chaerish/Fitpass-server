@@ -39,6 +39,12 @@ public class MemberFitnessConverter {
                 .build();
     }
 
+    public static MemberFitnessResponseDTO.CancelMemberFitnessResponseDTO toCancelMemberFitnessResponseDTO(MemberFitness memberFitness) {
+        return MemberFitnessResponseDTO.CancelMemberFitnessResponseDTO.builder()
+                .memberFitnessId(memberFitness.getId())
+                .build();
+    }
+
     public static MemberFitnessResDTO.MemberFitnessGroupDTO toGroupDto(List<MemberFitness> memberFitnessList) {
         List<MemberFitnessResDTO.MemberFitnessPreviewDTO> none = new ArrayList<>();
         List<MemberFitnessResDTO.MemberFitnessPreviewDTO> progress = new ArrayList<>();
