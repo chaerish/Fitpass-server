@@ -21,17 +21,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+        ## 스프링부트 yml 파일 생성
+      - name: make application-prod.yml
+        run: |
+          mkdir -p ./src/main/resources
+          cd ./src/main/resources
+          touch ./application-prod.yml
+          echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
 
       - name: Build with Gradle Wrapper
         run: ./gradlew build
-
-      ## 스프링부트 yml 파일 생성
-      - name: make application-prod.yml
-        run: |
-          mkdir -p ./src/main/resources
-          echo "${{ secrets.APPLICATION_PROD }}" | base64 --decode > ./src/main/resources/application-prod.yml
 
       ## 도커 빌드 후 도커 허브에 push
       - name: docker build and push to docker hub
