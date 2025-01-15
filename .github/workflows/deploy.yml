@@ -61,4 +61,5 @@ jobs:
               --network fitpass \
               --restart always \
               -e SPRING_PROFILES_ACTIVE=prod \
+              -e DEBUG = true \
               ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
