@@ -1,12 +1,14 @@
 package com.example.fitpassserver.domain.member.controller;
 
 
+import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.service.command.MemberCommandService;
 import com.example.fitpassserver.domain.member.validation.validator.CheckLoginIdValidator;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -20,8 +22,11 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+
+import javax.xml.stream.Location;
 
 @Slf4j
 @RestController
@@ -32,7 +37,7 @@ public class MemberController {
     private final MemberCommandService memberCommandService;
     private final CheckLoginIdValidator checkLoginIdValidator; //중복 아이디 체크
 
-    @InitBinder
+    @InitBinder("joinDTO")
     public void validatorBinder(WebDataBinder binder) {
         binder.addValidators(checkLoginIdValidator);
     }
@@ -91,5 +96,17 @@ public class MemberController {
         return ApiResponse.onSuccess(null); // HTTP 204 No Content 응답
     }
 
+    @Operation(summary = "소셜 로그인 후 추가 정보 입력받아 회원가입하는 api", description = "소셜 로그인 이후 추가 정보를 입력받아 회원가입하는 api입니다.")
+    @PostMapping("/oauth2/register")
+    public ApiResponse<?> oAuth2Join(@RequestBody @Valid MemberRequestDTO.SocialJoinDTO request, @CookieValue(value = "accessToken") String accessToken) {
+        Member updatedMember = memberCommandService.socialJoinMember(request, accessToken);
+        return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(updatedMember));
+    }
 
+    @Operation(summary = "사용자 위치 설정 api", description = "위도 경도를 받아 사용자의 위치를 설정합니다.")
+    @PatchMapping("/location")
+    public ApiResponse<String> setLocation(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.LocationDTO dto){
+        memberCommandService.setLocation(member.getLoginId(), dto);
+        return ApiResponse.onSuccess("사용자의 위치가 변경되었습니다.");
+    }
 }

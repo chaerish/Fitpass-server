@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.member.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
@@ -47,6 +48,39 @@ public class MemberRequestDTO {
 
     }
 
+    /** 소셜 로그인 후 회원가입 dto **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class SocialJoinDTO {
+        @NotBlank(message = "전화번호는 필수 입력 값입니다.")
+        private String phoneNumber;
+
+        @NotBlank
+        private String name;
+
+        @NotNull
+        @JsonProperty("agree")
+        private boolean isAgree;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("termsAgreed")
+        private boolean isTermsAgreed;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("locationAgreed")
+        private boolean isLocationAgreed;
+
+        @NotNull(message = "필수 동의 사항입니다.")
+        @JsonProperty("thirdPartyAgreed")
+        private boolean isThirdPartyAgreed;
+
+        @NotNull
+        @JsonProperty("marketingAgreed")
+        private boolean isMarketingAgreed;
+    }
+
 
     /** 로그인 요청 DTO */
     @Getter
@@ -79,6 +113,19 @@ public class MemberRequestDTO {
         @Pattern( regexp = "^[a-zA-Z0-9]{4,12}$", message="영어와 숫자를 사용하여 4-12자의 아이디를 입력해주세요.")
         String loginId;
     }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+
+    public static class LocationDTO{
+        @NotNull(message = "위도는 필수 입력 값입니다.")
+        private Double latitude;
+        @NotNull(message = "경도는 필수 입력 값입니다.")
+        private Double longitude;
+    }
+
 
 //    /** 아이디 찾기 dto **/
 //    @Getter
