@@ -2,7 +2,10 @@ package com.example.fitpassserver.domain.fitness.dto.response;
 
 import com.example.fitpassserver.domain.fitness.entity.Status;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
