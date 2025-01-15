@@ -25,7 +25,7 @@ public class CoinService {
         if (type == null) {
             throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
         }
-        if (!history.getMember().equals(member)) {
+        if (!history.getMember().getId().equals(member.getId())) {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
         }
         coinRepository.save(Coin.builder()
