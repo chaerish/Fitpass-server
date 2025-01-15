@@ -46,6 +46,12 @@ public class Member extends BaseEntity {
 //    @Column(name = "email")
 //    private String email;
 
+    @Column(name = "latitude")
+    private Double latitude;
+
+    @Column(name = "longitude")
+    private Double longitude;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
@@ -129,4 +135,8 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
+    public void setLocation(Double latitude, Double longitude){
+        this.latitude = latitude;
+        this. longitude = longitude;
+    }
 }
