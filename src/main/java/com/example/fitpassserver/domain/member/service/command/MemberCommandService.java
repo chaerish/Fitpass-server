@@ -11,4 +11,5 @@ public interface MemberCommandService {
     MemberResponseDTO.MemberTokenDTO refreshToken(String refreshToken);
     void deactivateAccount(Long memberId);
     Member socialJoinMember(MemberRequestDTO.SocialJoinDTO request, String accessToken);
+    void setLocation(String loginId, MemberRequestDTO.LocationDTO dto);
 }
