@@ -24,6 +24,16 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
+    public CoinPaymentHistory createNewCoinHistory(Member member, String tid) {
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+                .isAgree(true)
+                .tid(tid)
+                .member(member)
+                .build());
+    }
+
+
     public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
         return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
                 .orElseThrow(
@@ -43,7 +53,7 @@ public class CoinPaymentHistoryService {
         history.changeStatus(PaymentStatus.CANCEL);
         coinPaymentRepository.save(history);
     }
-    
+
     @Transactional
     public void fail(Member member) {
         CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
