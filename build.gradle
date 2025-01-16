@@ -46,6 +46,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.3'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.12.3'
+    //
+    implementation 'org.springframework.boot:spring-boot-starter-webflux';
 
     // coolSms
     implementation 'net.nurigo:sdk:4.2.7'
@@ -55,6 +57,9 @@ dependencies {
 
     //oauth
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+
+    // s3
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {
