@@ -18,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -35,7 +36,7 @@ public class PlanPaymentController {
     @Operation(summary = "코인 정기 결제 1회차 요청", description = "가장 처음 플랜을 등록시, 코인 정기 결제(플랜 구매)를 요청합니다.")
     @PostMapping("/first-request")
     public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
-                                                                                 @Valid PlanSubScriptionRequestDTO body) {
+                                                                                 @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
         coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
         return ApiResponse.onSuccess(response);

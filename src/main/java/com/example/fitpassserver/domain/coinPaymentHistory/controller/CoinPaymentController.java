@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +32,7 @@ public class CoinPaymentController {
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
     @PostMapping()
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
-                                                                 @Valid CoinSinglePayRequestDTO body) {
+                                                                 @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
         coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
         return ApiResponse.onSuccess(response);
