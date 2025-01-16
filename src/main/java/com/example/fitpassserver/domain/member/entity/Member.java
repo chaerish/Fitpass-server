@@ -1,12 +1,11 @@
 package com.example.fitpassserver.domain.member.entity;
 
-import com.example.fitpassserver.domain.CoinPaymentHistory.entity.CoinPaymentHistory;
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.global.entity.BaseEntity;
 
 import jakarta.persistence.*;
