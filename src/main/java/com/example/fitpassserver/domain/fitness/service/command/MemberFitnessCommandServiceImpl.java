@@ -19,6 +19,7 @@ import com.example.fitpassserver.domain.fitnessPaymentHistory.converter.FitnessP
 import com.example.fitpassserver.domain.fitnessPaymentHistory.entity.FitnessPaymentHistory;
 import com.example.fitpassserver.domain.fitnessPaymentHistory.repository.FitnessPaymentHistoryRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
     private final FitnessPaymentHistoryRepository fitnessPaymentHistoryRepository;
     private final CoinRepository coinRepository;
     private final CoinUsageHistoryRepository coinUsageHistoryRepository;
+    private final SmsCertificationUtil smsCertificationUtil;
 
     @Transactional
     public MemberFitness buyFitness(Member member, MemberFitnessRequestDTO.CreateMemberFitnessRequestDTO dto) {
@@ -55,6 +57,9 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         // 코인 사용 기록 저장
         Long price = (long) (fitness.getFee() - fitness.getDiscount());
         List<CoinUsageHistory> coinUsageHistories = useCoin(member, fitnessPaymentHistory, price);
+
+        // 결제 문자 발송
+        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
 
         return memberFitness;
     }
@@ -93,8 +98,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
                 coinUsageHistory = CoinUsageHistoryConverter.toCoinUsageHistory(coin, fitnessPaymentHistory, price.intValue());
                 usages.add(coinUsageHistory);
                 break;
-            }
-            else {
+            } else {
                 coin.decreaseCount(count);
                 coinUsageHistory = CoinUsageHistoryConverter.toCoinUsageHistory(coin, fitnessPaymentHistory, count.intValue());
                 usages.add(coinUsageHistory);
