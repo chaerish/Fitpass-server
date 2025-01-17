@@ -11,4 +11,12 @@ public class MemberFitnessResponseDTO {
     public static class CreateMemberFitnessResponseDTO {
         private Long memberFitnessId;
     }
+
+    @Getter
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @Builder
+    public static class CancelMemberFitnessResponseDTO {
+        private Long memberFitnessId;
+    }
 }

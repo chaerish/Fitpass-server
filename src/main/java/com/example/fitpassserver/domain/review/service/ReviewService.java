@@ -28,19 +28,19 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberFitnessRepository memberFitnessRepository;
 
-    public Long createReview(Member member, Long passId , ReviewReqDTO.CreateReviewReqDTO dto){
+    public Long createReview(Member member, Long passId, ReviewReqDTO.CreateReviewReqDTO dto) {
 
-        if(!dto.isAgree()){
+        if (!dto.isAgree()) {
             throw new ReviewException(ReviewErrorCode.REVIEW_POLICY_NOT_AGREED);
         }
 
         MemberFitness pass = memberFitnessRepository.findById(passId).orElseThrow(() -> new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
-        if(!member.getId().equals(pass.getMember().getId())){
+        if (!member.getId().equals(pass.getMember().getId())) {
             throw new FitnessException(FitnessErrorCode.USER_MISMATCH);
         }
 
-        if(!pass.getStatus().equals(Status.DONE)){
+        if (!pass.getStatus().equals(Status.DONE)) {
             throw new FitnessException(FitnessErrorCode.INVALID_PASS);
         }
 
@@ -53,7 +53,7 @@ public class ReviewService {
     }
 
     @Transactional(readOnly = true)
-    public ReviewResDTO.ReviewPageDto getReviewsByFitnessId(Long fitnessId, int page, int size, String sortBy) {
+    public ReviewResDTO.ReviewPageDto getReviewsByFitnessId(Member member, Long fitnessId, int page, int size, String sortBy) {
         Sort sort;
 
         // 정렬 기준에 따라 Sort 객체 설정
@@ -65,23 +65,24 @@ public class ReviewService {
 
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        return ReviewConverter.toPageDto(reviewRepository.findByFitnessId(fitnessId, pageable));
+
+        return ReviewConverter.toPageDto(member, reviewRepository.findByFitnessId(fitnessId, pageable));
     }
 
-    public void updateReview(Member member, Long reviewId, ReviewReqDTO.UpdateReviewReqDTO dto){
+    public void updateReview(Member member, Long reviewId, ReviewReqDTO.UpdateReviewReqDTO dto) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_NOT_FOUND));
         validMember(member, review);
         review.update(dto.getContent(), dto.getScore());
     }
 
-    public void deleteReview(Member member, Long reviewId){
+    public void deleteReview(Member member, Long reviewId) {
         Review review = reviewRepository.findById(reviewId).orElseThrow(() -> new ReviewException(ReviewErrorCode.REVIEW_NOT_FOUND));
         validMember(member, review);
         reviewRepository.delete(review);
     }
 
-    private void validMember (Member member, Review review){
-        if(!review.getMemberFitness().getMember().getId().equals(member.getId())){
+    private void validMember(Member member, Review review) {
+        if (!review.getMemberFitness().getMember().getId().equals(member.getId())) {
             throw new FitnessException(FitnessErrorCode.INVALID_PASS);
         }
     }

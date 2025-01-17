@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.review.converter;
 
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.review.dto.request.ReviewReqDTO;
 import com.example.fitpassserver.domain.review.dto.response.ReviewResDTO;
 import com.example.fitpassserver.domain.review.entity.Review;
@@ -18,7 +19,7 @@ public class ReviewConverter {
     }
 
 
-    public static ReviewResDTO.ReviewPageDto toPageDto(Page<Review> reviewPage) {
+    public static ReviewResDTO.ReviewPageDto toPageDto(Member member, Page<Review> reviewPage) {
         List<ReviewResDTO.ReviewPreviewResDTO> reviews = reviewPage.getContent().stream()
                 .map(review -> ReviewResDTO.ReviewPreviewResDTO.builder()
                         .id(review.getId())
@@ -26,6 +27,7 @@ public class ReviewConverter {
                         .score(review.getScore())
                         .createdAt(review.getCreatedAt())
                         .updatedAt(review.getUpdatedAt())
+                        .isOwner(review.getMemberFitness().getMember().getId().equals(member.getId()))
                         .build())
                 .collect(Collectors.toList());
 

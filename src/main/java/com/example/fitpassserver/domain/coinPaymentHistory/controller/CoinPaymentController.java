@@ -6,7 +6,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
-import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoSinglePaymentService;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -15,21 +15,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController("/coin/singlePay")
+@RestController
+@RequestMapping("/coin/pay")
 @RequiredArgsConstructor
 @Tag(name = "코인 결제 API", description = "코인 결제 API입니다.")
-public class KakaoPaymentController {
-    private final KakaoSinglePaymentService paymentService;
+public class CoinPaymentController {
+    private final KakaoPaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
 
-    @Operation(summary = "코인 단건 결제 요청", description = "코인 코인 단건 결제를 요청합니다.")
+    @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
     @PostMapping()
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
-                                                                 @Valid CoinSinglePayRequestDTO body) {
+                                                                 @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
         coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
         return ApiResponse.onSuccess(response);

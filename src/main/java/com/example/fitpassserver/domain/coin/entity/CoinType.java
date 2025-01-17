@@ -1,8 +1,5 @@
 package com.example.fitpassserver.domain.coin.entity;
 
-import java.time.Duration;
-import java.time.temporal.TemporalAmount;
-
 public enum CoinType {
     COIN_1("코인 1개", 550, 30),
     COIN_5("코인 5개", 2750, 30),
@@ -29,8 +26,8 @@ public enum CoinType {
         return price;
     }
 
-    public TemporalAmount getDeadLine() {
-        return Duration.ofDays(deadLine);
+    public long getDeadLine() {
+        return deadLine;
     }
 
     public static CoinType getCoinType(int price, int quantity) {
