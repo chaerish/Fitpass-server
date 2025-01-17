@@ -65,7 +65,7 @@ public class ProfileService {
                 .pictureUrl(createPictureUrl(memberId, profile))
                 .pictureKey(profile.getPictureKey())
                 .name(profile.getMember().getName())
-                .planName(plan != null ? plan.getPlanName().name() : null) // 패스 없으면 null 값
+                .planType(plan != null ? plan.getPlanType().name() : null) // 패스 없으면 null 값
                 .build();
 
         return getProfileDTO;
