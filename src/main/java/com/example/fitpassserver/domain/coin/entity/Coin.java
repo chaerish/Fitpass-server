@@ -56,4 +56,7 @@ public class Coin extends BaseEntity {
     public void decreaseCount(Long count) {
         this.count -= count;
     }
+    public void increaseCount(Long count) {
+        this.count += count;
+    }
 }
