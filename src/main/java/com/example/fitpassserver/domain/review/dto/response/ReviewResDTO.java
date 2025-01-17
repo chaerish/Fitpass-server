@@ -17,6 +17,7 @@ public class ReviewResDTO {
         public double score;
         public LocalDateTime createdAt;
         public LocalDateTime updatedAt;
+        public boolean isOwner;
     }
 
     @Getter

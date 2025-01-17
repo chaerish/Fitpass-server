@@ -35,6 +35,13 @@ public class MemberFitnessController {
         return ApiResponse.onSuccess(MemberFitnessConverter.toCreateMemberFitnessResponseDTO(memberFitness));
     }
 
+    @PostMapping("/cancel")
+    @Operation(summary = "피트니스 패스 구매 취소 API", description = "피트니스 패스 구매 취소 시 사용하는 API")
+    public ApiResponse<MemberFitnessResponseDTO.CancelMemberFitnessResponseDTO> cancelPass(@CurrentMember Member member, @RequestBody MemberFitnessRequestDTO.CancelMemberFitnessRequestDTO dto) {
+        MemberFitness memberFitness = memberFitnessCommandService.cancelFitness(member, dto);
+        return ApiResponse.onSuccess(MemberFitnessConverter.toCancelMemberFitnessResponseDTO(memberFitness));
+    }
+
     @Operation(
             summary = "보유 패스 조회",
             description = "사용자의 보유 패스 정보를 조회합니다. 패스 상태는 3가지(NONE, PROGRESS, DONE)로 나눠서 조회됩니다."
