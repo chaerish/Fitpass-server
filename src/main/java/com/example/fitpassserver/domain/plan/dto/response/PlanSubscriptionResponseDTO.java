@@ -1,8 +1,9 @@
-package com.example.fitpassserver.domain.coinPaymentHistory.dto.response;
+package com.example.fitpassserver.domain.plan.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.List;
 
-public record PlanSubScriptionResponseDTO(
+public record PlanSubscriptionResponseDTO(
         String aid,
         String tid,
         String cid,
@@ -26,7 +27,7 @@ public record PlanSubScriptionResponseDTO(
         @JsonProperty("payload")
         String payload,
         @JsonProperty("sequential_payment_methods")
-        Sequential sequential
+        List<Sequential> sequential // 변경: List로 처리
 ) {
     public record Amount(
             @JsonProperty("total") int total,
@@ -56,7 +57,6 @@ public record PlanSubScriptionResponseDTO(
             String sid,
             @JsonProperty("card_info")
             CardInfo2 cardInfo2
-
     ) {
     }
 
@@ -72,7 +72,7 @@ public record PlanSubScriptionResponseDTO(
             String bin,
             @JsonProperty("card_type")
             String cardType
-
     ) {
     }
 }
+

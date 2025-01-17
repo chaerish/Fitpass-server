@@ -146,8 +146,8 @@ public class Member extends BaseEntity {
         this.role = role;
     }
 
-    public void setLocation(Double latitude, Double longitude){
+    public void setLocation(Double latitude, Double longitude) {
         this.latitude = latitude;
-        this. longitude = longitude;
+        this.longitude = longitude;
     }
 }
