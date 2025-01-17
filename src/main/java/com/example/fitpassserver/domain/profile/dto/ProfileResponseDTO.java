@@ -29,7 +29,7 @@ public class ProfileResponseDTO {
         private String name;
 
         //멤버가 구매한 패스 이름
-        private String planName;
+        private String planType;
 
     }
 
