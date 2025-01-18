@@ -6,4 +6,5 @@ import com.example.fitpassserver.domain.member.entity.Member;
 
 public interface MemberFitnessCommandService {
     MemberFitness buyFitness(Member member, MemberFitnessRequestDTO.CreateMemberFitnessRequestDTO dto);
+    MemberFitness cancelFitness(Member member, MemberFitnessRequestDTO.CancelMemberFitnessRequestDTO dto);
 }

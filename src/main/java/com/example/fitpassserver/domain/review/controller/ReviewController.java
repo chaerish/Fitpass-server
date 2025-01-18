@@ -43,11 +43,12 @@ public class ReviewController {
     )
     @GetMapping("/{fitnessId}/review")
     public ApiResponse<ReviewResDTO.ReviewPageDto> getReviewPage(
+            @Parameter(description = "현재 인증된 사용자 정보", hidden = true) @CurrentMember Member member,
             @Parameter(description = "페이지 시작 오프셋 (기본값: 0)", example = "0") @RequestParam(defaultValue = "0") int offset,
             @Parameter(description = "페이지 크기 (기본값: 5)", example = "5") @RequestParam(defaultValue = "5") int pageSize,
             @Parameter(description = "정렬 기준 (기본값: date)", example = "date") @RequestParam(defaultValue = "date") String sortBy,
             @Parameter(description = "조회할 피트니스 ID", example = "2") @PathVariable Long fitnessId) {
-        ReviewResDTO.ReviewPageDto reviews = reviewService.getReviewsByFitnessId(fitnessId, offset, pageSize, sortBy);
+        ReviewResDTO.ReviewPageDto reviews = reviewService.getReviewsByFitnessId(member, fitnessId, offset, pageSize, sortBy);
         return ApiResponse.onSuccess(reviews);
     }
 

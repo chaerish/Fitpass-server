@@ -2,7 +2,7 @@ package com.example.fitpassserver.domain.coin.entity;
 
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.plan.entity.PlanName;
+import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +37,7 @@ public class Coin extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "plan_name", nullable = false)
-    private PlanName planName;
+    private PlanType planType;
 
     @Column(name = "count", nullable = false)
     private Long count;
@@ -48,12 +48,15 @@ public class Coin extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-  
+
     @OneToOne
     @JoinColumn(name = "history_id")
     private CoinPaymentHistory history;
 
     public void decreaseCount(Long count) {
         this.count -= count;
+    }
+    public void increaseCount(Long count) {
+        this.count += count;
     }
 }
