@@ -3,6 +3,8 @@ package com.example.fitpassserver.domain.notice.service;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeListResponse;
 import com.example.fitpassserver.domain.notice.entity.Notice;
+import com.example.fitpassserver.domain.notice.exception.NoticeErrorCode;
+import com.example.fitpassserver.domain.notice.exception.NoticeException;
 import com.example.fitpassserver.domain.notice.repository.NoticeRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,7 @@ public class NoticeService {
 
     public NoticeDetailResponse getNoticeDetail(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId)
-                .orElseThrow(() -> new IllegalArgumentException("Notice not found"));
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
 
         return new NoticeDetailResponse(
                 notice.getId(),
