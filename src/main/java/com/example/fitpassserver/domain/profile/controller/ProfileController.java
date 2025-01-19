@@ -25,7 +25,7 @@ public class ProfileController {
     @GetMapping("")
     @Operation(summary = "프로필 조회 API", description = "사용자의 ID로 프로필을 조회하는 api")
     public ApiResponse<ProfileResponseDTO.GetProfileDTO> getProfile(@CurrentMember Member member) {
-        ProfileResponseDTO.GetProfileDTO profile = profileService.getProfile(member.getId());
+        ProfileResponseDTO.GetProfileDTO profile = profileService.getProfile(member);
         return ApiResponse.onSuccess(profile);
     }
 
@@ -34,14 +34,14 @@ public class ProfileController {
     @Operation(summary = "프로필 변경 API", description = "프로필 이미지를 업로드하고 저장")
     public ApiResponse<Long> updateProfile(@CurrentMember Member member,
                                            @RequestParam("file") MultipartFile file) throws IOException {
-        Long profileId = profileService.updateProfile(member.getId(), file);
+        Long profileId = profileService.updateProfile(member, file);
         return ApiResponse.onSuccess(profileId);
     }
 
     @DeleteMapping("")
     @Operation(summary = "프로필 삭제 API", description = "사용자의 프로필 이미지를 삭제하는 API")
     public ApiResponse<Void> deleteProfile(@CurrentMember Member member) {
-        profileService.deleteProfile(member.getId());
+        profileService.deleteProfile(member);
         return ApiResponse.onSuccess(null);
     }
 

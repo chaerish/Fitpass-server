@@ -39,9 +39,10 @@ public class ProfileService {
 
     /* 프로필 변경 */
     @Transactional
-    public Long updateProfile(Long memberId, MultipartFile file) throws IOException {
+    public Long updateProfile(Member member, MultipartFile file) throws IOException {
+        Long memberId = member.getId();
         //멤버 확인
-        Member member = memberRepository.findById(memberId)
+        memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
 
@@ -72,7 +73,8 @@ public class ProfileService {
 
     /* 프로필 조회 */
     @Transactional(readOnly = true)
-    public ProfileResponseDTO.GetProfileDTO getProfile(Long memberId) {
+    public ProfileResponseDTO.GetProfileDTO getProfile(Member member) {
+        Long memberId = member.getId();
 
         Profile profile = profileRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new ProfileException(ProfileErrorCode.NOT_FOUND));
@@ -107,7 +109,8 @@ public class ProfileService {
 
     /* 프로필 삭제 -> 기본 이미지 변경시 */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deleteProfile(Long memberId) {
+    public void deleteProfile(Member member) {
+        Long memberId = member.getId();
 
         Profile profile = profileRepository.findProfileByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
