@@ -2,20 +2,17 @@ package com.example.fitpassserver.domain.member.service.command;
 
 import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
-import com.example.fitpassserver.domain.member.dto.MemberRequestDTO.SocialJoinDTO;
 import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
-import com.example.fitpassserver.domain.member.dto.MemberResponseDTO.MemberTokenDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.MemberStatus;
 import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
+import com.example.fitpassserver.domain.profile.entity.Profile;
+import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +24,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final PasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
+    private final ProfileRepository profileRepository;
 
-    /** 회원가입 **/
+    /**
+     * 회원가입
+     **/
     @Override
     @Transactional
     public Member joinMember(MemberRequestDTO.JoinDTO request) {
@@ -41,9 +41,22 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         newMember.encodePassword(passwordEncoder.encode(request.getPassword()));
 
-        return memberRepository.save(newMember);
+        Member savedMember = memberRepository.save(newMember);
+
+        //profile 객체 생성
+        Profile profile = Profile.builder()
+                .member(savedMember)
+                .pictureKey("none")  //기본 프로필
+                .build();
+
+        profileRepository.save(profile);
+
+        return savedMember;
     }
-    /** 로그인 **/
+
+    /**
+     * 로그인
+     **/
     @Override
     public MemberResponseDTO.MemberTokenDTO login(MemberRequestDTO.LoginDTO dto) {
         Member member = memberRepository.findByLoginId(dto.getLoginId())
@@ -63,7 +76,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 .refreshToken(jwtProvider.createRefreshToken(member))
                 .build();
     }
-    /** 토큰 재발급 */
+
+    /**
+     * 토큰 재발급
+     */
     @Override
     public MemberResponseDTO.MemberTokenDTO refreshToken(String refreshToken) {
         // Refresh Token 유효성 검증
@@ -88,7 +104,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 .build();
     }
 
-    /** 회원 탈퇴(soft delete) **/
+    /**
+     * 회원 탈퇴(soft delete)
+     **/
     @Transactional
     @Override
     public void deactivateAccount(Long memberId) {

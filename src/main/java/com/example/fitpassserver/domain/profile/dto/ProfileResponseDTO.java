@@ -17,7 +17,6 @@ public class ProfileResponseDTO {
         @Schema(description = "프로필 고유 아이디", example = "0")
         private Long id;
 
-        @NotBlank
         @Schema(description = "사용자의 공유 프로필 URL", example = "https://///...")
         private String pictureUrl;
 

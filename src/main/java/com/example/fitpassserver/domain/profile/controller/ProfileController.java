@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -28,13 +30,12 @@ public class ProfileController {
     }
 
 
-    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "프로필 변경 API", description = "프로필 이미지 변경하는 api")
-    public ApiResponse<?> patchProfile(@CurrentMember Member member, @RequestPart("image") MultipartFile image) {
-
-        String imageUrl = profileService.updateProfileImage(image);
-
-        return ApiResponse.onSuccess(imageUrl);
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "프로필 변경 API", description = "프로필 이미지를 업로드하고 저장")
+    public ApiResponse<Long> updateProfile(@CurrentMember Member member,
+                                           @RequestParam("file") MultipartFile file) throws IOException {
+        Long profileId = profileService.updateProfile(member.getId(), file);
+        return ApiResponse.onSuccess(profileId);
     }
 
     @DeleteMapping("")
