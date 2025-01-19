@@ -40,7 +40,7 @@ public class SmsCertificationUtil {
 
     // 코인 단건 결제 메시지 발송
     public void sendCoinPaymentSMS(String to, int quantity, int total) {
-        String text = "[FitPass]\n" + total + "원 결제 돼었습니다.\n"
+        String text = "[FitPass]\n" + total + "원 결제 되었습니다.\n"
                 + "코인" + quantity + "개를 구매하셨습니다.\n";
         sendPaymentSMS(to, text);
     }
@@ -53,8 +53,9 @@ public class SmsCertificationUtil {
     }
 
     // 플랜 결제 메시지 발송
-    public void sendPlanPaymentSMS(String to) {
-        String text = "";
+    public void sendPlanPaymentSMS(String to, String name, int price) {
+        String text = "[FitPass]\n" + "[" + name + "]" + "플랜을 결제하였습니다.\n"
+                + price + "원을 결제 완료되었습니다.\n";
         sendPaymentSMS(to, text);
     }
 
