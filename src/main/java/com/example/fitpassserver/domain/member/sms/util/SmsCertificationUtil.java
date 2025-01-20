@@ -23,6 +23,11 @@ public class SmsCertificationUtil {
 
     DefaultMessageService messageService; // 메시지 서비스를 위한 객체
 
+
+    private static final String COIN_MESSAGE_FORMAT = "[FitPass]\n%s원 결제 되었습니다.\n코인 %s개를 구매하셨습니다.\n";
+    private static final String PASS_MESSAGE_FORMAT = "[FitPass]\n[%s] 시설 패스 결제하였습니다.\n%s코인을 사용했습니다.\n";
+    private static final String PLAN_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜을 결제하였습니다.\n%s원을 결제 완료되었습니다.\n";
+
     @PostConstruct // 의존성 주입이 완료된 후 초기화를 수행하는 메서드
     public void init() {
         this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr"); // 메시지 서비스 초기화
@@ -40,23 +45,17 @@ public class SmsCertificationUtil {
 
     // 코인 단건 결제 메시지 발송
     public void sendCoinPaymentSMS(String to, int quantity, int total) {
-        String text = "[FitPass]\n" + total + "원 결제 되었습니다.\n"
-                + "코인" + quantity + "개를 구매하셨습니다.\n";
-        sendPaymentSMS(to, text);
+        sendPaymentSMS(to, String.format(COIN_MESSAGE_FORMAT, total, quantity));
     }
 
     // 패스 구매 메시지 발송
     public void sendPassPaymentSMS(String to, Long price, MemberFitness memberFitness) {
-        String text = "[FitPass]\n" + "[" + memberFitness.getFitness().getName() + "]" + "시설 패스 결제하였습니다.\n"
-                + price + "코인을 사용했습니다.\n";
-        sendPaymentSMS(to, text);
+        sendPaymentSMS(to, String.format(PASS_MESSAGE_FORMAT, memberFitness.getFitness().getName(), price));
     }
 
     // 플랜 결제 메시지 발송
     public void sendPlanPaymentSMS(String to, String name, int price) {
-        String text = "[FitPass]\n" + "[" + name + "]" + "플랜을 결제하였습니다.\n"
-                + price + "원을 결제 완료되었습니다.\n";
-        sendPaymentSMS(to, text);
+        sendPaymentSMS(to, String.format(PLAN_MESSAGE_FORMAT, name, price));
     }
 
     // 메시지 초기 설정
