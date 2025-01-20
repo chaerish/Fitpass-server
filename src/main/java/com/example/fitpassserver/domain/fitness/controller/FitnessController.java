@@ -67,7 +67,7 @@ public class FitnessController {
 
     @Operation(summary = "키워드로 시설 검색 api", description = "사용자가 입력한 키워드가 포함된 시설을 반환합니다.")
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<FitnessSearchResponse>>> searchFitness(@RequestParam String keyword,
+    public ResponseEntity<ApiResponse<CursorPaginationResponse<FitnessSearchResponse>>> searchFitness(@RequestParam String keyword,
                                                                                   @RequestParam(required = false) Long cursor, // 커서 값 (Optional, 처음 요청 시 null)
                                                                                   @RequestParam(defaultValue = "10") int size,
                                                                                  @CurrentMember Member member
@@ -75,7 +75,7 @@ public class FitnessController {
         double latitude = (member != null && member.getLatitude() != null) ? member.getLatitude() : DEFAULT_LATITUDE;
         double longitude = (member != null && member.getLongitude() != null) ? member.getLongitude() : DEFAULT_LONGITUDE;
 
-        List<FitnessSearchResponse> result = fitnessSearchService.searchFitnessByKeyword(keyword, latitude, longitude);
+        CursorPaginationResponse<FitnessSearchResponse> result = fitnessSearchService.searchFitnessByKeyword(keyword, cursor, size, latitude, longitude);
         return ResponseEntity.ok(ApiResponse.onSuccess(result));
     }
 
