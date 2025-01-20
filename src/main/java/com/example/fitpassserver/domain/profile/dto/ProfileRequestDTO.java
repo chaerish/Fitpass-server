@@ -13,7 +13,7 @@ public class ProfileRequestDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class PutProfileDTO {
-        @Schema(description = "업데이트할 사용자 프로필 키 경로", example = "untitle.png")
+        @Schema(description = "업데이트할 사용자 프로필 이미지 경로", example = "untitle.png")
         @JsonProperty("imageUrl")
         private String key;
     }

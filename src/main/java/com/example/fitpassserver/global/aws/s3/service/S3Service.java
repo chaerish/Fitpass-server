@@ -5,20 +5,36 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.example.fitpassserver.domain.profile.entity.Profile;
+import com.example.fitpassserver.domain.profile.exception.ProfileErrorCode;
+import com.example.fitpassserver.domain.profile.exception.ProfileException;
+import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class S3Service {
     private final AmazonS3 amazonS3Client;
+    private final ProfileRepository profileRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
 
     // 버킷 이름
@@ -43,6 +59,19 @@ public class S3Service {
                 .preSignedUrl(url.toExternalForm())
                 .key(key)
                 .build();
+    }
+
+    //presigned url로 파일 업로드
+    @Transactional
+    public String uploadFile(MultipartFile file, String key) throws IOException {
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(file.getSize());
+        metadata.setContentType(file.getContentType());
+
+        //s3에 파일 업로드
+        amazonS3Client.putObject(new PutObjectRequest(bucket, key, file.getInputStream(), metadata));
+
+        return amazonS3Client.getUrl(bucket, key).toString();
     }
 
     @Transactional(readOnly = true)
@@ -92,10 +121,26 @@ public class S3Service {
     }
 
     @Transactional
-    public void deleteFile(String key) {
-        if (amazonS3Client.doesObjectExist(bucket, key)) {
-            amazonS3Client.deleteObject(bucket, key);
+    public void deleteFile(Long profileId) {
+        //버킷에서 삭제
+        Profile profile = profileRepository.findById(profileId)
+                .orElseThrow(() -> new ProfileException(ProfileErrorCode.NOT_FOUND));
+
+        String key = profile.getPictureKey();
+
+        if (key != null && !key.equals("none")) {
+            if (amazonS3Client.doesObjectExist(bucket, key)) {
+                amazonS3Client.deleteObject(bucket, key);
+                log.info("Deleted file with key: " + key);
+            } else {
+                log.error("File not found in S3: " + key);
+                throw new ProfileException(ProfileErrorCode.FILE_NOT_FOUND);
+            }
+
+        } else {
+            log.info("No picture to delete for profileId: " + profileId);
         }
+
     }
 
 }
