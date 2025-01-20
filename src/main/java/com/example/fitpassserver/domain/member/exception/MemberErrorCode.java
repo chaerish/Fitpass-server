@@ -5,6 +5,7 @@ import com.example.fitpassserver.global.apiPayload.code.ErrorReasonDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
 @Getter
 @AllArgsConstructor
 public enum MemberErrorCode implements BaseErrorCode {
@@ -15,7 +16,8 @@ public enum MemberErrorCode implements BaseErrorCode {
     INVALID_VERIFICATION_CODE(HttpStatus.NOT_FOUND, "CODE400", "인증번호가 맞지 않습니다."),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN401", "유효하지 않은 토큰입니다."),
     ALREADY_DELETED(HttpStatus.BAD_REQUEST, "MEMBER400", "이미 탈퇴한 계정입니다."),
-    DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "PHONE409", "이미 가입된 번호입니다.");
+    DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "PHONE409", "이미 가입된 번호입니다."),
+    UNVERIFIED_PHONE_NUMBER(HttpStatus.UNAUTHORIZED, "PHONE401", "인증되지 않은 전화번호입니다.");
     private final HttpStatus status;
     private final String code;
     private final String message;

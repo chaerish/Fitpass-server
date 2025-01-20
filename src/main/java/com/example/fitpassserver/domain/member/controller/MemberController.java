@@ -8,7 +8,6 @@ import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.service.command.MemberCommandService;
 import com.example.fitpassserver.domain.member.validation.validator.CheckLoginIdValidator;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -20,13 +19,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-
-import javax.xml.stream.Location;
 
 @Slf4j
 @RestController
@@ -44,13 +39,14 @@ public class MemberController {
 
     @Operation(summary = "회원가입 api", description = "회원가입을 위한 api입니다.")
     @PostMapping("/register")
-    public ApiResponse<MemberResponseDTO.JoinResultDTO> join(@RequestBody @Valid MemberRequestDTO.JoinDTO request){
+    public ApiResponse<MemberResponseDTO.JoinResultDTO> join(@RequestBody @Valid MemberRequestDTO.JoinDTO request) {
         Member member = memberCommandService.joinMember(request);
         return ApiResponse.onSuccess(MemberConverter.toJoinResultDTO(member));
     }
+
     @Operation(summary = "아이디 중복 확인 api", description = "중복 아이디 확인을 위한 api입니다.")
-    @GetMapping("/checkLoginId")
-    public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginIdDTO request){
+    @GetMapping("/check/login-id")
+    public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginIdDTO request) {
         return ApiResponse.onSuccess(null);
     }
 
@@ -89,7 +85,8 @@ public class MemberController {
         MemberResponseDTO.MemberTokenDTO tokenResponse = memberCommandService.refreshToken(refreshToken);
         return ApiResponse.onSuccess(tokenResponse);
     }
-    @Operation(summary = "사용자 탈퇴 api",description = "사용자 탈퇴시 사용하는 api입니다..")
+
+    @Operation(summary = "사용자 탈퇴 api", description = "사용자 탈퇴시 사용하는 api입니다..")
     @DeleteMapping("/{memberId}")
     public ApiResponse<Void> deleteMember(@PathVariable Long memberId) {
         memberCommandService.deactivateAccount(memberId); // 회원 탈퇴 처리
@@ -105,8 +102,17 @@ public class MemberController {
 
     @Operation(summary = "사용자 위치 설정 api", description = "위도 경도를 받아 사용자의 위치를 설정합니다.")
     @PatchMapping("/location")
-    public ApiResponse<String> setLocation(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.LocationDTO dto){
+    public ApiResponse<String> setLocation(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.LocationDTO dto) {
         memberCommandService.setLocation(member.getLoginId(), dto);
         return ApiResponse.onSuccess("사용자의 위치가 변경되었습니다.");
     }
+
+    @Operation(summary = "전화번호 변경 api", description = "인증된 전화번호를 변경하는 api입니다.")
+    @PostMapping("/changePhoneNumber")
+    public ApiResponse<?> changePhoneNumber(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.ChangePhoneNumberDTO request) {
+        memberCommandService.changePhoneNumber(member, request);
+        return ApiResponse.onSuccess("전화번호가 변경되었습니다.");
+    }
+
+
 }

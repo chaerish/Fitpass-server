@@ -9,6 +9,8 @@ import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
+import com.example.fitpassserver.domain.member.sms.repositroy.SmsRepository;
+import com.example.fitpassserver.domain.member.sms.service.SmsService;
 import com.example.fitpassserver.domain.profile.entity.Profile;
 import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
@@ -25,6 +27,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final MemberRepository memberRepository;
     private final JwtProvider jwtProvider;
     private final ProfileRepository profileRepository;
+    private final SmsService smsService;
+    private final SmsRepository smsRepository;
 
     /**
      * 회원가입
@@ -139,4 +143,34 @@ public class MemberCommandServiceImpl implements MemberCommandService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
         member.setLocation(dto.getLatitude(), dto.getLongitude());
     }
+
+    /**
+     * 전화번호 변경
+     **/
+    public void changePhoneNumber(Member member, MemberRequestDTO.ChangePhoneNumberDTO request) {
+        String newPhoneNumber = request.getNewPhoneNumber();
+
+        //전화번호 중복 확인은 인증번호 발송하며 확인
+        //회원 조회
+        Member currentMember = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        //비밀번호 확인
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
+        }
+
+        //레디스에서 인증 확인
+        if (!smsRepository.hasKey(newPhoneNumber)) {
+            throw new MemberException(MemberErrorCode.UNVERIFIED_PHONE_NUMBER);
+        }
+
+        member.updatePhoneNumber(request.getNewPhoneNumber());
+        memberRepository.save(member);
+
+        //레디스에서 해당 번호 삭제
+        smsRepository.deleteSmsCertification(newPhoneNumber);
+
+    }
+
 }

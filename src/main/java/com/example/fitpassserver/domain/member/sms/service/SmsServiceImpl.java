@@ -35,7 +35,7 @@ public class SmsServiceImpl implements SmsService {
     @Override // SmsService 인터페이스의 메서드를 구현
     public boolean verifyCode(SmsRequestDTO.CodeVertifyDTO smsVerifyDto) {
         if (isVerify(smsVerifyDto.getPhoneNumber(), smsVerifyDto.getCertificationCode())) { // 인증 코드 검증
-            smsRepository.deleteSmsCertification(smsVerifyDto.getPhoneNumber()); // 검증이 성공하면 Redis에서 인증 코드 삭제
+            //smsRepository.deleteSmsCertification(smsVerifyDto.getPhoneNumber()); // 변경 로직위해 3분 지나면 삭제되도록
             return true; // 인증 성공 반환
         } else {
             return false; // 인증 실패 반환
