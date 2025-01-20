@@ -1,6 +1,5 @@
 package com.example.fitpassserver.domain.member.sms.service;
 
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
@@ -24,12 +23,11 @@ public class SmsServiceImpl implements SmsService {
         String phoneNum = smsRequestDto.getPhoneNumber(); // SmsRequestDTO에서 전화번호를 가져옴
 
         //이미 가입된 번호인지 확인
-        memberRepository.findByPhoneNumber(phoneNum).ifPresent(member -> {
-            // 멤버가 있을 때 member를 이용하여 Exception 전에 처리할 로직이 추가된다면 작성할 부분
+        if (memberRepository.existsActiveByPhoneNumber(phoneNum)) {
             throw new MemberException(MemberErrorCode.DUPLICATE_PHONE_NUMBER);
-        });
+        }
 
-        String certificationCode = Integer.toString((int)(Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드를 랜덤으로 생성
+        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드를 랜덤으로 생성
         smsCertificationUtil.sendSMS(phoneNum, certificationCode); // SMS 인증 유틸리티를 사용하여 SMS 발송
         smsRepository.createSmsCertification(phoneNum, certificationCode); // 인증 코드를 Redis에 저장
     }
