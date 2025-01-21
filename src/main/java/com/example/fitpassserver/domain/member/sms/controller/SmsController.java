@@ -1,12 +1,13 @@
 package com.example.fitpassserver.domain.member.sms.controller;
 
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.sms.dto.SmsRequestDTO;
 import com.example.fitpassserver.domain.member.sms.service.SmsService;
+import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,19 +25,19 @@ public class SmsController {
 
     @Operation(summary = "전화번호 인증번호 발송 api", description = "인증번호 발송을 위한 api입니다.")
     @PostMapping("/vertify-code")
-    public ResponseEntity<?> SendSMS(@RequestBody @Valid SmsRequestDTO.CodeSendDTO smsRequestDto) {
+    public ApiResponse<?> SendSMS(@RequestBody @Valid SmsRequestDTO.CodeSendDTO smsRequestDto) {
         smsService.SendSms(smsRequestDto);
-        return ResponseEntity.ok("문자를 전송했습니다.");
+        return ApiResponse.onSuccess("문자를 전송했습니다.");
     }
 
     @Operation(summary = "전화번호 인증번호 검증 api", description = "인증번호 검증을 위한 api입니다.")
     @PostMapping("/verification")
-    public ResponseEntity<?> verifyCode(@RequestBody @Valid SmsRequestDTO.CodeVertifyDTO smsVerifyDto) {
+    public ApiResponse<?> verifyCode(@RequestBody @Valid SmsRequestDTO.CodeVertifyDTO smsVerifyDto) {
         boolean verify = smsService.verifyCode(smsVerifyDto);
         if (verify) {
-            return ResponseEntity.ok("확인 되었습니다.");
+            return ApiResponse.onSuccess("인증이 완료되었습니다.");
         } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증에 실패했습니다.");
+            throw new MemberException(MemberErrorCode.INCORRECT_CODE);
         }
     }
 }
