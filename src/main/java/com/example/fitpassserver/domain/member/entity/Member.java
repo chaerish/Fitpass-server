@@ -22,7 +22,7 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
-@SQLRestriction("deleted_at is NULL")
+@SQLRestriction("status = 'ACTIVE'")
 @Table(name = "member")
 public class Member extends BaseEntity {
     @Id
