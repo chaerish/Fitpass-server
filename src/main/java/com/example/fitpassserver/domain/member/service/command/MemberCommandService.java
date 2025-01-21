@@ -20,4 +20,6 @@ public interface MemberCommandService {
     void changePhoneNumber(Member member, MemberRequestDTO.ChangePhoneNumberDTO request);
 
     void resetPassword(MemberRequestDTO.ResetPasswordDTO request);
+
+    void changePassword(Member member, MemberRequestDTO.ChangePasswordDTO request);
 }

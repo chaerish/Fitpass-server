@@ -137,5 +137,12 @@ public class MemberController {
         return ApiResponse.onSuccess("비밀번호 변경 완료");
     }
 
+    @Operation(summary = "비밀번호 변경 api", description = "비밀번호를 변경하는 api입니다.")
+    @PatchMapping("/change/password")
+    public ApiResponse<?> resetPassword(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.ChangePasswordDTO request) {
+        memberCommandService.changePassword(member, request);
+        return ApiResponse.onSuccess("비밀번호 변경 완료");
+    }
+
 
 }

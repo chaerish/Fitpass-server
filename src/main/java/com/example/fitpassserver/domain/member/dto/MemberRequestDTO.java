@@ -201,5 +201,21 @@ public class MemberRequestDTO {
         private String newPassword;
     }
 
+    /**
+     * 비밀번호 변경 dto
+     **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ChangePasswordDTO {
+        @NotBlank
+        private String password;
+
+        @NotBlank
+        @Pattern(regexp = "^[a-zA-Z0-9]{8,20}$", message = "영어와 숫자를 사용하여 8-20자의 비밀번호를 입력해주세요.")
+        private String newPassword;
+    }
+
 
 }

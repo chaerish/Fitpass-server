@@ -191,5 +191,23 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         memberRepository.save(member);
     }
 
+    /**
+     * 비밀번호 변경
+     **/
+    @Override
+    @Transactional
+    public void changePassword(Member member, MemberRequestDTO.ChangePasswordDTO request) {
+
+        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+            throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
+        }
+
+        Member currentMember = memberRepository.findByLoginId(member.getLoginId())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        currentMember.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+
+        memberRepository.save(currentMember);
+    }
+
 
 }
