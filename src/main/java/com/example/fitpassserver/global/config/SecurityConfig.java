@@ -1,16 +1,14 @@
 package com.example.fitpassserver.global.config;
 
 
-import com.example.fitpassserver.domain.member.principal.PrincipalDetailsService;
 import com.example.fitpassserver.domain.member.principal.CustomOAuth2UserService;
+import com.example.fitpassserver.domain.member.principal.PrincipalDetailsService;
 import com.example.fitpassserver.global.jwt.filter.JwtFilter;
 import com.example.fitpassserver.global.jwt.handler.JwtAccessDeniedHandler;
 import com.example.fitpassserver.global.jwt.handler.JwtAuthenticationEntryPoint;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import com.example.fitpassserver.global.oauth.handler.CustomOAuth2SuccessHandler;
 import jakarta.servlet.Filter;
-import java.util.Arrays;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +22,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -41,17 +41,19 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
-            "/auth/register",
-            "/auth/phoneNumberCheck",
-            "/auth/verification",
-            "auth/login",
-            "auth/checkLoginId",
-            "auth/refresh",
-            "/auth/oauth2/**"
+            "/auth/register", //회원가입
+            "/auth/verify-code", //인증번호 발송
+            "/auth/verification", //인증번호 확인
+            "/auth/login", //로그인
+            "/auth/check/login-id", //중복 아이디 확인
+            "/auth/refresh", //리프레시 토큰
+            "/auth/oauth2/**", //소셜로그인
+            "/auth/find-id", //아이디 찾기
+            "/auth/find-password" //비밀번호 찾기
     };
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(request -> request
@@ -77,10 +79,12 @@ public class SecurityConfig {
                 );
         return http.build();
     }
+
     @Bean
     public Filter jwtFilter() {
         return new JwtFilter(jwtProvider, principalDetailsService);
     }
+
     @Bean
     public PasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();

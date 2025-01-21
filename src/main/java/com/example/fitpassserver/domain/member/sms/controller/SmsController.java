@@ -24,7 +24,7 @@ public class SmsController {
     }
 
     @Operation(summary = "전화번호 인증번호 발송 api", description = "인증번호 발송을 위한 api입니다.")
-    @PostMapping("/vertify-code")
+    @PostMapping("/verify-code")
     public ApiResponse<?> SendSMS(@RequestBody @Valid SmsRequestDTO.CodeSendDTO smsRequestDto) {
         smsService.SendSms(smsRequestDto);
         return ApiResponse.onSuccess("문자를 전송했습니다.");
