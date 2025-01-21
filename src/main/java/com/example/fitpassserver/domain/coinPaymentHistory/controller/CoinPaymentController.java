@@ -9,6 +9,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHi
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,6 +29,7 @@ public class CoinPaymentController {
     private final KakaoPaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
+    private final SmsCertificationUtil smsCertificationUtil;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
     @PostMapping()
@@ -46,6 +48,7 @@ public class CoinPaymentController {
         KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, history.getTid());
         coinService.createNewCoin(member, history, dto);
         coinPaymentHistoryService.approve(history);
+        smsCertificationUtil.sendCoinPaymentSMS(member.getPhoneNumber(), dto.quantity(), dto.amount().total());
         return ApiResponse.onSuccess(dto);
     }
 
