@@ -11,11 +11,13 @@ public interface MemberCommandService {
 
     MemberResponseDTO.MemberTokenDTO refreshToken(String refreshToken);
 
-    void deactivateAccount(Long memberId);
+    void deactivateAccount(Member member);
 
     Member socialJoinMember(MemberRequestDTO.SocialJoinDTO request, String accessToken);
 
     void setLocation(String loginId, MemberRequestDTO.LocationDTO dto);
 
     void changePhoneNumber(Member member, MemberRequestDTO.ChangePhoneNumberDTO request);
+
+    void resetPassword(MemberRequestDTO.ResetPasswordDTO request);
 }

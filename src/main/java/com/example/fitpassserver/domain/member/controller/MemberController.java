@@ -48,8 +48,9 @@ public class MemberController {
 
     @Operation(summary = "아이디 중복 확인 api", description = "중복 아이디 확인을 위한 api입니다.")
     @GetMapping("/check/login-id")
-    public ApiResponse<?> checkLoginId(@RequestBody @Valid MemberRequestDTO.CheckLoginIdDTO request) {
-        return ApiResponse.onSuccess(null);
+    public ApiResponse<?> checkLoginId(@RequestParam("loginId") String loginId) {
+        boolean isDuplicate = memberQueryService.checkLoginId(loginId);
+        return ApiResponse.onSuccess(isDuplicate);
     }
 
     @Operation(summary = "로그인 api", description = "로그인을 위한 api입니다.")
@@ -90,8 +91,8 @@ public class MemberController {
 
     @Operation(summary = "사용자 탈퇴 api", description = "사용자 탈퇴시 사용하는 api입니다..")
     @DeleteMapping("/{memberId}")
-    public ApiResponse<Void> deleteMember(@PathVariable Long memberId) {
-        memberCommandService.deactivateAccount(memberId); // 회원 탈퇴 처리
+    public ApiResponse<Void> deleteMember(@CurrentMember Member member) {
+        memberCommandService.deactivateAccount(member); // 회원 탈퇴 처리
         return ApiResponse.onSuccess(null); // HTTP 204 No Content 응답
     }
 
@@ -110,7 +111,7 @@ public class MemberController {
     }
 
     @Operation(summary = "전화번호 변경 api", description = "인증된 전화번호를 변경하는 api입니다.")
-    @PostMapping("/change/phone-number")
+    @PatchMapping("/change/phone-number")
     public ApiResponse<?> changePhoneNumber(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.ChangePhoneNumberDTO request) {
         memberCommandService.changePhoneNumber(member, request);
         return ApiResponse.onSuccess("전화번호가 변경되었습니다.");
@@ -121,6 +122,19 @@ public class MemberController {
     public ApiResponse<?> findId(@RequestBody @Valid MemberRequestDTO.FindLoginIdDTO request) {
         String loginId = memberQueryService.getLoginId(request);
         return ApiResponse.onSuccess(loginId);
+    }
+
+    @Operation(summary = "비밀번호 찾기 api", description = "아이디 찾기 api입니다.")
+    @PostMapping("/find-password")
+    public ApiResponse<?> findPassword(@RequestBody @Valid MemberRequestDTO.FindPasswordDTO request) {
+        return ApiResponse.onSuccess(memberQueryService.findPassword(request));
+    }
+
+    @Operation(summary = "비밀번호 리셋 api", description = "비밀번호 찾기 후 비밀번호를 리셋하는 api입니다.")
+    @PatchMapping("/reset-password")
+    public ApiResponse<?> resetPassword(@RequestBody @Valid MemberRequestDTO.ResetPasswordDTO request) {
+        memberCommandService.resetPassword(request);
+        return ApiResponse.onSuccess("비밀번호 변경 완료");
     }
 
 

@@ -155,6 +155,22 @@ public class MemberRequestDTO {
     }
 
     /**
+     * 비밀번호 찾기 dto
+     **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FindPasswordDTO {
+        @NotBlank
+        private String loginId;
+        @NotBlank
+        private String name;
+        @NotNull
+        private String phoneNumber;
+    }
+
+    /**
      * 전화번호 변경 dto
      **/
     @Getter
@@ -168,6 +184,21 @@ public class MemberRequestDTO {
         private String password;
         @NotBlank
         private String newPhoneNumber;
+    }
+
+    /**
+     * 비밀번호 리셋 dto
+     **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class ResetPasswordDTO {
+        @NotBlank(message = "비밀번호 찾기 api를 통해 반환된 loginId값을 넣어주세요")
+        private String loginId;
+        @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
+        @Pattern(regexp = "^[a-zA-Z0-9]{8,20}$", message = "영어와 숫자를 사용하여 8-20자의 비밀번호를 입력해주세요.")
+        private String newPassword;
     }
 
 

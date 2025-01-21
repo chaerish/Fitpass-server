@@ -117,13 +117,13 @@ public class MemberCommandServiceImpl implements MemberCommandService {
      **/
     @Transactional
     @Override
-    public void deactivateAccount(Long memberId) {
-        Member member = memberRepository.findById(memberId)
+    public void deactivateAccount(Member member) {
+        Member currentMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND)); // 회원이 없으면 예외 발생
 
-        member.deactivateAccount(); // 탈퇴 메서드 호출
+        currentMember.deactivateAccount(); // 탈퇴 메서드 호출
 
-        memberRepository.save(member); // 상태 변경된 엔티티 저장
+        memberRepository.save(currentMember); // 상태 변경된 엔티티 저장
     }
 
     @Override
@@ -151,6 +151,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     /**
      * 전화번호 변경
      **/
+    @Override
+    @Transactional
     public void changePhoneNumber(Member member, MemberRequestDTO.ChangePhoneNumberDTO request) {
         String newPhoneNumber = request.getNewPhoneNumber();
 
@@ -176,5 +178,18 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         smsRepository.deleteSmsCertification(newPhoneNumber);
 
     }
+
+    /**
+     * 비밀번호 리셋(비밀번호 찾기 후)
+     **/
+    @Override
+    @Transactional
+    public void resetPassword(MemberRequestDTO.ResetPasswordDTO request) {
+        Member member = memberRepository.findByLoginId(request.getLoginId())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        member.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+        memberRepository.save(member);
+    }
+
 
 }

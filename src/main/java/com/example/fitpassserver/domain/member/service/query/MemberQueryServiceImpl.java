@@ -22,6 +22,14 @@ public class MemberQueryServiceImpl implements MemberQueryService {
     }
 
     @Override
+    public boolean checkLoginId(String loginId) {
+        if (memberRepository.existsByLoginId(loginId)) {
+            throw new MemberException(MemberErrorCode.DUPLICATE_LOGINID);
+        }
+        return true;
+    }
+
+    @Override
     public String getLoginId(MemberRequestDTO.FindLoginIdDTO requst) {
         String name = requst.getName();
         String phoneNumber = requst.getPhoneNumber();
@@ -45,5 +53,32 @@ public class MemberQueryServiceImpl implements MemberQueryService {
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
         return member.getLoginId();
+    }
+
+    @Override
+    public String findPassword(MemberRequestDTO.FindPasswordDTO requst) {
+        String loginId = requst.getLoginId();
+        String name = requst.getName();
+        String phoneNumber = requst.getPhoneNumber();
+        //로그인아이디 정보 확인
+        if (!memberRepository.existsByLoginId(loginId)) {
+            throw new MemberException(MemberErrorCode.INVALID_INFO);
+        }
+        //이름 정보 확인
+        if (!memberRepository.existsByName(name)) {
+            throw new MemberException(MemberErrorCode.INVALID_INFO);
+        }
+
+        //전화번호 정보 확인
+        if (!memberRepository.existsByPhoneNumber(phoneNumber)) {
+            throw new MemberException(MemberErrorCode.INVALID_INFO);
+        }
+
+        //redis에서 인증여부 확인
+        if (!smsRepository.hasKey(phoneNumber)) {
+            throw new MemberException(MemberErrorCode.UNVERIFIED_PHONE_NUMBER);
+        }
+
+        return loginId;
     }
 }

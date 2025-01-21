@@ -80,7 +80,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(15)")
-    public MemberStatus status;
+    public MemberStatus status = MemberStatus.ACTIVE;
 
     @Column(name = "is_deleted")
     private boolean isDeleted = false;
@@ -141,5 +141,9 @@ public class Member extends BaseEntity {
 
     public void updatePhoneNumber(String newPhoneNumber) {
         this.phoneNumber = newPhoneNumber;
+    }
+
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
     }
 }

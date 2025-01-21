@@ -7,4 +7,8 @@ public interface MemberQueryService {
     Member getMember(String loginId);
 
     String getLoginId(MemberRequestDTO.FindLoginIdDTO requst);
+
+    boolean checkLoginId(String loginId);
+
+    String findPassword(MemberRequestDTO.FindPasswordDTO requst);
 }
