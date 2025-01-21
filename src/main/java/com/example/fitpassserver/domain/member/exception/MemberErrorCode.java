@@ -17,6 +17,7 @@ public enum MemberErrorCode implements BaseErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "TOKEN401", "유효하지 않은 토큰입니다."),
     ALREADY_DELETED(HttpStatus.BAD_REQUEST, "MEMBER400", "이미 탈퇴한 계정입니다."),
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "PHONE409", "이미 가입된 번호입니다."),
+    INVALID_INFO(HttpStatus.BAD_REQUEST, "MEMBER404", "올바르지 않은 정보입니다."),
     UNVERIFIED_PHONE_NUMBER(HttpStatus.UNAUTHORIZED, "PHONE401", "인증되지 않은 전화번호입니다.");
     private final HttpStatus status;
     private final String code;

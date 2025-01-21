@@ -36,6 +36,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     @Override
     @Transactional
     public Member joinMember(MemberRequestDTO.JoinDTO request) {
+        //이미 가입된 번호인지 확인
+        if (memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new MemberException(MemberErrorCode.DUPLICATE_PHONE_NUMBER);
+        }
         //필수 동의 사항 검증
         if (!request.isTermsAgreed() || !request.isLocationAgreed() || !request.isThirdPartyAgreed()) {
             throw new MemberException(MemberErrorCode.BAD_REQUEST);

@@ -1,7 +1,5 @@
 package com.example.fitpassserver.domain.member.sms.service;
 
-import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
-import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.domain.member.sms.dto.SmsRequestDTO;
 import com.example.fitpassserver.domain.member.sms.repositroy.SmsRepository;
@@ -22,10 +20,6 @@ public class SmsServiceImpl implements SmsService {
     public void SendSms(SmsRequestDTO.CodeSendDTO smsRequestDto) {
         String phoneNum = smsRequestDto.getPhoneNumber(); // SmsRequestDTO에서 전화번호를 가져옴
 
-        //이미 가입된 번호인지 확인
-        if (memberRepository.existsActiveByPhoneNumber(phoneNum)) {
-            throw new MemberException(MemberErrorCode.DUPLICATE_PHONE_NUMBER);
-        }
 
         String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드를 랜덤으로 생성
         smsCertificationUtil.sendSMS(phoneNum, certificationCode); // SMS 인증 유틸리티를 사용하여 SMS 발송

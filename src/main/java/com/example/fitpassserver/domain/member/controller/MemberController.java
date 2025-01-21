@@ -9,6 +9,7 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.service.command.MemberCommandService;
+import com.example.fitpassserver.domain.member.service.query.MemberQueryService;
 import com.example.fitpassserver.domain.member.validation.validator.CheckLoginIdValidator;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
 
     private final MemberCommandService memberCommandService;
+    private final MemberQueryService memberQueryService;
     private final CheckLoginIdValidator checkLoginIdValidator; //중복 아이디 체크
 
     @InitBinder("joinDTO")
@@ -108,10 +110,17 @@ public class MemberController {
     }
 
     @Operation(summary = "전화번호 변경 api", description = "인증된 전화번호를 변경하는 api입니다.")
-    @PostMapping("/changePhoneNumber")
+    @PostMapping("/change/phone-number")
     public ApiResponse<?> changePhoneNumber(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.ChangePhoneNumberDTO request) {
         memberCommandService.changePhoneNumber(member, request);
         return ApiResponse.onSuccess("전화번호가 변경되었습니다.");
+    }
+
+    @Operation(summary = "아이디 찾기 api", description = "아이디 찾기 api입니다.")
+    @PostMapping("/find-id")
+    public ApiResponse<?> findId(@RequestBody @Valid MemberRequestDTO.FindLoginIdDTO request) {
+        String loginId = memberQueryService.getLoginId(request);
+        return ApiResponse.onSuccess(loginId);
     }
 
 

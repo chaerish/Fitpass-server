@@ -140,18 +140,19 @@ public class MemberRequestDTO {
         private Double longitude;
     }
 
-
-//    /** 아이디 찾기 dto **/
-//    @Getter
-//    @Builder
-//    @AllArgsConstructor
-//    @NoArgsConstructor
-//    public class FindLoginIdDTO{
-//        @NotNull
-//        private String name;
-//        @NotNull
-//        private String phoneNumber;
-//    }
+    /**
+     * 아이디 찾기 dto
+     **/
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FindLoginIdDTO {
+        @NotNull
+        private String name;
+        @NotNull
+        private String phoneNumber;
+    }
 
     /**
      * 전화번호 변경 dto
