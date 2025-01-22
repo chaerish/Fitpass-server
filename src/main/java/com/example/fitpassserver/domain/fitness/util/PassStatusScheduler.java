@@ -16,7 +16,7 @@ public class PassStatusScheduler {
 
     private final MemberFitnessRepository memberFitnessRepository;
 
-    @Scheduled(fixedRate = 60000) // 1분마다 실행
+    @Scheduled(fixedDelay = 60000) // 1분마다 실행
     public void updatePassStatus() {
         List<MemberFitness> memberFitnessList = memberFitnessRepository.findByStatusAndActiveTimeBefore(Status.PROGRESS, LocalDateTime.now().minusHours(1));
         memberFitnessList.forEach(MemberFitness::done);
