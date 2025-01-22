@@ -44,7 +44,7 @@ public class CoinPaymentHistory extends BaseEntity {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @Enumerated(EnumType.STRING)
-    @JoinColumn(name = "payment_status", nullable = false)
+    @Column(name = "payment_status", nullable = false, length = 20)
     private PaymentStatus paymentStatus;
 
     public void changeStatus(PaymentStatus paymentStatus) {
