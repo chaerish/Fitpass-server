@@ -90,7 +90,7 @@ public class MemberController {
     }
 
     @Operation(summary = "사용자 탈퇴 api", description = "사용자 탈퇴시 사용하는 api입니다..")
-    @DeleteMapping("/{memberId}")
+    @DeleteMapping("/withdraw")
     public ApiResponse<Void> deleteMember(@CurrentMember Member member) {
         memberCommandService.deactivateAccount(member); // 회원 탈퇴 처리
         return ApiResponse.onSuccess(null); // HTTP 204 No Content 응답
