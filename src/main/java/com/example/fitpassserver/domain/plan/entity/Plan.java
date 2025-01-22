@@ -36,12 +36,13 @@ public class Plan extends BaseEntity {
 
     @Column(name = "plan_date", nullable = false)
     private LocalDate planDate;
-
     @OneToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @Column(name = "sid", nullable = false)
     private String sid;
+    @Column(name = "payment_count", nullable = false)
+    private int paymentCount;
 
     public void changePlanType(PlanType planType) {
         this.planType = planType;
@@ -49,5 +50,13 @@ public class Plan extends BaseEntity {
 
     public void setSid(String sid) {
         this.sid = sid;
+    }
+
+    public void addPaymentCount() {
+        this.sid += 1;
+    }
+
+    public boolean isRegularPlan() {
+        return paymentCount >= 1 && this.planType.equals(PlanType.NONE);
     }
 }
