@@ -124,7 +124,7 @@ public class MemberController {
         return ApiResponse.onSuccess(loginId);
     }
 
-    @Operation(summary = "비밀번호 찾기 api", description = "아이디 찾기 api입니다.")
+    @Operation(summary = "비밀번호 찾기 api", description = "비밀번호 찾기 api입니다.")
     @PostMapping("/find-password")
     public ApiResponse<?> findPassword(@RequestBody @Valid MemberRequestDTO.FindPasswordDTO request) {
         return ApiResponse.onSuccess(memberQueryService.findPassword(request));
