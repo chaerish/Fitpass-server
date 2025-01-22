@@ -54,7 +54,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         //profile 객체 생성
         Profile profile = Profile.builder()
                 .member(savedMember)
-                .pictureKey("none")  //기본 프로필
+                .pictureKey("none")
+                .pictureUrl("none")
                 .build();
 
         profileRepository.save(profile);
