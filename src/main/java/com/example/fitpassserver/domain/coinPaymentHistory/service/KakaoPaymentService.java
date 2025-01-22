@@ -8,6 +8,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
+import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
@@ -96,9 +97,9 @@ public class KakaoPaymentService {
                 1,
                 dto.totalAmount(),
                 0,
-                PLAN_APPROVE_URL,
-                PLAN_CANCEL_URL,
-                PLAN_FAIL_URL
+                APPROVE_URL,
+                CANCEL_URL,
+                FAIL_URL
         );
         Mono<FirstSubscriptionResponseDTO> response = kakao.post()
                 .uri(BASE_URL + "/ready")
@@ -112,23 +113,20 @@ public class KakaoPaymentService {
     }
 
     //정기 결제 두번째 회차
-    public SubscriptionResponseDTO ready(Member member) {
-        Plan plan = planRepository.findByMember(member).orElseThrow(
-                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
-        );
-
+    public SubscriptionResponseDTO ready(Member member, Plan plan) {
+        if (plan.getSid() == null) {
+            throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
+        }
         WebClient kakao = getKakaoClient();
-        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
+        SubscriptionRequestDTO request = new SubscriptionRequestDTO(
                 monthlyCid,
+                plan.getSid(),
                 orderId,
                 userId,
                 plan.getPlanType().getName(),
                 1,
                 plan.getPlanType().getPrice(),
-                0,
-                PLAN_APPROVE_URL,
-                PLAN_CANCEL_URL,
-                PLAN_FAIL_URL
+                0
         );
         Mono<SubscriptionResponseDTO> response = kakao.post()
                 .uri(BASE_URL + "/subscription")
@@ -185,7 +183,7 @@ public class KakaoPaymentService {
         return response.block();
     }
 
-    //정기 구독 끊기
+    //정기 구독 취소
     public KakaoCancelResponseDTO subscriptionCancel(Member member) {
         Plan plan = planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)

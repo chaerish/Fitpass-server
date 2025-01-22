@@ -8,9 +8,8 @@ import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
-import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
-import com.example.fitpassserver.domain.plan.exception.PlanException;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -40,18 +39,15 @@ public class CoinService {
                 .build());
     }
 
-    public void createSubscriptionNewCoin(Member member, CoinPaymentHistory history, String itemName) {
-        PlanType type = PlanType.getPlanType(itemName);
-        if (type == null) {
-            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
-        }
+    public void createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
         if (!history.getMember().getId().equals(member.getId())) {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
         }
+        PlanType planType = plan.getPlanType();
         coinRepository.save(Coin.builder()
                 .member(member)
-                .planType(type)
-                .count((long) type.getCoinQuantity())
+                .planType(planType)
+                .count((long) planType.getCoinQuantity())
                 .expiredDate(LocalDate.now().plusDays(30))
                 .history(history)
                 .build());

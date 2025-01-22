@@ -9,7 +9,9 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum PlanErrorCode implements BaseErrorCode {
-    PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "Plan404", "구독하고 계신 플랜을 찾을 수 없습니다.");
+    SID_NOT_FOUND(HttpStatus.NOT_FOUND, "SID404", "구독하고 계신 플랜의 SID를 찾을 수 없습니다."),
+    PLAN_NOT_FOUND(HttpStatus.NOT_FOUND, "Plan404", "구독하고 계신 플랜을 찾을 수 없습니다."),
+    PLAN_PAYMENT_BAD_REQUEST(HttpStatus.NOT_FOUND, "Plan400", "해당 플랜이 유효하지 않습니다.");
     private final HttpStatus status;
     private final String code;
     private final String message;
