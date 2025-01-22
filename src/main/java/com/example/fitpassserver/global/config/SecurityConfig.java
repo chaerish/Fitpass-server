@@ -47,7 +47,13 @@ public class SecurityConfig {
             "auth/login",
             "auth/checkLoginId",
             "auth/refresh",
-            "/auth/oauth2/**"
+            "/auth/oauth2/**",
+            "/fitness",
+            "/fitness/recommend",
+            "/fitness/{fitnessId}",
+            "/fitness/search",
+            "/notice",
+            "/notice/{noticeId}"
     };
 
     @Bean

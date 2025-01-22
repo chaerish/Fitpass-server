@@ -3,6 +3,8 @@ package com.example.fitpassserver.domain.fitness.service;
 import com.example.fitpassserver.domain.fitness.controller.response.FitnessDetailResponse;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,7 @@ public class FitnessDetailService {
     }
     public FitnessDetailResponse getFitnessDetail(Long fitnessId, double userLatitude, double userLongitude) {
         Fitness fitness = fitnessRepository.findById(fitnessId)
-                .orElseThrow(() -> new IllegalArgumentException("Fitness not found with id: " + fitnessId));
+                .orElseThrow(() -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
 
         double distance = DistanceCalculator.distance(
                 userLatitude, userLongitude,
