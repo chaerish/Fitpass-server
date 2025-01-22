@@ -41,15 +41,19 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
-            "/auth/register", //회원가입
-            "/auth/verify-code", //인증번호 발송
-            "/auth/verification", //인증번호 확인
-            "/auth/login", //로그인
-            "/auth/check/login-id", //중복 아이디 확인
-            "/auth/refresh", //리프레시 토큰
-            "/auth/oauth2/**", //소셜로그인
-            "/auth/find-id", //아이디 찾기
-            "/auth/find-password" //비밀번호 찾기
+            "/auth/register",
+            "/auth/phoneNumberCheck",
+            "/auth/verification",
+            "auth/login",
+            "auth/checkLoginId",
+            "auth/refresh",
+            "/auth/oauth2/**",
+            "/fitness",
+            "/fitness/recommend",
+            "/fitness/{fitnessId}",
+            "/fitness/search",
+            "/notice",
+            "/notice/{noticeId}"
     };
 
     @Bean
