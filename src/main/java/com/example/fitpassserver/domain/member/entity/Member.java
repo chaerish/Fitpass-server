@@ -80,6 +80,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(15)")
+    @Builder.Default
     public MemberStatus status = MemberStatus.ACTIVE;
 
     @Column(name = "is_deleted")
