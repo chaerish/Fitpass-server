@@ -48,6 +48,8 @@ public class FitnessDetailService {
                 .fee(fitness.getFee())
                 .distance(distance)
                 .imageUrl(imageUrl)
+                .fitnessLatitude(fitness.getLatitude())
+                .fitnessLongitude(fitness.getLongitude())
                 .build();
     }
 }
