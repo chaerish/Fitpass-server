@@ -7,15 +7,18 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.stereotype.Service;
 import java.util.stream.Collectors;
 
 @Service
 public class FitnessDetailService {
     private final FitnessRepository fitnessRepository;
+    private final S3Service s3Service;
 
-    public FitnessDetailService(FitnessRepository fitnessRepository) {
+    public FitnessDetailService(FitnessRepository fitnessRepository, S3Service s3Service) {
         this.fitnessRepository = fitnessRepository;
+        this.s3Service = s3Service;
     }
     public FitnessDetailResponse getFitnessDetail(Long fitnessId, double userLatitude, double userLongitude) {
         Fitness fitness = fitnessRepository.findById(fitnessId)
@@ -25,6 +28,9 @@ public class FitnessDetailService {
                 userLatitude, userLongitude,
                 fitness.getLatitude(), fitness.getLongitude()
         );
+        String key = "fitness/default.png";
+        String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+
         String categories = fitness.getCategoryList().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.joining(", "));
@@ -41,6 +47,7 @@ public class FitnessDetailService {
                 .etc(fitness.getEtc())
                 .fee(fitness.getFee())
                 .distance(distance)
+                .imageUrl(imageUrl)
                 .build();
     }
 }

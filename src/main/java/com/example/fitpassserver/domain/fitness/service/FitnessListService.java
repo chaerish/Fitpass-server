@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,9 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessListService {
     private final FitnessRepository fitnessRepository;
+    private final S3Service s3Service;
 
-    public FitnessListService(FitnessRepository fitnessRepository) {
+    public FitnessListService(FitnessRepository fitnessRepository, S3Service s3Service) {
         this.fitnessRepository = fitnessRepository;
+        this.s3Service = s3Service;
     }
 
     public CursorPaginationResponse<FitnessListResponse> getFitnessList(
@@ -37,6 +40,10 @@ public class FitnessListService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
+
+                    String key = "fitness/default.png";
+                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+
                     String categories = fitness.getCategoryList().stream()
                             .map(Category::getCategoryName)
                             .collect(Collectors.joining(", "));
@@ -47,7 +54,8 @@ public class FitnessListService {
                             fitness.getAddress(),
                             distance,
                             fitness.getFee(),
-                            categories
+                            categories,
+                            imageUrl
                     );
                 })
                 .collect(Collectors.toList());

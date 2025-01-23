@@ -13,5 +13,6 @@ public class FitnessListResponse {
     private String address;
     private Double distance; // 거리
     private Integer fee;
-    private String categoryName; // 카테고리 이름
+    private String categoryName;
+    private String imageUrl;
 }
