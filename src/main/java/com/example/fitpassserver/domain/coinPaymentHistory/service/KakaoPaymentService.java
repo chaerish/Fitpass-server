@@ -7,11 +7,13 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -113,7 +115,7 @@ public class KakaoPaymentService {
     }
 
     //정기 결제 두번째 회차
-    public SubscriptionResponseDTO ready(Member member, Plan plan) {
+    public SubscriptionResponseDTO ready(Plan plan) {
         if (plan.getSid() == null) {
             throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
         }
@@ -202,6 +204,25 @@ public class KakaoPaymentService {
                     log.error("API Error {}", e.getMessage());
                 });
         return response.block();
+    }
+
+    //sid 가 유효한지 체크
+    public SIDCheckResponseDTO sidCheck(Plan plan) {
+        WebClient kakao = getKakaoClient();
+        SIDCheckDTO request = new SIDCheckDTO(
+                monthlyCid,
+                plan.getSid()
+        );
+        Mono<SIDCheckResponseDTO> response = kakao.post()
+                .uri(BASE_URL + "/manage/subscription/status")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(SIDCheckResponseDTO.class)
+                .doOnError((e) -> {
+                    log.error("API Error {}", e.getMessage());
+                });
+        return response.block();
+
     }
 
 

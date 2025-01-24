@@ -11,7 +11,7 @@ import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
 import com.example.fitpassserver.domain.plan.service.PlanService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -41,14 +41,6 @@ public class PlanPaymentController {
                                                                                  @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
         coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
-        return ApiResponse.onSuccess(response);
-    }
-
-    @Operation(summary = "코인 정기 결제 2회차 요청", description = "코인 정기 결제(플랜 구매)를 2회차일 때 요청합니다.")
-    @PostMapping("/request")
-    public ApiResponse<SubscriptionResponseDTO> requestSubscriptionPay(@CurrentMember Member member) {
-        SubscriptionResponseDTO response = paymentService.ready(member, planService.getPlan(member));
-        coinPaymentHistoryService.createNewCoinHistory(member, response.tid());
         return ApiResponse.onSuccess(response);
     }
 
@@ -84,6 +76,13 @@ public class PlanPaymentController {
     public ApiResponse<KakaoCancelResponseDTO> cancelSubscriptionPay(@CurrentMember Member member) {
         KakaoCancelResponseDTO response = paymentService.subscriptionCancel(member);
         planService.cancelNewPlan(member);
+        return ApiResponse.onSuccess(response);
+    }
+
+    @Operation(summary = "정기 결제 상태 확인", description = "정기 결제 활성화, 비활성화 체크를 위해 요청합니다.")
+    @PostMapping("/sid-status")
+    public ApiResponse<SIDCheckResponseDTO> checkSidStatus(@CurrentMember Member member) {
+        SIDCheckResponseDTO response = paymentService.sidCheck(planService.getPlan(member));
         return ApiResponse.onSuccess(response);
     }
 
