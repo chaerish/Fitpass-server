@@ -47,6 +47,9 @@ public class CoinPaymentHistory extends BaseEntity {
     @JoinColumn(name = "payment_status", nullable = false)
     private PaymentStatus paymentStatus;
 
+    @Column(name = "payment_price", nullable = false)
+    private Integer paymentPrice;
+
     public void changeStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
