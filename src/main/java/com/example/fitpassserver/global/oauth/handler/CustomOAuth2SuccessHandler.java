@@ -26,6 +26,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final long accessExpiration;
     private final long refreshExpiration;
 
+    private static final String REDIRECT_URL = "http://localhost:5173";
+
     public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.jwtProvider = jwtProvider;
         this.memberRepository = memberRepository;
@@ -45,25 +47,15 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         String accessToken = jwtProvider.createAccessToken(member);
         String refreshToken = jwtProvider.createRefreshToken(member);
 
-        // 쿠키 설정
-        addCookie(response, "accessToken", accessToken, (int) (accessExpiration / 1000));
-        addCookie(response, "refreshToken", refreshToken, (int) (refreshExpiration / 1000));
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        response.setHeader("refreshToken", refreshToken);
 
         if (!member.isAdditionalInfo()) {
-            addCookie(response, "status", "additionalInfo", 60 * 5); // 상태 쿠키 설정 (5분)
-            response.sendRedirect("http://localhost:3000/additional-info");
+            response.setHeader("status", "register");
+            response.sendRedirect(REDIRECT_URL + "/signup/step2");
         } else {
-            addCookie(response, "status", "home", 60 * 5); // 상태 쿠키 설정 (5분)
-            response.sendRedirect("http://localhost:3000");
+            response.setHeader("status", "home");
+            response.sendRedirect(REDIRECT_URL);
         }
-    }
-
-    private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setHttpOnly(true); // JavaScript로 접근 불가
-        cookie.setSecure(true); // HTTPS에서만 사용
-        cookie.setPath("/"); // 모든 경로에 적용
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
     }
 }
