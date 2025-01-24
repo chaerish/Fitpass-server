@@ -55,7 +55,7 @@ public class Plan extends BaseEntity {
     }
 
     public void addPaymentCount() {
-        this.sid += 1;
+        this.paymentCount += 1;
     }
 
     public boolean isRegularPlan() {
