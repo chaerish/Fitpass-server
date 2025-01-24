@@ -7,31 +7,31 @@ import com.example.fitpassserver.domain.member.sms.service.SmsService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequiredArgsConstructor
+@RequestMapping("")
 public class SmsController {
 
     private final SmsService smsService;
 
-    public SmsController(@Autowired SmsService smsService) {
-        this.smsService = smsService;
+    @Operation(summary = "HTTPS 관련 api", description = "인스턴스 상태 unhealthy일 경우 임의로 200 반환하게 하는 api")
+    @GetMapping("/healthcheck")
+    public String healthycheck() {
+        return "OK";
     }
 
     @Operation(summary = "전화번호 인증번호 발송 api", description = "인증번호 발송을 위한 api입니다.")
-    @PostMapping("/verify-code")
+    @PostMapping("/auth/verify-code")
     public ApiResponse<?> SendSMS(@RequestBody @Valid SmsRequestDTO.CodeSendDTO smsRequestDto) {
         smsService.SendSms(smsRequestDto);
         return ApiResponse.onSuccess("문자를 전송했습니다.");
     }
 
     @Operation(summary = "전화번호 인증번호 검증 api", description = "인증번호 검증을 위한 api입니다.")
-    @PostMapping("/verification")
+    @PostMapping("/auth/verification")
     public ApiResponse<?> verifyCode(@RequestBody @Valid SmsRequestDTO.CodeVertifyDTO smsVerifyDto) {
         boolean verify = smsService.verifyCode(smsVerifyDto);
         if (verify) {
