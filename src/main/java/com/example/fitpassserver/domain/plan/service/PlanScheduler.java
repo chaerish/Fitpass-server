@@ -23,8 +23,7 @@ public class PlanScheduler {
     private final KakaoPaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
 
-    //    @Scheduled(cron = "0 0 0 * * ?")
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(cron = "0 0 0 * * ?")
     @Async
     public void regularPay() {
         List<Plan> planToProcess = planRepository.findAllByPlanDateBefore(LocalDate.now());
@@ -33,7 +32,6 @@ public class PlanScheduler {
                 processPay(plan);
             } catch (Exception e) {
                 log.error("plan ID: {} 에서 정기 결제 실패: {}", plan.getId(), e.getMessage(), e);
-                throw e;
             }
         }
     }
