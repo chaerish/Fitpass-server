@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -39,6 +40,8 @@ public class KakaoPaymentService {
     private String cid;
     @Value("${kakaopay.monthly-fee-cid}")
     private String monthlyCid;
+    @Value("${kakaopay.monthly-fee-regular-cid}")
+    private String monthlyRegularCid;
     @Value("kakaopay.order-id")
     private String orderId;
     @Value("kakaopay.user-id")
@@ -121,7 +124,7 @@ public class KakaoPaymentService {
         }
         WebClient kakao = getKakaoClient();
         SubscriptionRequestDTO request = new SubscriptionRequestDTO(
-                monthlyCid,
+                monthlyRegularCid,
                 plan.getSid(),
                 orderId,
                 userId,
@@ -134,6 +137,18 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/subscription")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        clientResponse -> {
+                            // HTTP 에러 발생 시 본문 읽기
+                            return clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        log.error("API Error Response: {}", errorBody);
+                                        return Mono.error(
+                                                new RuntimeException("구독 실패 이유: " + errorBody));
+                                    });
+                        }
+                )
                 .bodyToMono(SubscriptionResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -201,6 +216,7 @@ public class KakaoPaymentService {
                 .retrieve()
                 .bodyToMono(KakaoCancelResponseDTO.class)
                 .doOnError((e) -> {
+
                     log.error("API Error {}", e.getMessage());
                 });
         return response.block();
