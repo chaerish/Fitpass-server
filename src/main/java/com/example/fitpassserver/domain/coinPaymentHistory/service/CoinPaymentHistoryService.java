@@ -11,6 +11,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayErr
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayException;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,16 +19,14 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class CoinPaymentHistoryService {
     private final CoinPaymentRepository coinPaymentRepository;
     private final CoinRepository coinRepository;
 
-    public void createNewCoinPayment(Member member, String tid, String methodName, Integer price) {
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
+    public CoinPaymentHistory createNewCoinPayment(Member member, String tid, String methodName, Integer price) {
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(methodName)
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.READY)
@@ -59,19 +58,30 @@ public class CoinPaymentHistoryService {
         }
 
         if (query.toLowerCase().equals("all")) {
-            coinPaymentHistories = coinRepository.findAllByHistoryCreatedAtLessThanAndMemberIsOrderByCreatedAtDesc(createdAt, member, pageable);
+            coinPaymentHistories = coinRepository.findAllByHistoryCreatedAtLessThanAndMemberIsOrderByCreatedAtDesc(
+                    createdAt, member, pageable);
         } else {
-            coinPaymentHistories = coinRepository.findAllByQueryIsCreatedAtLessThanOrderByCreatedAtDesc(query, createdAt, member, pageable);
+            coinPaymentHistories = coinRepository.findAllByQueryIsCreatedAtLessThanOrderByCreatedAtDesc(query,
+                    createdAt, member, pageable);
         }
 
         return CoinPaymentHistoryResponseListDTO.builder()
-                .items(coinPaymentHistories.getContent().stream().map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO).toList())
+                .items(coinPaymentHistories.getContent().stream()
+                        .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
+                        .toList())
                 .hasNext(coinPaymentHistories.hasNext())
-                .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent().get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
+                .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent()
+                        .get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
                 .size(coinPaymentHistories.getNumberOfElements())
                 .build();
     }
 
+//    public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
+//        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
+//                .orElseThrow(
+//                        () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
+//                );
+//    }
 
     public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
         return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
