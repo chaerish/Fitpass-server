@@ -18,6 +18,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -25,6 +26,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "plan")
+@SQLRestriction("plan_type <> 'NONE'") //<> 같지않다
 public class Plan extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,12 +38,13 @@ public class Plan extends BaseEntity {
 
     @Column(name = "plan_date", nullable = false)
     private LocalDate planDate;
-
     @OneToOne
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
     @Column(name = "sid", nullable = false)
     private String sid;
+    @Column(name = "payment_count", nullable = false)
+    private int paymentCount;
 
     public void changePlanType(PlanType planType) {
         this.planType = planType;
@@ -49,5 +52,17 @@ public class Plan extends BaseEntity {
 
     public void setSid(String sid) {
         this.sid = sid;
+    }
+
+    public void addPaymentCount() {
+        this.paymentCount += 1;
+    }
+
+    public boolean isRegularPlan() {
+        return paymentCount >= 1 && this.planType.equals(PlanType.NONE);
+    }
+
+    public void updatePlanDate() {
+        this.planDate = LocalDate.now();
     }
 }

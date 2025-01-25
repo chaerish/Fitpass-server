@@ -30,6 +30,7 @@ public class CoinPaymentHistoryService {
         coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(methodName)
                 .isAgree(true)
+                .paymentStatus(PaymentStatus.READY)
                 .tid(tid)
                 .member(member)
                 .paymentPrice(price)
@@ -41,6 +42,7 @@ public class CoinPaymentHistoryService {
                 .paymentMethod("카카오페이 정기 결제") //todo: 수정
                 .isAgree(true)
                 .tid(tid)
+                .paymentStatus(PaymentStatus.SUCCESS)
                 .member(member)
                 .paymentPrice(price)
                 .build());

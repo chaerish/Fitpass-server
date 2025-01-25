@@ -7,10 +7,13 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
+import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -21,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -36,17 +40,23 @@ public class KakaoPaymentService {
     private String cid;
     @Value("${kakaopay.monthly-fee-cid}")
     private String monthlyCid;
+    @Value("${kakaopay.monthly-fee-regular-cid}")
+    private String monthlyRegularCid;
     @Value("kakaopay.order-id")
     private String orderId;
     @Value("kakaopay.user-id")
     private String userId;
+    @Value("kakaopay.approve-url")
+    private String APPROVE_URL;
+    @Value("kakaopay.approve-url")
+    private String CANCEL_URL;
+    @Value("kakaopay.approve-url")
+    private String FAIL_URL;
+
     private final String BASE_URL = "https://open-api.kakaopay.com/online/v1/payment";
     private final String PLAN_APPROVE_URL = "http://localhost:8080/coin/pay/success";
     private final String PLAN_CANCEL_URL = "http://localhost:8080/coin/pay/cancel";
     private final String PLAN_FAIL_URL = "http://localhost:8080/coin/pay/fail";
-    private final String APPROVE_URL = "http://localhost:8080/coin/pay/success";
-    private final String CANCEL_URL = "http://localhost:8080/coin/pay/cancel";
-    private final String FAIL_URL = "http://localhost:8080/coin/pay/fail";
     private final PlanRepository planRepository;
 
     @NotNull
@@ -96,9 +106,9 @@ public class KakaoPaymentService {
                 1,
                 dto.totalAmount(),
                 0,
-                PLAN_APPROVE_URL,
-                PLAN_CANCEL_URL,
-                PLAN_FAIL_URL
+                APPROVE_URL,
+                CANCEL_URL,
+                FAIL_URL
         );
         Mono<FirstSubscriptionResponseDTO> response = kakao.post()
                 .uri(BASE_URL + "/ready")
@@ -112,28 +122,37 @@ public class KakaoPaymentService {
     }
 
     //정기 결제 두번째 회차
-    public SubscriptionResponseDTO ready(Member member) {
-        Plan plan = planRepository.findByMember(member).orElseThrow(
-                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
-        );
-
+    public SubscriptionResponseDTO ready(Plan plan) {
+        if (plan.getSid() == null) {
+            throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
+        }
         WebClient kakao = getKakaoClient();
-        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
-                monthlyCid,
+        SubscriptionRequestDTO request = new SubscriptionRequestDTO(
+                monthlyRegularCid,
+                plan.getSid(),
                 orderId,
                 userId,
                 plan.getPlanType().getName(),
                 1,
                 plan.getPlanType().getPrice(),
-                0,
-                PLAN_APPROVE_URL,
-                PLAN_CANCEL_URL,
-                PLAN_FAIL_URL
+                0
         );
         Mono<SubscriptionResponseDTO> response = kakao.post()
                 .uri(BASE_URL + "/subscription")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(
+                        HttpStatusCode::isError,
+                        clientResponse -> {
+                            // HTTP 에러 발생 시 본문 읽기
+                            return clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        log.error("API Error Response: {}", errorBody);
+                                        return Mono.error(
+                                                new RuntimeException("구독 실패 이유: " + errorBody));
+                                    });
+                        }
+                )
                 .bodyToMono(SubscriptionResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -185,7 +204,7 @@ public class KakaoPaymentService {
         return response.block();
     }
 
-    //정기 구독 끊기
+    //정기 구독 취소
     public KakaoCancelResponseDTO subscriptionCancel(Member member) {
         Plan plan = planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
@@ -201,9 +220,29 @@ public class KakaoPaymentService {
                 .retrieve()
                 .bodyToMono(KakaoCancelResponseDTO.class)
                 .doOnError((e) -> {
+
                     log.error("API Error {}", e.getMessage());
                 });
         return response.block();
+    }
+
+    //sid 가 유효한지 체크
+    public SIDCheckResponseDTO sidCheck(Plan plan) {
+        WebClient kakao = getKakaoClient();
+        SIDCheckDTO request = new SIDCheckDTO(
+                monthlyCid,
+                plan.getSid()
+        );
+        Mono<SIDCheckResponseDTO> response = kakao.post()
+                .uri(BASE_URL + "/manage/subscription/status")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(SIDCheckResponseDTO.class)
+                .doOnError((e) -> {
+                    log.error("API Error {}", e.getMessage());
+                });
+        return response.block();
+
     }
 
 

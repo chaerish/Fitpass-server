@@ -16,21 +16,35 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanService {
     private final PlanRepository planRepository;
 
-    public void createNewPlan(Member member, String planName, String sid) {
-        planRepository.save(Plan.builder()
+    public Plan createNewPlan(Member member, String planName, String sid) {
+        return planRepository.save(Plan.builder()
                 .planType(PlanType.getPlanType(planName))
                 .planDate(LocalDate.now())
                 .sid(sid)
+                .paymentCount(1)
                 .member(member)
                 .build());
     }
 
     @Transactional
     public void cancelNewPlan(Member member) {
+        Plan plan = getPlan(member);
+        plan.changePlanType(PlanType.NONE);
+        planRepository.save(plan);
+    }
+
+    public Plan getPlan(Member member) {
         Plan plan = planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
         );
-        plan.changePlanType(PlanType.NONE);
-        planRepository.save(plan);
+        return plan;
+    }
+
+    public Plan getRegularPaymentPlan(Member member) {
+        Plan plan = getPlan(member);
+        if (!plan.isRegularPlan()) {
+            throw new PlanException(PlanErrorCode.PLAN_PAYMENT_BAD_REQUEST);
+        }
+        return plan;
     }
 }
