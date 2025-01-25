@@ -40,7 +40,7 @@ public class PlanScheduler {
     public void processPay(Plan plan) {
         Member member = plan.getMember();
         SubscriptionResponseDTO response = paymentService.ready(plan);
-        coinPaymentHistoryService.createNewCoinHistory(member, response.tid());
+        coinPaymentHistoryService.createNewCoinHistory(member, response.tid(), response.amount().total());
         plan.updatePlanDate();
         plan.addPaymentCount();
         planRepository.save(plan);
