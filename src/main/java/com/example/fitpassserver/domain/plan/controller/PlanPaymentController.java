@@ -36,7 +36,7 @@ public class PlanPaymentController {
     public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
                                                                                  @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
+        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
         return ApiResponse.onSuccess(response);
     }
 
@@ -44,7 +44,7 @@ public class PlanPaymentController {
     @PostMapping("/request")
     public ApiResponse<SubscriptionResponseDTO> requestSubscriptionPay(@CurrentMember Member member) {
         SubscriptionResponseDTO response = paymentService.ready(member);
-        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinHistory(member, response.tid());
+        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinHistory(member, response.tid(), response.amount().total());
         coinService.createSubscriptionNewCoin(member, history, response.item_name());
         return ApiResponse.onSuccess(response);
     }
