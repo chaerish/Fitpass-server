@@ -2,6 +2,7 @@ package com.example.fitpassserver.domain.coinPaymentHistory.controller;
 
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
@@ -12,14 +13,12 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/coin/pay")
@@ -36,7 +35,7 @@ public class CoinPaymentController {
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
                                                                  @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
+        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
         return ApiResponse.onSuccess(response);
     }
 
@@ -64,6 +63,18 @@ public class CoinPaymentController {
     public ApiResponse<?> cancelSinglePay(@CurrentMember Member member) {
         coinPaymentHistoryService.cancel(member);
         return ApiResponse.onSuccess("결제가 취소되었습니다.");
+    }
+
+    @Operation(summary = "코인 결제 내역 조회 API", description = "결제 내역 조회 API")
+    @Parameters({
+            @Parameter(name = "query", description = "전체: ALL(default), 요금제: PLAN, 코인: COIN")
+    })
+    @GetMapping("/history")
+    public ApiResponse<CoinPaymentHistoryResponseListDTO> getCoinHistory(@CurrentMember Member member,
+                                                                         @RequestParam(required = false, defaultValue = "ALL") String query,
+                                                                         @RequestParam(required = false, defaultValue = "0") Long cursor,
+                                                                         @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.onSuccess(coinPaymentHistoryService.getCoinHistory(member, query, cursor, size));
     }
 
 }
