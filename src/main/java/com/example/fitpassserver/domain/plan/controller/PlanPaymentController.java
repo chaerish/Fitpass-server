@@ -40,10 +40,10 @@ public class PlanPaymentController {
     public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
                                                                                  @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName());
+        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
         return ApiResponse.onSuccess(response);
     }
-
+  
     @PostMapping("/success")
     @Operation(summary = "플랜 정기 결제 성공", description = "플랜 정기 결제 1회차에만 성공시 실행되는 API")
     public ApiResponse<PlanSubscriptionResponseDTO> approveSinglePay(@CurrentMember Member member,

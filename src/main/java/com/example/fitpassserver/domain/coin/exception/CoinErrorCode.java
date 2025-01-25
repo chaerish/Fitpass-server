@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum CoinErrorCode implements BaseErrorCode {
     COIN_NOT_FOUND(HttpStatus.NOT_FOUND, "COIN404", "코인의 단위가 맞지 않습니다."),
+    COIN_PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COIN404", "코인 구매 기록을 찾을 수 없습니다."),
     COIN_UNAUTHORIZED_ERROR(HttpStatus.UNAUTHORIZED, "COIN401", "해당 코인에 대한 권한이 없습니다.");
     private final HttpStatus status;
     private final String code;

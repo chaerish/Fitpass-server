@@ -39,7 +39,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandService {
 
-    private static final Duration PASS_ACTIVE_DURATION = Duration.ofDays(1L);
+    private static final Duration PASS_ACTIVE_DURATION = Duration.ofHours(1L);
     private static final Duration COIN_ACTIVE_DURATION = Duration.ofDays(30L);
 
     private final MemberFitnessRepository memberFitnessRepository;
