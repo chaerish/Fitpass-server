@@ -55,7 +55,8 @@ public class SecurityConfig {
             "/fitness/{fitnessId}",
             "/fitness/search",
             "/notice",
-            "/notice/{noticeId}"
+            "/notice/{noticeId}",
+            "/healthcheck"
     };
 
     @Bean
