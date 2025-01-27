@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,9 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessListService {
     private final FitnessRepository fitnessRepository;
+    private final S3Service s3Service;
 
-    public FitnessListService(FitnessRepository fitnessRepository) {
+    public FitnessListService(FitnessRepository fitnessRepository, S3Service s3Service) {
         this.fitnessRepository = fitnessRepository;
+        this.s3Service = s3Service;
     }
 
     public CursorPaginationResponse<FitnessListResponse> getFitnessList(
@@ -29,7 +32,7 @@ public class FitnessListService {
             Long cursor,
             int size
     ) {
-        List<Fitness> fitnessList = fetchFitnessListBySort(categoryName, sort, cursor, size);
+        List<Fitness> fitnessList = fetchFitnessListBySort(categoryName, sort, userLatitude, userLongitude, cursor, size);
 
         List<FitnessListResponse> responses = fitnessList.stream()
                 .map(fitness -> {
@@ -37,6 +40,10 @@ public class FitnessListService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
+
+                    String key = "fitness/default.png";
+                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+
                     String categories = fitness.getCategoryList().stream()
                             .map(Category::getCategoryName)
                             .collect(Collectors.joining(", "));
@@ -47,7 +54,8 @@ public class FitnessListService {
                             fitness.getAddress(),
                             distance,
                             fitness.getFee(),
-                            categories
+                            categories,
+                            imageUrl
                     );
                 })
                 .collect(Collectors.toList());
@@ -55,24 +63,31 @@ public class FitnessListService {
         Long nextCursor = fitnessList.isEmpty() ? null : fitnessList.get(fitnessList.size() - 1).getId();
         return new CursorPaginationResponse<>(responses, nextCursor);
     }
-    private List<Fitness> fetchFitnessListBySort(String categoryName, String sort, Long cursor, int size) {
+    private List<Fitness> fetchFitnessListBySort(String categoryName, String sort, double userLatitude, double userLongitude, Long cursor, int size) {
         Sort sortingCriteria = switch (sort) {
             case "lowPrice" -> Sort.by(Sort.Direction.ASC, "fee");
             case "highPrice" -> Sort.by(Sort.Direction.DESC, "fee");
-            default -> Sort.by(Sort.Direction.ASC, "distance"); // 기본값: 거리순 정렬
+            default -> Sort.unsorted();
         };
-        // Pageable 객체 생성 (커서와 페이지 크기 반영)
         Pageable pageable = PageRequest.of(0, size, sortingCriteria);
-
-        // 커서 기준 데이터 조회
+        List<Fitness> fitnessList;
         if (cursor != null) {
-            return fitnessRepository.findByCategoryList_CategoryNameAndIdGreaterThan(
+            fitnessList = fitnessRepository.findByCategoryList_CategoryNameAndIdGreaterThan(
                     categoryName, cursor, pageable
             ).getContent();
         } else {
-            return fitnessRepository.findByCategoryList_CategoryName(
+            fitnessList = fitnessRepository.findByCategoryList_CategoryName(
                     categoryName, pageable
             ).getContent();
         }
+        if ("distance".equals(sort)) {
+            fitnessList = fitnessList.stream()
+                    .sorted((f1, f2) -> Double.compare(
+                            DistanceCalculator.distance(userLatitude, userLongitude, f1.getLatitude(), f1.getLongitude()),
+                            DistanceCalculator.distance(userLatitude, userLongitude, f2.getLatitude(), f2.getLongitude())
+                    ))
+                    .collect(Collectors.toList());
+        }
+        return fitnessList;
     }
 }

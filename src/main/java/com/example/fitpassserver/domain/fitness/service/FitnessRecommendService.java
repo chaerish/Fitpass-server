@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.fitness.controller.response.FitnessRecom
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,9 +12,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessRecommendService {
     private final FitnessRepository fitnessRepository;
+    private final S3Service s3Service;
 
-    public FitnessRecommendService(FitnessRepository fitnessRepository) {
+    public FitnessRecommendService(FitnessRepository fitnessRepository,  S3Service s3Service) {
         this.fitnessRepository = fitnessRepository;
+        this.s3Service = s3Service;
     }
 
     public List<Fitness> getRecommendFitness() {
@@ -28,11 +31,14 @@ public class FitnessRecommendService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
+                    String key = "fitness/default.png";
+                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
 
                     return FitnessRecommendResponse.builder()
                             .fitnessId(fitness.getId())
                             .name(fitness.getName())
                             .distance(distance)
+                            .imageUrl(imageUrl)
                             .build();
                 })
                 .collect(Collectors.toList());

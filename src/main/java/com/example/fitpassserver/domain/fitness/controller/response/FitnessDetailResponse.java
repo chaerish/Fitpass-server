@@ -17,4 +17,7 @@ public class FitnessDetailResponse {
     private String etc;
     private Integer fee;
     private Double distance;
+    private String imageUrl;
+    private Double fitnessLatitude;
+    private Double fitnessLongitude;
 }

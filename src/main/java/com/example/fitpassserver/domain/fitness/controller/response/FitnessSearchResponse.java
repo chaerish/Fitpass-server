@@ -14,4 +14,5 @@ public class FitnessSearchResponse {
     private String address;
     private Integer fee;
     private double distance;
+    private String imageUrl;
 }

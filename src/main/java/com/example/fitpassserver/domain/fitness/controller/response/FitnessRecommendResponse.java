@@ -9,4 +9,5 @@ public class FitnessRecommendResponse {
     private Long fitnessId;
     private String name;
     private double distance;
+    private String imageUrl;
 }

@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.notice.entity.Notice;
 import com.example.fitpassserver.domain.notice.exception.NoticeErrorCode;
 import com.example.fitpassserver.domain.notice.exception.NoticeException;
 import com.example.fitpassserver.domain.notice.repository.NoticeRepository;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,9 +18,11 @@ import java.util.stream.Collectors;
 @Service
 public class NoticeService {
     private final NoticeRepository noticeRepository;
+    private final S3Service s3Service;
 
-    public NoticeService(NoticeRepository noticeRepository) {
+    public NoticeService(NoticeRepository noticeRepository, S3Service s3Service) {
         this.noticeRepository = noticeRepository;
+        this.s3Service = s3Service;
     }
 
     public Map<String, Object> getNoticeList(Pageable pageable) {
@@ -42,12 +45,16 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
 
+        String key = "notice/default.png";
+        String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+
         return new NoticeDetailResponse(
                 notice.getId(),
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getNoticeImage(),
-                notice.getCreatedAt()
+                notice.getCreatedAt(),
+                imageUrl
         );
     }
 }

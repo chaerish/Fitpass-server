@@ -5,6 +5,7 @@ import com.example.fitpassserver.domain.fitness.controller.response.FitnessSearc
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
+import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessSearchService {
     private final FitnessRepository fitnessRepository;
+    private final S3Service s3Service;
 
-    public FitnessSearchService(FitnessRepository fitnessRepository) {
+    public FitnessSearchService(FitnessRepository fitnessRepository, S3Service s3Service) {
         this.fitnessRepository = fitnessRepository;
+        this.s3Service = s3Service;
     }
 
     public CursorPaginationResponse<FitnessSearchResponse> searchFitnessByKeyword(
@@ -27,8 +30,8 @@ public class FitnessSearchService {
         Pageable pageable = PageRequest.of(0, size);
 
         List<Fitness> fitnessList = (cursor == null)
-                ? fitnessRepository.findTopByNameContaining(keyword, pageable) // 처음 요청 시
-                : fitnessRepository.findNextByNameContaining(keyword, cursor, pageable); // 이후 요청 시
+                ? fitnessRepository.findTopByNameContaining(keyword, pageable)
+                : fitnessRepository.findNextByNameContaining(keyword, cursor, pageable);
 
         List<FitnessSearchResponse> responses = fitnessList.stream()
                 .map(fitness -> {
@@ -36,6 +39,8 @@ public class FitnessSearchService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
+                    String key = "fitness/default.png";
+                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
 
                     return FitnessSearchResponse.builder()
                             .fitnessId(fitness.getId())
@@ -43,6 +48,7 @@ public class FitnessSearchService {
                             .address(fitness.getAddress())
                             .fee(fitness.getFee())
                             .distance(distance)
+                            .imageUrl(imageUrl)
                             .build();
                 })
                 .sorted((r1, r2) -> Double.compare(r1.getDistance(), r2.getDistance()))
