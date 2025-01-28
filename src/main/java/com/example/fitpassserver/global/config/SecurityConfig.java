@@ -9,6 +9,7 @@ import com.example.fitpassserver.global.jwt.handler.JwtAuthenticationEntryPoint;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import com.example.fitpassserver.global.oauth.handler.CustomOAuth2SuccessHandler;
 import jakarta.servlet.Filter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,8 +23,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -44,11 +43,11 @@ public class SecurityConfig {
             "/auth/register",
             "/auth/verify-code",
             "/auth/verification",
-            "auth/login",
-            "auth/check/login-id",
-            "auth/refresh",
-            "auth/find-id",
-            "auth/find-password",
+            "/auth/login",
+            "/auth/check/login-id",
+            "/auth/refresh",
+            "/auth/find-id",
+            "/auth/find-password",
             "/auth/oauth2/**",
             "/fitness",
             "/fitness/recommend",
