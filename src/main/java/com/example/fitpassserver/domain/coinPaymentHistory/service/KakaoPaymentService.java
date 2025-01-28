@@ -7,18 +7,17 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
-import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.*;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +57,7 @@ public class KakaoPaymentService {
     private final String PLAN_CANCEL_URL = "http://localhost:8080/coin/pay/cancel";
     private final String PLAN_FAIL_URL = "http://localhost:8080/coin/pay/fail";
     private final PlanRepository planRepository;
+    private final SmsCertificationUtil smsCertificationUtil;
 
     @NotNull
     private WebClient getKakaoClient() {
@@ -148,6 +148,21 @@ public class KakaoPaymentService {
                             return clientResponse.bodyToMono(String.class)
                                     .flatMap(errorBody -> {
                                         log.error("API Error Response: {}", errorBody);
+
+                                        try {
+                                            ObjectMapper objectMapper = new ObjectMapper();
+                                            JsonNode root = objectMapper.readTree(errorBody);
+                                            int errorCode = root.path("error_code").asInt();
+                                            String methodResultCode = root.path("extras").path("method_result_code").asText();
+
+                                            // 금액 부족 에러 처리
+                                            if (errorCode == -782 && "8008".equals(methodResultCode)) {
+                                                smsCertificationUtil.sendPlanInsufficientFundsAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
+                                            }
+                                        } catch (Exception e) {
+                                            log.error("Parsing Error: {}", e.getMessage());
+                                        }
+
                                         return Mono.error(
                                                 new RuntimeException("구독 실패 이유: " + errorBody));
                                     });
