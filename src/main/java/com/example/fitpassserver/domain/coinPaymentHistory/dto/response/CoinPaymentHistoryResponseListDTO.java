@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public record CoinPaymentHistoryResponseListDTO(
         List<CoinPaymentHistoryResponseDTO> items,
+        boolean isSubscribing,
         boolean hasNext,
         Long cursor,
         int size
