@@ -12,6 +12,8 @@ import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayExc
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import java.time.LocalDateTime;
+
+import com.example.fitpassserver.domain.plan.entity.PlanType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -69,6 +71,7 @@ public class CoinPaymentHistoryService {
                 .items(coinPaymentHistories.getContent().stream()
                         .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
                         .toList())
+                .isSubscribing(coinPaymentHistories.getContent().stream().anyMatch(coin -> !coin.getPlanType().equals(PlanType.NONE)))
                 .hasNext(coinPaymentHistories.hasNext())
                 .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent()
                         .get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
