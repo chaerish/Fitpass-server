@@ -7,20 +7,17 @@ import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.jwt.exception.AuthException;
 import com.example.fitpassserver.global.jwt.exception.JwtErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
-import javax.crypto.SecretKey;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -31,9 +28,7 @@ public class JwtProvider {
     private long accessExpiration;
     private long refreshExpiration;
 
-    public JwtProvider(MemberRepository memberRepository, @Value("${Jwt.secret}") String secret,
-                       @Value("${Jwt.token.access-expiration-time}") long accessExpiration,
-                       @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
+    public JwtProvider(MemberRepository memberRepository, @Value("${Jwt.secret}") String secret, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.secret = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpiration = accessExpiration;
         this.refreshExpiration = refreshExpiration;
@@ -81,9 +76,9 @@ public class JwtProvider {
         try {
             return Jwts.parser()
                     .setSigningKey(secret)
-                    .build().parseSignedClaims(token);
+                    .build()
+                    .parseClaimsJws(token);
         } catch (Exception e) {
-            log.error("JWT 형식이 올바르지 않습니다: {}", e.getMessage());
             throw new AuthException(JwtErrorCode.INVALID_TOKEN);
         }
     }
