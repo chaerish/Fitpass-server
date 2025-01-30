@@ -80,6 +80,7 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
         } catch (Exception e) {
+            log.error("JWT 형식이 올바르지 않습니다: {}", e.getMessage());
             throw new AuthException(JwtErrorCode.INVALID_TOKEN);
         }
     }
