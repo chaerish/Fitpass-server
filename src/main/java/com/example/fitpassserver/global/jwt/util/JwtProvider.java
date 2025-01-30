@@ -82,11 +82,11 @@ public class JwtProvider {
     public Jws<Claims> getClaims(String token) {
         try {
             return Jwts.parser()
-                    .clockSkewSeconds(180)
+                    .clockSkewSeconds(60)
                     .verifyWith(secret)
                     .build().parseSignedClaims(token);
-        } catch (Exception e) {
-            log.error("JWT 형식이 올바르지 않습니다: {}", e.getMessage());
+        } catch (JwtException e) {
+            log.error("JWT 오류: {}", e.getMessage());
             throw new AuthException(JwtErrorCode.INVALID_TOKEN);
         }
     }
@@ -100,7 +100,7 @@ public class JwtProvider {
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = getClaims(token);
-            String loginId = claims.getBody().getSubject();
+            String loginId = claims.getPayload().getSubject();
 
             // 사용자 상태 확인
             Member member = memberRepository.findByLoginId(loginId)
