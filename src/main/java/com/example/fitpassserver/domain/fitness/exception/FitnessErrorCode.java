@@ -20,8 +20,9 @@ public enum FitnessErrorCode implements BaseErrorCode {
     USER_MISMATCH(HttpStatus.BAD_REQUEST,
             "PASS400_4", "로그인한 유저와 패스의 유저가 일치하지 않습니다."),
     FITNESS_NOT_FOUND(HttpStatus.NOT_FOUND,
-            "FITNESS404_1", "해당 시설이 존재하지 않습니다.");
-
+            "FITNESS404_1", "해당 시설이 존재하지 않습니다."),
+    FITNESS_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND,
+            "FITNESS404_1", "해당 시설의 이미지가 존재하지 않습니다.");
 
     private final HttpStatus status;
     private final String code;
