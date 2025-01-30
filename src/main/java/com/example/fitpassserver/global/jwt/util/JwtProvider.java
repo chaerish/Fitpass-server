@@ -75,8 +75,9 @@ public class JwtProvider {
 
     //토큰의 클레임 가져오는 메서드
     public Jws<Claims> getClaims(String token) {
+        log.info("Token : {}", token);
         try {
-           return Jwts.parser()
+            return Jwts.parser()
                     .clockSkewSeconds(60)
                     .verifyWith(secret)
                     .build().parseSignedClaims(token);
