@@ -76,6 +76,7 @@ public class JwtProvider {
         try {
             return Jwts.parser()
                     .setSigningKey(secret)
+                    .clockSkewSeconds(60)
                     .build()
                     .parseClaimsJws(token);
         } catch (Exception e) {
