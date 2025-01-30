@@ -82,6 +82,7 @@ public class JwtProvider {
     public Jws<Claims> getClaims(String token) {
         try {
             return Jwts.parser()
+                    .clockSkewSeconds(60)
                     .verifyWith(secret)
                     .build().parseSignedClaims(token);
         } catch (Exception e) {
