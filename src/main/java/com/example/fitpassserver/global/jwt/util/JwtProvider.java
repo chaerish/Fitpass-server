@@ -47,12 +47,14 @@ public class JwtProvider {
     public String createToken(Member member, long expiration) {
         Instant issuedAt = Instant.now();
         Instant expiredAt = issuedAt.plusMillis(expiration);
+        System.out.println("System current time: " + System.currentTimeMillis());
+        System.out.println("Instant now: " + Instant.now());
         return Jwts.builder()
                 .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
                 .setSubject(member.getLoginId())
                 .claim("id", member.getId())
-                .setIssuedAt(Date.from(issuedAt))
-                .setExpiration(Date.from(expiredAt))
+                .issuedAt(Date.from(issuedAt))
+                .expiration(Date.from(expiredAt))
                 .signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -74,11 +76,10 @@ public class JwtProvider {
     //토큰의 클레임 가져오는 메서드
     public Jws<Claims> getClaims(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(secret)
+           return Jwts.parser()
                     .clockSkewSeconds(60)
-                    .build()
-                    .parseClaimsJws(token);
+                    .verifyWith(secret)
+                    .build().parseSignedClaims(token);
         } catch (Exception e) {
             log.error("JWT 형식이 올바르지 않습니다: {}", e.getMessage());
             throw new AuthException(JwtErrorCode.INVALID_TOKEN);
@@ -104,7 +105,7 @@ public class JwtProvider {
                 throw new MemberException(MemberErrorCode.INACTIVE_ACCOUNT);
             }
 
-            return !claims.getBody().getExpiration().before(new Date());
+            return !claims.getPayload().getExpiration().before(new Date());
         } catch (JwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
             return false;
