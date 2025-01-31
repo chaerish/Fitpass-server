@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.profile.service;
 
 
+import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
@@ -16,14 +17,14 @@ import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.io.IOException;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class ProfileService {
     private final PlanRepository planRepository;
     private final MemberRepository memberRepository;
     private final S3Service s3Service;
+    private final CoinRepository coinRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
@@ -44,7 +46,6 @@ public class ProfileService {
         //멤버 확인
         memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
-
 
         //프로필 유무 확인
         Profile profile = profileRepository.findProfileByMemberId(memberId)
@@ -86,7 +87,6 @@ public class ProfileService {
         Plan plan = planRepository.findByMemberId(profile.getMember().getId())
                 .orElse(null);
 
-
         //presigned url 생성
         String presignedUrl;
         if (profile.getPictureKey() != null && !profile.getPictureKey().equals("none")) {
@@ -94,17 +94,17 @@ public class ProfileService {
         } else {
             presignedUrl = "none";
         }
-
-        //converter
-        ProfileResponseDTO.GetProfileDTO getProfileDTO = ProfileResponseDTO.GetProfileDTO.builder()
+        Long coinQuantity = coinRepository.findAllByMemberAndExpiredDateGreaterThanEqual(member, LocalDate.now())
+                .stream()
+                .mapToLong(coin -> coin.getCount() != null ? coin.getCount() : 0L).sum();
+        return ProfileResponseDTO.GetProfileDTO.builder()
                 .id(profile.getId())
                 .pictureUrl(presignedUrl)
+                .coinQuantity(coinQuantity)
                 .pictureKey(profile.getPictureKey())
                 .name(profile.getMember().getName())
                 .planType(plan != null ? plan.getPlanType().name() : null) // 패스 없으면 null 값
                 .build();
-
-        return getProfileDTO;
     }
 
     /* 프로필 삭제 -> 기본 이미지 변경시 */

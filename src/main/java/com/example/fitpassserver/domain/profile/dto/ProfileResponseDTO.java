@@ -26,6 +26,7 @@ public class ProfileResponseDTO {
 
         @NotBlank
         private String name;
+        private Long coinQuantity;
 
         //멤버가 구매한 패스 이름
         private String planType;
