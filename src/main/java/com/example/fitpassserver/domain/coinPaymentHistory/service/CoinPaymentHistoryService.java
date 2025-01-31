@@ -66,12 +66,13 @@ public class CoinPaymentHistoryService {
             coinPaymentHistories = coinRepository.findAllByQueryIsCreatedAtLessThanOrderByCreatedAtDesc(query,
                     createdAt, member, pageable);
         }
+        boolean isSubscribing = coinRepository.existsByMemberAndPlanTypeIsNot(member, PlanType.NONE);
 
         return CoinPaymentHistoryResponseListDTO.builder()
                 .items(coinPaymentHistories.getContent().stream()
                         .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
                         .toList())
-                .isSubscribing(coinPaymentHistories.getContent().stream().anyMatch(coin -> !coin.getPlanType().equals(PlanType.NONE)))
+                .isSubscribing(isSubscribing)
                 .hasNext(coinPaymentHistories.hasNext())
                 .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent()
                         .get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
