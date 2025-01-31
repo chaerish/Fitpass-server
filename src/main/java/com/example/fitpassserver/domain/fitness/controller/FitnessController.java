@@ -1,10 +1,7 @@
 package com.example.fitpassserver.domain.fitness.controller;
 
 import com.example.fitpassserver.domain.fitness.controller.response.*;
-import com.example.fitpassserver.domain.fitness.service.FitnessDetailService;
-import com.example.fitpassserver.domain.fitness.service.FitnessListService;
-import com.example.fitpassserver.domain.fitness.service.FitnessRecommendService;
-import com.example.fitpassserver.domain.fitness.service.FitnessSearchService;
+import com.example.fitpassserver.domain.fitness.service.*;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -20,17 +17,19 @@ public class FitnessController {
     private final FitnessSearchService fitnessSearchService;
     private final FitnessDetailService fitnessDetailService;
     private final FitnessListService fitnessListService;
+    private final FitnessPaymentService fitnessPaymentService;
 
     private static final double DEFAULT_LATITUDE = 37.5665;
     private static final double DEFAULT_LONGITUDE = 126.9780;
 
 
 
-    public FitnessController(FitnessRecommendService fitnessRecommendService, FitnessSearchService fitnessSearchService, FitnessDetailService fitnessDetailService, FitnessListService fitnessListService) {
+    public FitnessController(FitnessRecommendService fitnessRecommendService, FitnessSearchService fitnessSearchService, FitnessDetailService fitnessDetailService, FitnessListService fitnessListService, FitnessPaymentService fitnessPaymentService) {
         this.fitnessRecommendService = fitnessRecommendService;
         this.fitnessSearchService = fitnessSearchService;
         this.fitnessDetailService = fitnessDetailService;
         this.fitnessListService = fitnessListService;
+        this.fitnessPaymentService = fitnessPaymentService;
     }
 
     @Operation(summary = "메인 페이지에서 필터로 시설 검색할 수 있는 api", description = "무한스크롤이며 카테고리, 정렬 기준으로 정렬합니다.")
@@ -93,6 +92,12 @@ public class FitnessController {
         return ResponseEntity.ok(ApiResponse.onSuccess(response));
     }
 
+    @Operation(summary = "피트니스 구매 정보 API", description = "피트니스 구매 전의 정보를 조회할 수 있습니다.")
+    @GetMapping("/payment/{fitnessId}")
+    public ApiResponse<FitnessPaymentResponse> getFitnessPaymentDetail(@CurrentMember Member member,
+                                                                       @PathVariable Long fitnessId) {
+        return ApiResponse.onSuccess(fitnessPaymentService.getFitnessPaymentDetail(fitnessId, member));
+    }
 
 
 }
