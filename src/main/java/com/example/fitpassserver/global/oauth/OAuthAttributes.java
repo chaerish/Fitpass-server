@@ -3,6 +3,7 @@ package com.example.fitpassserver.global.oauth;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.global.oauth.provider.GoogleOAuth2UserInfo;
+import com.example.fitpassserver.global.oauth.provider.KakaoOAuth2UserInfo;
 import com.example.fitpassserver.global.oauth.provider.NaverOAuth2UserInfo;
 import com.example.fitpassserver.global.oauth.provider.OAuth2UserInfo;
 import java.util.Map;
@@ -27,6 +28,8 @@ public class OAuthAttributes {
             return ofNaver(userNameAttributeName, attributes);
         } else if ("google".equalsIgnoreCase(registrationId)) {
             return ofGoogle(userNameAttributeName, attributes);
+        } else if ("kakao".equalsIgnoreCase(registrationId)) {
+            return ofKakao(userNameAttributeName, attributes);
         } else {
             throw new IllegalArgumentException("지원하지 않는 OAuth 2.0 형식입니다.");
         }
@@ -43,6 +46,13 @@ public class OAuthAttributes {
         return OAuthAttributes.builder()
                 .nameAttributeKey(userNameAttributeName)
                 .oauth2UserInfo(new NaverOAuth2UserInfo(attributes))
+                .build();
+    }
+
+    private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
+        return OAuthAttributes.builder()
+                .nameAttributeKey(userNameAttributeName)
+                .oauth2UserInfo(new KakaoOAuth2UserInfo(attributes))
                 .build();
     }
 
