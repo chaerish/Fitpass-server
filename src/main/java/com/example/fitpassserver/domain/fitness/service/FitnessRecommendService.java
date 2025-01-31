@@ -15,6 +15,7 @@ public class FitnessRecommendService {
     private final FitnessRepository fitnessRepository;
     private final FitnessImageService fitnessImageService;
 
+
     public FitnessRecommendService(FitnessRepository fitnessRepository, S3Service s3Service, FitnessImageService fitnessImageService) {
         this.fitnessRepository = fitnessRepository;
         this.fitnessImageService = fitnessImageService;
@@ -41,9 +42,6 @@ public class FitnessRecommendService {
                             .imageUrl(imageUrl)
                             .build();
                 })
-                .sorted(Comparator.comparingDouble(FitnessRecommendResponse::getDistance))
-                // 상위 7개만 반환
-                .limit(7)
                 .collect(Collectors.toList());
     }
 }
