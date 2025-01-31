@@ -51,7 +51,7 @@ public class JwtProvider {
     //공통 토큰 생성
     public String createToken(Member member, long expiration) {
         Instant issuedAt = Instant.now();
-        Instant expiredAt = issuedAt.plusSeconds(expiration);
+        Instant expiredAt = issuedAt.plusMillis(expiration);
         System.out.println("issuedAt: " + issuedAt);
         System.out.println("expiredAt: " + expiredAt);
         return Jwts.builder()
