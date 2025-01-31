@@ -35,6 +35,15 @@ public class MemberFitnessResDTO {
 
         @Schema(description = "피트니스 ID", example = "3")
         private Long fitnessId;
+
+        @Schema(description = "피트니스 이름", example = "시설 이름")
+        private String fitnessName;
+
+        @Schema(description = "피트니스 주소", example = "시설 주소")
+        private String fitnessAddress;
+
+        @Schema(description = "거리", example = "3.0")
+        private double distance;
     }
 
     @Getter
