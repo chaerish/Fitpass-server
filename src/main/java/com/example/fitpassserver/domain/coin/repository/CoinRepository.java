@@ -16,7 +16,10 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
                                                                                                   Long count,
                                                                                                   LocalDate expiredDate);
 
-    List<Coin> findAllByMemberAndExpiredDateBefore(Member member, LocalDate now);
+    List<Coin> findAllByMemberAndExpiredDateGreaterThanEqual(Member member, LocalDate now);
+
+    @Query("SELECT c FROM Coin c WHERE c.member = :member AND c.expiredDate < :now")
+    List<Coin> findExpiredCoinsByMember(@Param("member") Member member, @Param("now") LocalDate now);
 
     @Query("SELECT c FROM Coin c " +
             "WHERE (CASE WHEN c.planType = 'NONE' THEN 'NONE' ELSE 'NOT NONE' END) = " +

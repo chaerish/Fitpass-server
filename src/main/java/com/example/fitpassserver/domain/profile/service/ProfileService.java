@@ -1,7 +1,6 @@
 package com.example.fitpassserver.domain.profile.service;
 
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
@@ -20,7 +19,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -96,9 +94,9 @@ public class ProfileService {
         } else {
             presignedUrl = "none";
         }
-        List<Coin> coinList = coinRepository.findAllByMemberAndExpiredDateBefore(member, LocalDate.now());
-        Long coinQuantity = coinRepository.findAllByMemberAndExpiredDateBefore(member, LocalDate.now()).stream()
-                .mapToLong(Coin::getCount).sum();
+        Long coinQuantity = coinRepository.findAllByMemberAndExpiredDateGreaterThanEqual(member, LocalDate.now())
+                .stream()
+                .mapToLong(coin -> coin.getCount() != null ? coin.getCount() : 0L).sum();
         return ProfileResponseDTO.GetProfileDTO.builder()
                 .id(profile.getId())
                 .pictureUrl(presignedUrl)
