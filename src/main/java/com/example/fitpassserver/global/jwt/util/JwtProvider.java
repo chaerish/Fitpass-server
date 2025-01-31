@@ -51,9 +51,9 @@ public class JwtProvider {
     //공통 토큰 생성
     public String createToken(Member member, long expiration) {
         Instant issuedAt = Instant.now();
-        Instant expiredAt = issuedAt.plusMillis(expiration);
-        System.out.println("System current time: " + System.currentTimeMillis());
-        System.out.println("Instant now: " + Instant.now());
+        Instant expiredAt = issuedAt.plusSeconds(expiration);
+        System.out.println("issuedAt: " + issuedAt);
+        System.out.println("expiredAt: " + expiredAt);
         return Jwts.builder()
                 .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
                 .setSubject(member.getLoginId())
@@ -86,7 +86,7 @@ public class JwtProvider {
                     .verifyWith(secret)
                     .build().parseSignedClaims(token);
         } catch (JwtException e) {
-            log.error("JWT 오류: {}", e.getMessage());
+            log.error("JWT {} 오류: {}", e.getClass(), e.getMessage());
             throw new AuthException(JwtErrorCode.INVALID_TOKEN);
         }
     }
