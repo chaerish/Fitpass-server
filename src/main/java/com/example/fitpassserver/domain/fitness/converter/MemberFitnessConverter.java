@@ -5,6 +5,7 @@ import com.example.fitpassserver.domain.fitness.dto.MemberFitnessResponseDTO;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
+import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 
@@ -24,12 +25,19 @@ public class MemberFitnessConverter {
     }
 
     public static MemberFitnessResDTO.MemberFitnessPreviewDTO toDto(MemberFitness memberFitness) {
+        double distance = DistanceCalculator.distance(
+                memberFitness.getMember().getLatitude(), memberFitness.getMember().getLongitude(),
+                memberFitness.getFitness().getLatitude(), memberFitness.getFitness().getLongitude()
+        );
         return MemberFitnessResDTO.MemberFitnessPreviewDTO.builder()
                 .id(memberFitness.getId())
                 .status(memberFitness.getStatus())
                 .activeTime(memberFitness.getActiveTime())
                 .memberId(memberFitness.getMember().getId())
                 .fitnessId(memberFitness.getFitness().getId())
+                .fitnessName(memberFitness.getFitness().getName())
+                .fitnessAddress(memberFitness.getFitness().getAddress())
+                .distance(distance)
                 .build();
     }
 

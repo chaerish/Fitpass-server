@@ -8,6 +8,7 @@ import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.MemberFitnessRepository;
+import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
@@ -37,6 +38,8 @@ public class MemberFitnessService {
     public MemberFitnessResDTO.MemberFitnessGroupDTO getPassList(String id){
         // 유저 찾기
         Member member = memberRepository.findByLoginId(id).orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+
         // 해당 유저의 패스 찾기 -> 리포지토리 메서드 추가
         List<MemberFitness> memberFitnessList = memberFitnessRepository.findAllByMember(member);
         return MemberFitnessConverter.toGroupDto(memberFitnessList);
