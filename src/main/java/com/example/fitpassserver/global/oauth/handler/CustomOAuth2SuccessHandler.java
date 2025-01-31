@@ -6,7 +6,6 @@ import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,7 +25,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final long accessExpiration;
     private final long refreshExpiration;
 
-    private static final String REDIRECT_URL = "http://localhost:5173";
+    private static final String REDIRECT_URL = "http://localhost:3000";
 
     public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.jwtProvider = jwtProvider;
@@ -43,19 +42,27 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
         Member member = memberRepository.findById(oAuth2User.getId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-        // JWT 생성
         String accessToken = jwtProvider.createAccessToken(member);
         String refreshToken = jwtProvider.createRefreshToken(member);
 
-        response.setHeader("Authorization", "Bearer " + accessToken);
-        response.setHeader("refreshToken", refreshToken);
+        addCookie(response, "accessToken", accessToken, (int) (accessExpiration / 1000));
+        addCookie(response, "refreshToken", refreshToken, (int) (refreshExpiration / 1000));
 
         if (!member.isAdditionalInfo()) {
-            response.setHeader("status", "register");
+            addCookie(response, "status", "register", 60 * 5);
             response.sendRedirect(REDIRECT_URL + "/signup/step2");
         } else {
-            response.setHeader("status", "home");
+            addCookie(response, "status", "home", 60 * 5);
             response.sendRedirect(REDIRECT_URL);
         }
+    }
+
+    private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
+        Cookie cookie = new Cookie(name, value);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAge);
+        response.addCookie(cookie);
     }
 }
