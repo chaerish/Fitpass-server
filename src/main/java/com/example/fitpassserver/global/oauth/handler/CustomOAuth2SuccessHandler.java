@@ -25,7 +25,7 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     private final long accessExpiration;
     private final long refreshExpiration;
 
-    private static final String REDIRECT_URL = "http://localhost:3000";
+    private static final String REDIRECT_URL = "http://localhost:5173";
 
     public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.jwtProvider = jwtProvider;
