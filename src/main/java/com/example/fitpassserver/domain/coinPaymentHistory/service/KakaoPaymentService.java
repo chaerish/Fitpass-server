@@ -1,12 +1,17 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.service;
 
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.KakaoPaymentRequestDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePayApproveRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
+import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
@@ -65,70 +70,70 @@ public class KakaoPaymentService {
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).build();
     }
 
-//    /*
-//    결제 Ready
-//     */
-//    //단건 결제
-//    public KakaoPaymentResponseDTO ready(CoinSinglePayRequestDTO dto) {
-//        WebClient kakao = getKakaoClient();
-//        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
-//                cid,
-//                orderId,
-//                userId,
-//                dto.itemName(),
-//                dto.quantity(),
-//                dto.totalAmount(),
-//                0,
-//                APPROVE_URL,
-//                CANCEL_URL,
-//                FAIL_URL
-//        );
-//        Mono<KakaoPaymentResponseDTO> response = kakao.post()
-//                .uri(BASE_URL + "/ready")
-//                .bodyValue(request)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError,
-//                        clientResponse -> {
-//                            // HTTP 에러 발생 시 본문 읽기
-//                            return clientResponse.bodyToMono(String.class)
-//                                    .flatMap(errorBody -> {
-//                                        log.error("API Error Response: {}", errorBody);
-//                                        return Mono.error(
-//                                                new RuntimeException("구독 실패 이유: " + errorBody));
-//                                    });
-//                        })
-//                .bodyToMono(KakaoPaymentResponseDTO.class)
-//                .doOnError((e) -> {
-//                    log.error("API Error {}", e.getMessage());
-//                });
-//        return response.block();
-//    }
-//
-//    //정기 결제 첫번째
-//    public FirstSubscriptionResponseDTO ready(PlanSubScriptionRequestDTO dto) {
-//        WebClient kakao = getKakaoClient();
-//        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
-//                monthlyCid,
-//                orderId,
-//                userId,
-//                dto.itemName(),
-//                1,
-//                dto.totalAmount(),
-//                0,
-//                APPROVE_URL,
-//                CANCEL_URL,
-//                FAIL_URL
-//        );
-//        Mono<FirstSubscriptionResponseDTO> response = kakao.post()
-//                .uri(BASE_URL + "/ready")
-//                .bodyValue(request)
-//                .retrieve()
-//                .bodyToMono(FirstSubscriptionResponseDTO.class)
-//                .doOnError((e) -> {
-//                    log.error("API Error {}", e.getMessage());
-//                });
-//        return response.block();
-//    }
+    /*
+    결제 Ready
+     */
+    //단건 결제
+    public KakaoPaymentResponseDTO ready(CoinSinglePayRequestDTO dto) {
+        WebClient kakao = getKakaoClient();
+        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
+                cid,
+                orderId,
+                userId,
+                dto.itemName(),
+                dto.quantity(),
+                dto.totalAmount(),
+                0,
+                APPROVE_URL,
+                CANCEL_URL,
+                FAIL_URL
+        );
+        Mono<KakaoPaymentResponseDTO> response = kakao.post()
+                .uri(BASE_URL + "/ready")
+                .bodyValue(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError,
+                        clientResponse -> {
+                            // HTTP 에러 발생 시 본문 읽기
+                            return clientResponse.bodyToMono(String.class)
+                                    .flatMap(errorBody -> {
+                                        log.error("API Error Response: {}", errorBody);
+                                        return Mono.error(
+                                                new RuntimeException("구독 실패 이유: " + errorBody));
+                                    });
+                        })
+                .bodyToMono(KakaoPaymentResponseDTO.class)
+                .doOnError((e) -> {
+                    log.error("API Error {}", e.getMessage());
+                });
+        return response.block();
+    }
+
+    //정기 결제 첫번째
+    public FirstSubscriptionResponseDTO ready(PlanSubScriptionRequestDTO dto) {
+        WebClient kakao = getKakaoClient();
+        KakaoPaymentRequestDTO request = new KakaoPaymentRequestDTO(
+                monthlyCid,
+                orderId,
+                userId,
+                dto.itemName(),
+                1,
+                dto.totalAmount(),
+                0,
+                APPROVE_URL,
+                CANCEL_URL,
+                FAIL_URL
+        );
+        Mono<FirstSubscriptionResponseDTO> response = kakao.post()
+                .uri(BASE_URL + "/ready")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(FirstSubscriptionResponseDTO.class)
+                .doOnError((e) -> {
+                    log.error("API Error {}", e.getMessage());
+                });
+        return response.block();
+    }
 
     //정기 결제 두번째 회차
     public SubscriptionResponseDTO ready(Plan plan) {
