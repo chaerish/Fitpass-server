@@ -30,7 +30,8 @@ public class NoticeService {
         List<NoticeListResponse> content = noticePage.getContent().stream()
                 .map(notice -> new NoticeListResponse(
                         notice.getId(),
-                        notice.getTitle()
+                        notice.getTitle(),
+                        notice.getType()
                 ))
                 .collect(Collectors.toList());
 
