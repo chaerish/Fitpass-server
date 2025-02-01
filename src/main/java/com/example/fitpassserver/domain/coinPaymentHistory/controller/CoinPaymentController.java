@@ -36,7 +36,7 @@ public class CoinPaymentController {
     private final SmsCertificationUtil smsCertificationUtil;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
-    @PostMapping()
+    @PostMapping("/request")
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
                                                                  @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
