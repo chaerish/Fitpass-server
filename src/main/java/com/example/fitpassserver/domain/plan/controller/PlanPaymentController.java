@@ -8,6 +8,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentS
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
@@ -34,22 +35,20 @@ public class PlanPaymentController {
     private final PlanService planService;
     private final SmsCertificationUtil smsCertificationUtil;
 
-//    @Operation(summary = "코인 정기 결제 1회차 요청", description = "가장 처음 플랜을 등록시, 코인 정기 결제(플랜 구매)를 요청합니다.")
-//    @PostMapping("/first-request")
-//    public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
-//                                                                                 @RequestBody @Valid PlanSubScriptionRequestDTO body) {
-//        FirstSubscriptionResponseDTO response = paymentService.ready(body);
-//        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
-//        return ApiResponse.onSuccess(response);
-//    }
+    @Operation(summary = "코인 정기 결제 1회차 요청", description = "가장 처음 플랜을 등록시, 코인 정기 결제(플랜 구매)를 요청합니다.")
+    @PostMapping("/first-request")
+    public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
+                                                                                 @RequestBody @Valid PlanSubScriptionRequestDTO body) {
+        FirstSubscriptionResponseDTO response = paymentService.ready(body);
+        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
+        return ApiResponse.onSuccess(response);
+    }
 
     @PostMapping("/first-request")
     @Operation(summary = "플랜 1회차 정기 결제 요청", description = "플랜 정기 결제 1회차에만 성공시 실행되는 API")
     public ApiResponse<PlanSubscriptionResponseDTO> approveSinglePay(@CurrentMember Member member,
-                                                                     @RequestParam("pg_token") String pgToken,
-                                                                     @RequestBody @Valid PlanSubScriptionRequestDTO body) {
-        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinHistory(member, body.tid(),
-                body.totalAmount());
+                                                                     @RequestParam("pg_token") String pgToken) {
+        CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
         PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(pgToken, history.getTid());
         coinPaymentHistoryService.approve(history);
         coinService.createSubscriptionNewCoin(member, history,

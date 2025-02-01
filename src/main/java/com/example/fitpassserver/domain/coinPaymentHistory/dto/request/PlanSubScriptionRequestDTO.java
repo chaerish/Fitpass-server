@@ -13,7 +13,6 @@ public record PlanSubScriptionRequestDTO(
         Integer totalAmount,
         @Schema(description = "결제 수단")
         @NotNull(message = "결제 수단을 입력해주세요.")
-        String methodName,
-        String tid
+        String methodName
 ) {
 }
