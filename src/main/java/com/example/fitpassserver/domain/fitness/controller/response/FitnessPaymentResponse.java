@@ -9,8 +9,8 @@ import lombok.Getter;
 @Getter
 public class FitnessPaymentResponse {
     private Long id;
-    private String name;
-    private String fitnessImage;
+    private String fitnessName;
+    private String imageUrl;
     private Integer fee;
     private Integer discount;
     private Integer totalFee;
@@ -21,8 +21,8 @@ public class FitnessPaymentResponse {
         int totalFee = fitness.getFee() - fitness.getDiscount();
         return FitnessPaymentResponse.builder()
                 .id(fitness.getId())
-                .name(fitness.getName())
-                .fitnessImage(fitness.getFitnessImage())
+                .fitnessName(fitness.getName())
+                .imageUrl(fitness.getFitnessImage())
                 .fee(fitness.getFee())
                 .discount(fitness.getDiscount())
                 .totalFee(totalFee)

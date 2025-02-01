@@ -7,7 +7,7 @@ import lombok.Getter;
 @Builder
 public class FitnessRecommendResponse {
     private Long fitnessId;
-    private String name;
+    private String fitnessName;
     private double distance;
     private String imageUrl;
 }
