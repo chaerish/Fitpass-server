@@ -71,7 +71,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         List<CoinUsageHistory> coinUsageHistories = useCoin(member, fitnessPaymentHistory, price);
 
         // 결제 문자 발송
-//        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
+        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
 
         return memberFitness;
     }

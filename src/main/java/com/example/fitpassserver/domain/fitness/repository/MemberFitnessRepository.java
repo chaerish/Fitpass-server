@@ -13,8 +13,6 @@ import java.util.Optional;
 public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Long> {
     List<MemberFitness> findAllByMember(Member member);
 
-    Optional<MemberFitness> findByMemberIsAndFitnessIs(Member member, Fitness fitness);
-
     List<MemberFitness> findByStatusAndActiveTimeBefore(Status status, LocalDateTime time);
 
     boolean existsByMemberAndStatusIsNot(Member member, Status status);
