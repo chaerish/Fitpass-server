@@ -6,7 +6,6 @@ public record NoticeDetailResponse(
         Long id,
         String title,
         String content,
-        String noticeImage,
         LocalDateTime createdAt,
         String imageUrl
 ) {

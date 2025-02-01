@@ -45,16 +45,25 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
 
-        String key = "notice/default.png";
-        String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+        String imageUrl = getNoticeImage(notice.getId());
 
         return new NoticeDetailResponse(
                 notice.getId(),
                 notice.getTitle(),
                 notice.getContent(),
-                notice.getNoticeImage(),
                 notice.getCreatedAt(),
                 imageUrl
         );
+    }
+
+    public String getNoticeImage(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_IMAGE_NOT_FOUND));
+
+        if (notice.getNoticeImage() != null && !notice.getNoticeImage().equals("none")) {
+            return s3Service.getGetS3Url(noticeId, notice.getNoticeImage()).getPreSignedUrl();
+        } else {
+            return "none";
+        }
     }
 }

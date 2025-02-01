@@ -16,11 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessSearchService {
     private final FitnessRepository fitnessRepository;
-    private final S3Service s3Service;
+    private final FitnessImageService fitnessImageService;
 
-    public FitnessSearchService(FitnessRepository fitnessRepository, S3Service s3Service) {
+    public FitnessSearchService(FitnessRepository fitnessRepository, S3Service s3Service,FitnessImageService fitnessImageService) {
         this.fitnessRepository = fitnessRepository;
-        this.s3Service = s3Service;
+        this.fitnessImageService = fitnessImageService;
     }
 
     public CursorPaginationResponse<FitnessSearchResponse> searchFitnessByKeyword(
@@ -39,8 +39,7 @@ public class FitnessSearchService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
-                    String key = "fitness/default.png";
-                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+                    String imageUrl = fitnessImageService.getFitnessImage(fitness.getId());
 
                     return FitnessSearchResponse.builder()
                             .fitnessId(fitness.getId())

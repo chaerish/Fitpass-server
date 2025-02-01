@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessDetailService {
     private final FitnessRepository fitnessRepository;
-    private final S3Service s3Service;
+    private final FitnessImageService fitnessImageService;
 
-    public FitnessDetailService(FitnessRepository fitnessRepository, S3Service s3Service) {
+    public FitnessDetailService(FitnessRepository fitnessRepository, S3Service s3Service, FitnessImageService fitnessImageService) {
         this.fitnessRepository = fitnessRepository;
-        this.s3Service = s3Service;
+        this.fitnessImageService = fitnessImageService;
     }
     public FitnessDetailResponse getFitnessDetail(Long fitnessId, double userLatitude, double userLongitude) {
         Fitness fitness = fitnessRepository.findById(fitnessId)
@@ -28,8 +28,7 @@ public class FitnessDetailService {
                 userLatitude, userLongitude,
                 fitness.getLatitude(), fitness.getLongitude()
         );
-        String key = "fitness/default.png";
-        String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+        String imageUrl = fitnessImageService.getFitnessImage(fitnessId);
 
         String categories = fitness.getCategoryList().stream()
                 .map(Category::getCategoryName)

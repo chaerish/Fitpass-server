@@ -17,11 +17,11 @@ import java.util.stream.Collectors;
 @Service
 public class FitnessListService {
     private final FitnessRepository fitnessRepository;
-    private final S3Service s3Service;
+    private final FitnessImageService fitnessImageService;
 
-    public FitnessListService(FitnessRepository fitnessRepository, S3Service s3Service) {
+    public FitnessListService(FitnessRepository fitnessRepository, S3Service s3Service, FitnessImageService fitnessImageService) {
         this.fitnessRepository = fitnessRepository;
-        this.s3Service = s3Service;
+        this.fitnessImageService = fitnessImageService;
     }
 
     public CursorPaginationResponse<FitnessListResponse> getFitnessList(
@@ -40,9 +40,7 @@ public class FitnessListService {
                             userLatitude, userLongitude,
                             fitness.getLatitude(), fitness.getLongitude()
                     );
-
-                    String key = "fitness/default.png";
-                    String imageUrl = s3Service.getGetS3Url(null, key).getPreSignedUrl();
+                    String imageUrl = fitnessImageService.getFitnessImage(fitness.getId());
 
                     String categories = fitness.getCategoryList().stream()
                             .map(Category::getCategoryName)
