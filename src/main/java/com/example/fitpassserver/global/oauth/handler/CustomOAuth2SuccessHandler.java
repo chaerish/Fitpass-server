@@ -28,6 +28,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Value("${spring.security.oauth2.redirect-url}")
     private String REDIRECT_URL;
+    @Value("${property.name}")
+    private String SPRING_PROFILE;
 
     public CustomOAuth2SuccessHandler(JwtProvider jwtProvider, MemberRepository memberRepository, @Value("${Jwt.token.access-expiration-time}") long accessExpiration, @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.jwtProvider = jwtProvider;
@@ -60,15 +62,17 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
     }
 
     private void addCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        ResponseCookie cookie = ResponseCookie.from(name, value)
+        ResponseCookie.ResponseCookieBuilder cookieBuilder = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(false)
                 .secure(true)
                 .sameSite("None")
-                .path("/")
-                .maxAge(maxAge)
-                .build();
+                .maxAge(maxAge);
 
-        response.addHeader("Set-Cookie", cookie.toString());
+        if (SPRING_PROFILE.equals("prod")) {
+            cookieBuilder.domain(".fitpass.co.kr");
+        }
+
+        response.addHeader("Set-Cookie", cookieBuilder.build().toString());
     }
 }
