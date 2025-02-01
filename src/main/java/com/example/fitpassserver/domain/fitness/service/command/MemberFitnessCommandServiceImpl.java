@@ -56,9 +56,9 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
                 new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
         // 이미 구매한 패스가 존재하는 경우 예외 처리
-        memberFitnessRepository.findByMemberIsAndFitnessIs(member, fitness).ifPresent(value -> {
+        if (memberFitnessRepository.existsByMemberAndStatusIsNot(member, Status.DONE)) {
             throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
-        });
+        }
 
         MemberFitness memberFitness = createMemberFitness(member, fitness, dto);
 
@@ -71,7 +71,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         List<CoinUsageHistory> coinUsageHistories = useCoin(member, fitnessPaymentHistory, price);
 
         // 결제 문자 발송
-        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
+//        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
 
         return memberFitness;
     }
