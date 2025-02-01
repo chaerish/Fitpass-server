@@ -49,6 +49,7 @@ public class SecurityConfig {
             "/auth/refresh",
             "/auth/find-id",
             "/auth/find-password",
+            "/auth/reset-password",
             "/auth/oauth2/**",
             "/fitness",
             "/fitness/recommend",
@@ -101,7 +102,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://api.fitpass.co.kr","https://fitpass.co.kr","https://fitpass-web.vercel.app"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://api.fitpass.co.kr", "https://fitpass.co.kr", "https://fitpass-web.vercel.app"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
