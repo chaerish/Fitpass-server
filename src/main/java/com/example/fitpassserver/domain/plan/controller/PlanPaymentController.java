@@ -44,7 +44,7 @@ public class PlanPaymentController {
         return ApiResponse.onSuccess(response);
     }
 
-    @PostMapping("/first-request")
+    @PostMapping("/success")
     @Operation(summary = "플랜 1회차 정기 결제 요청", description = "플랜 정기 결제 1회차에만 성공시 실행되는 API")
     public ApiResponse<PlanSubscriptionResponseDTO> approveSinglePay(@CurrentMember Member member,
                                                                      @RequestParam("pg_token") String pgToken) {
