@@ -21,7 +21,7 @@ public class MemberFitnessResDTO {
         @Schema(description = "회원 피트니스 ID", example = "1")
         private Long id;
 
-        @Schema(description = "피트니스 상태 (NONE, PROGRESS, DONE)", example = "PROGRESS")
+        @Schema(description = "패스 상태 (NONE, PROGRESS, DONE)", example = "PROGRESS")
         private Status status;
 
         @Schema(description = "패스 사용 시 활성화된 시간", example = "2025-01-14T12:00:00")
@@ -40,7 +40,7 @@ public class MemberFitnessResDTO {
         private String fitnessName;
 
         @Schema(description = "피트니스 주소", example = "시설 주소")
-        private String fitnessAddress;
+        private String address;
 
         @Schema(description = "거리", example = "3.0")
         private double distance;

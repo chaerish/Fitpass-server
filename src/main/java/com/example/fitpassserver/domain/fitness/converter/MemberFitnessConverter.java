@@ -40,7 +40,7 @@ public class MemberFitnessConverter {
                 .memberId(memberFitness.getMember().getId())
                 .fitnessId(memberFitness.getFitness().getId())
                 .fitnessName(memberFitness.getFitness().getName())
-                .fitnessAddress(memberFitness.getFitness().getAddress())
+                .address(memberFitness.getFitness().getAddress())
                 .distance(distance)
                 .imageUrl(imageUrl)
                 .build();
