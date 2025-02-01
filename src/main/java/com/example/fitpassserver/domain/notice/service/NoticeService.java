@@ -31,7 +31,7 @@ public class NoticeService {
                 .map(notice -> new NoticeListResponse(
                         notice.getId(),
                         notice.getTitle(),
-                        notice.getType()
+                        notice.getType().getValue()
                 ))
                 .collect(Collectors.toList());
 
