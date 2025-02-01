@@ -44,6 +44,8 @@ public class MemberFitnessResDTO {
 
         @Schema(description = "거리", example = "3.0")
         private double distance;
+
+        private String imageUrl;
     }
 
     @Getter
