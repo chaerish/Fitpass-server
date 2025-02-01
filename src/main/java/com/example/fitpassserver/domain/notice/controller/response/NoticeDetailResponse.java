@@ -7,6 +7,7 @@ public record NoticeDetailResponse(
         String title,
         String content,
         LocalDateTime createdAt,
-        String imageUrl
+        String imageUrl,
+        Long views
 ) {
 }
