@@ -28,6 +28,7 @@ public class MemberFitnessService {
     private final MemberFitnessRepository memberFitnessRepository;
     // MemberRepository 의존성 추가
      private final MemberRepository memberRepository;
+     private final FitnessImageService fitnessImageService;
 
      private void checkMember(Member member, MemberFitness memberFitness){
          if(!memberFitness.getMember().getId().equals(member.getId())){
@@ -42,7 +43,7 @@ public class MemberFitnessService {
 
         // 해당 유저의 패스 찾기 -> 리포지토리 메서드 추가
         List<MemberFitness> memberFitnessList = memberFitnessRepository.findAllByMember(member);
-        return MemberFitnessConverter.toGroupDto(memberFitnessList);
+        return MemberFitnessConverter.toGroupDto(memberFitnessList, fitnessImageService);
     }
 
     public void usePass(Member member, Long passId, boolean isAgree){
@@ -67,6 +68,6 @@ public class MemberFitnessService {
 
         checkMember(member, memberFitness);
 
-        return MemberFitnessConverter.toDto(memberFitness);
+        return MemberFitnessConverter.toDto(memberFitness, fitnessImageService);
     }
 }
