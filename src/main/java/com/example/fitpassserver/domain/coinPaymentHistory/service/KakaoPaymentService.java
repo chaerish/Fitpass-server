@@ -55,11 +55,10 @@ public class KakaoPaymentService {
     private String CANCEL_URL;
     @Value("${kakaopay.fail-url}")
     private String FAIL_URL;
+    @Value("${kakaopay.plan-approve-url}")
+    private String PLAN_APPROVE_URL;
 
     private final String BASE_URL = "https://open-api.kakaopay.com/online/v1/payment";
-    private final String PLAN_APPROVE_URL = "http://localhost:8080/coin/pay/success";
-    private final String PLAN_CANCEL_URL = "http://localhost:8080/coin/pay/cancel";
-    private final String PLAN_FAIL_URL = "http://localhost:8080/coin/pay/fail";
     private final PlanRepository planRepository;
     private final SmsCertificationUtil smsCertificationUtil;
 
@@ -120,7 +119,7 @@ public class KakaoPaymentService {
                 1,
                 dto.totalAmount(),
                 0,
-                APPROVE_URL,
+                PLAN_APPROVE_URL,
                 CANCEL_URL,
                 FAIL_URL
         );
