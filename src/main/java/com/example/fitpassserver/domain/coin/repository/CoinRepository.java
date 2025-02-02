@@ -5,8 +5,6 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import com.example.fitpassserver.domain.plan.entity.PlanType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -36,5 +34,4 @@ public interface CoinRepository extends JpaRepository<Coin, Long> {
     Slice<Coin> findAllByHistoryCreatedAtLessThanAndMemberIsOrderByCreatedAtDesc(LocalDateTime createAt, Member member,
                                                                                  Pageable pageable);
 
-    boolean existsByMemberAndPlanTypeIsNot(Member member, PlanType planType);
 }

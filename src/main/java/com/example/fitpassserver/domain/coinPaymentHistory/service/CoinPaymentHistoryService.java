@@ -11,9 +11,9 @@ import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayErr
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayException;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
-import java.time.LocalDateTime;
-
 import com.example.fitpassserver.domain.plan.entity.PlanType;
+import com.example.fitpassserver.domain.plan.repository.PlanRepository;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class CoinPaymentHistoryService {
     private final CoinPaymentRepository coinPaymentRepository;
     private final CoinRepository coinRepository;
+    private final PlanRepository planRepository;
 
     public CoinPaymentHistory createNewCoinPayment(Member member, String tid, String methodName, Integer price) {
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
@@ -66,7 +67,7 @@ public class CoinPaymentHistoryService {
             coinPaymentHistories = coinRepository.findAllByQueryIsCreatedAtLessThanOrderByCreatedAtDesc(query,
                     createdAt, member, pageable);
         }
-        boolean isSubscribing = coinRepository.existsByMemberAndPlanTypeIsNot(member, PlanType.NONE);
+        boolean isSubscribing = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
 
         return CoinPaymentHistoryResponseListDTO.builder()
                 .items(coinPaymentHistories.getContent().stream()
