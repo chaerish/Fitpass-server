@@ -4,7 +4,6 @@ import com.example.fitpassserver.domain.fitness.controller.response.FitnessRecom
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
-import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
@@ -16,7 +15,7 @@ public class FitnessRecommendService {
     private final FitnessImageService fitnessImageService;
 
 
-    public FitnessRecommendService(FitnessRepository fitnessRepository, S3Service s3Service, FitnessImageService fitnessImageService) {
+    public FitnessRecommendService(FitnessRepository fitnessRepository, FitnessImageService fitnessImageService) {
         this.fitnessRepository = fitnessRepository;
         this.fitnessImageService = fitnessImageService;
     }
