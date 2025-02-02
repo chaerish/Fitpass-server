@@ -21,10 +21,11 @@ public class NoticeAdminController {
 
     @GetMapping
     public Map<String, Object> getAllNotices(
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         Pageable pageable = PageRequest.of(page-1, size);
-        return noticeAdminService.getNoticeAdminList(pageable);
+        return noticeAdminService.getNoticeAdminList(keyword,pageable);
     }
 }

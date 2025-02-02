@@ -24,9 +24,15 @@ public class NoticeAdminService {
     }
     // 공지사항 목록 조회
     @Transactional(readOnly = true)
-    public Map<String, Object> getNoticeAdminList(Pageable pageable) {
-        Page<Notice> noticePage = noticeRepository.findAllByOrderByCreatedAtDesc(pageable);
-
+    public Map<String, Object> getNoticeAdminList(String keyword,Pageable pageable) {
+        Page<Notice> noticePage;
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            // 🔹 검색어가 있을 경우 검색 기능 적용
+            noticePage = noticeRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
+        } else {
+            // 🔹 검색어가 없으면 전체 목록 조회
+            noticePage = noticeRepository.findAllByOrderByCreatedAtDesc(pageable);
+        }
         List<NoticeAdminResDTO> noticeList = noticePage.getContent().stream()
                 .map(notice -> new NoticeAdminResDTO(
                         notice.getId(),
