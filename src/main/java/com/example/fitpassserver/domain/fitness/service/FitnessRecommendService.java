@@ -6,7 +6,7 @@ import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.stereotype.Service;
-
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +42,9 @@ public class FitnessRecommendService {
                             .imageUrl(imageUrl)
                             .build();
                 })
+                .sorted(Comparator.comparingDouble(FitnessRecommendResponse::getDistance))
+                // 상위 7개만 반환
+                .limit(7)
                 .collect(Collectors.toList());
     }
 }
