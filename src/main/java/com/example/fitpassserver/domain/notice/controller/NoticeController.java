@@ -1,12 +1,14 @@
 package com.example.fitpassserver.domain.notice.controller;
 
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
+import com.example.fitpassserver.domain.notice.controller.response.NoticeHomeSlideResponse;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,5 +32,10 @@ public class NoticeController {
     public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNoticeDetail(@PathVariable Long noticeId) {
         NoticeDetailResponse noticeDetail = noticeService.getNoticeDetail(noticeId);
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeDetail));
+    }
+
+    @GetMapping("/homeSlide")
+    public List<NoticeHomeSlideResponse> getNoticeHomeSlides() {
+        return noticeService.getNoticeHomeSlides();
     }
 }

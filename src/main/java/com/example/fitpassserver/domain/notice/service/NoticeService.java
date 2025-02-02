@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.notice.service;
 
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
+import com.example.fitpassserver.domain.notice.controller.response.NoticeHomeSlideResponse;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeListResponse;
 import com.example.fitpassserver.domain.notice.entity.Notice;
 import com.example.fitpassserver.domain.notice.exception.NoticeErrorCode;
@@ -10,6 +11,7 @@ import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +62,19 @@ public class NoticeService {
                 imageUrl,
                 notice.getViews()
         );
+    }
+
+    //홈슬라이드 게시할 공지사항 조회
+    @Transactional(readOnly = true)
+    public List<NoticeHomeSlideResponse> getNoticeHomeSlides() {
+        List<Notice> homeSlideNotices = noticeRepository.findByIsHomeSlideTrueAndIsDraftFalse();
+
+        return homeSlideNotices.stream()
+                .map(notice -> new NoticeHomeSlideResponse(
+                        notice.getId(),
+                        getNoticeImage(notice.getId())
+                ))
+                .collect(Collectors.toList());
     }
 
     public String getNoticeImage(Long noticeId) {
