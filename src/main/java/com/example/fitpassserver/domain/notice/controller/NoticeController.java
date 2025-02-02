@@ -35,7 +35,8 @@ public class NoticeController {
     }
 
     @GetMapping("/homeSlide")
-    public List<NoticeHomeSlideResponse> getNoticeHomeSlides() {
-        return noticeService.getNoticeHomeSlides();
+    public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides() {
+        List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides();
+        return ResponseEntity.ok(ApiResponse.onSuccess(homeSlides));
     }
 }

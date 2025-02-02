@@ -42,5 +42,7 @@ public class Notice extends BaseEntity {
     public void increaseViews() {
         this.views += 1;
     }
-
+    public void setHomeSlide(boolean isHomeSlide) {
+        this.isHomeSlide = isHomeSlide;
+    }
 }

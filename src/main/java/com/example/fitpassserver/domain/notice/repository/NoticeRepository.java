@@ -12,4 +12,5 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     List<Notice> findByIsHomeSlideTrueAndIsDraftFalse();
     Page<Notice> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<Notice> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
+    long countByIsHomeSlideTrue();
 }
