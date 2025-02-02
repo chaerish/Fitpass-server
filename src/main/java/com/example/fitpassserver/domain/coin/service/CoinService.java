@@ -20,7 +20,7 @@ public class CoinService {
     private final CoinRepository coinRepository;
 
     //결제 성공시 Coin 엔티티 증가
-    public void createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
+    public Coin createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
         int price = dto.amount().total();
         int quantity = dto.quantity();
         CoinType type = CoinType.getCoinType(price, quantity);
@@ -30,21 +30,21 @@ public class CoinService {
         if (!history.getMember().getId().equals(member.getId())) {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
         }
-        coinRepository.save(Coin.builder()
+        return coinRepository.save(Coin.builder()
                 .member(member)
-                .count((long) quantity)
+                .count(((long) type.getCount() * quantity))
                 .expiredDate(LocalDate.now().plusDays(type.getDeadLine()))
                 .history(history)
                 .planType(PlanType.NONE)
                 .build());
     }
 
-    public void createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
+    public Coin createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
         if (!history.getMember().getId().equals(member.getId())) {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
         }
         PlanType planType = plan.getPlanType();
-        coinRepository.save(Coin.builder()
+        return coinRepository.save(Coin.builder()
                 .member(member)
                 .planType(planType)
                 .count((long) planType.getCoinQuantity())

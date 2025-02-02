@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.entity;
 
+import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -12,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -49,6 +51,16 @@ public class CoinPaymentHistory extends BaseEntity {
 
     @Column(name = "payment_price", nullable = false)
     private Integer paymentPrice;
+
+    @Column(name = "coin_count", nullable = false)
+    private Long coinCount;
+    @OneToOne
+    @JoinColumn(name = "coin_id")
+    private Coin coin;
+
+    public void setCoin(Coin coin) {
+        this.coin = coin;
+    }
 
     public void changeStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
