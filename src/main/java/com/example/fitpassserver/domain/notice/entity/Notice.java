@@ -22,7 +22,8 @@ public class Notice extends BaseEntity {
     private String content;
 
     @Column(name = "views")
-    private Long views;
+    @Builder.Default
+    private Long views = 0L;
 
     @Column(name = "notice_image")
     private String noticeImage;
@@ -30,5 +31,10 @@ public class Notice extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private NoticeType type;
+
+    // 🔹 조회수 증가 메서드 추가
+    public void increaseViews() {
+        this.views += 1;
+    }
 
 }

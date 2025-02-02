@@ -19,15 +19,18 @@ public class FitnessPaymentService {
 
     private final FitnessRepository fitnessRepository;
     private final CoinRepository coinRepository;
+    private final FitnessImageService fitnessImageService;
 
     @Transactional(readOnly = true)
     public FitnessPaymentResponse getFitnessPaymentDetail(Long fitnessId, Member member) {
         Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(() ->
                 new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
 
+        String imageUrl = fitnessImageService.getFitnessImage(fitnessId);
+
         Long coinQuantity = coinRepository.findAllByMemberAndExpiredDateGreaterThanEqual(member, LocalDate.now())
                 .stream()
                 .mapToLong(coin -> coin.getCount() != null ? coin.getCount() : 0L).sum();
-        return FitnessPaymentResponse.toFitnessPaymentResponse(fitness, coinQuantity);
+        return FitnessPaymentResponse.toFitnessPaymentResponse(fitness, coinQuantity, imageUrl);
     }
 }

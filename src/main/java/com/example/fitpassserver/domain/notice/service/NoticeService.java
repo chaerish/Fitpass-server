@@ -48,12 +48,17 @@ public class NoticeService {
 
         String imageUrl = getNoticeImage(notice.getId());
 
+        // 🔹 조회수 증가
+        notice.increaseViews();
+        noticeRepository.save(notice);
+
         return new NoticeDetailResponse(
                 notice.getId(),
                 notice.getTitle(),
                 notice.getContent(),
                 notice.getCreatedAt(),
-                imageUrl
+                imageUrl,
+                notice.getViews()
         );
     }
 
