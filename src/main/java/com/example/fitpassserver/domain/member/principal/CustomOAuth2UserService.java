@@ -2,6 +2,8 @@ package com.example.fitpassserver.domain.member.principal;
 
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
+import com.example.fitpassserver.domain.profile.entity.Profile;
+import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.oauth.OAuthAttributes;
 import java.util.Collections;
 import java.util.Map;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
 
     private final MemberRepository memberRepository;
+    private final ProfileRepository profileRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -31,7 +34,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
 
-
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -39,6 +41,14 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         OAuthAttributes extractAttributes = OAuthAttributes.of(registrationId, userNameAttributeName, attributes);
 
         Member createdMember = getMember(extractAttributes);
+
+        Profile profile = Profile.builder()
+                .member(createdMember)
+                .pictureKey("none")
+                .pictureUrl("none")
+                .build();
+
+        profileRepository.save(profile);
 
         return new CustomOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority(createdMember.getRole().getKey())),
