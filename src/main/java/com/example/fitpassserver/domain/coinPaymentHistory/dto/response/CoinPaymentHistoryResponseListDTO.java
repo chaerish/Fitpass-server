@@ -24,14 +24,15 @@ public record CoinPaymentHistoryResponseListDTO(
             Integer price,
             LocalDateTime createdAt
     ) {
-        public static CoinPaymentHistoryResponseDTO toCoinPaymentHistoryResponseDTO(Coin coin) {
+        public static CoinPaymentHistoryResponseDTO toCoinPaymentHistoryResponseDTO(Coin coin,
+                                                                                    CoinPaymentHistory history) {
             CoinPaymentHistory coinPaymentHistory = coin.getHistory();
             return CoinPaymentHistoryResponseDTO.builder()
                     .id(coinPaymentHistory.getId())
                     .planType(coin.getPlanType())
                     .createdAt(coin.getCreatedAt())
                     .isAgree(coinPaymentHistory.isAgree())
-                    .coinCount(coin.getCount())
+                    .coinCount(history.getCoinCount())
                     .price(coinPaymentHistory.getPaymentPrice())
                     .build();
         }

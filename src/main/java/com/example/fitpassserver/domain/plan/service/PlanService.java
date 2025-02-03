@@ -16,6 +16,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlanService {
     private final PlanRepository planRepository;
 
+    public void checkOriginalPlan(Member member) {
+        boolean flag = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
+        if (flag) {
+            throw new PlanException(PlanErrorCode.PLAN_DUPLICATE_ERROR);
+        }
+    }
+
     public Plan createNewPlan(Member member, String planName, String sid) {
         return planRepository.save(Plan.builder()
                 .planType(PlanType.getPlanType(planName))

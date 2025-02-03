@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.plan.controller;
 
+import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
@@ -40,19 +41,20 @@ public class PlanPaymentController {
     public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
                                                                                  @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
+        coinPaymentHistoryService.createNewCoinPaymentByPlan(member, response.tid(), body);
         return ApiResponse.onSuccess(response);
     }
 
     @PostMapping("/success")
-    @Operation(summary = "플랜 1회차 정기 결제 요청", description = "플랜 정기 결제 1회차에만 성공시 실행되는 API")
+    @Operation(summary = "플랜 1회차 정기 결제 성공 후 요청", description = "플랜 정기 결제 1회차에만 성공 요청시 실행되는 API")
     public ApiResponse<PlanSubscriptionResponseDTO> approveSinglePay(@CurrentMember Member member,
                                                                      @RequestParam("pg_token") String pgToken) {
+        planService.checkOriginalPlan(member);
         CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
         PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(pgToken, history.getTid());
-        coinPaymentHistoryService.approve(history);
-        coinService.createSubscriptionNewCoin(member, history,
+        Coin coin = coinService.createSubscriptionNewCoin(member, history,
                 planService.createNewPlan(member, dto.itemName(), dto.sid()));
+        coinPaymentHistoryService.approve(history, coin);
         smsCertificationUtil.sendPlanPaymentSMS(member.getPhoneNumber(), dto.itemName(), dto.amount().total());
         return ApiResponse.onSuccess(dto);
     }

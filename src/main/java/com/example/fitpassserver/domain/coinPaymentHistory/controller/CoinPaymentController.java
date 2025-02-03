@@ -40,18 +40,17 @@ public class CoinPaymentController {
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
                                                                  @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body.methodName(), body.totalAmount());
+        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body);
         return ApiResponse.onSuccess(response);
     }
 
-    @Operation(summary = "코인 단건 결제 성공", description = "결제 성공시 실행되는 API")
+    @Operation(summary = "코인 단건 결제 성공 요청", description = "결제 성공 요청시 실행되는 API")
     @PostMapping("/success")
     public ApiResponse<KakaoPaymentApproveDTO> approveSinglePay(@CurrentMember Member member,
                                                                 @RequestParam("pg_token") String pgToken) {
         CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
         KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, history.getTid());
-        coinService.createNewCoin(member, history, dto);
-        coinPaymentHistoryService.approve(history);
+        coinPaymentHistoryService.approve(history, coinService.createNewCoin(member, history, dto));
         smsCertificationUtil.sendCoinPaymentSMS(member.getPhoneNumber(), dto.quantity(), dto.amount().total());
         return ApiResponse.onSuccess(dto);
     }
