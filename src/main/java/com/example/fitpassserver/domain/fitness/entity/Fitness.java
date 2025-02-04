@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.fitness.entity;
 
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -61,8 +62,29 @@ public class Fitness extends BaseEntity {
     @Column(name = "is_recommend", nullable = false)
     private Boolean isRecommend;
 
+    @Column(name = "is_purchasable")
+    private Boolean isPurchasable;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member admin;
+
+    @Column(name = "total_fee")
+    private Integer totalFee;
+
+    @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FitnessImage> additionalImages = new ArrayList<>();
+
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
+
+    public void setAdmin(Member member){
+        this.admin = member;
+    }
+
+    public void setCategoryList(List<Category> categoryList){
+        this.categoryList = categoryList;
+    }
 
 }
