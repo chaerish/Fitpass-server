@@ -55,8 +55,7 @@ public class SecurityConfig {
             "/fitness/recommend",
             "/fitness/{fitnessId}",
             "/fitness/search",
-            "/notice",
-            "/notice/{noticeId}",
+            "/notice/**",
             "/healthcheck"
     };
 
