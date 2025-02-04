@@ -1,5 +1,6 @@
 package com.example.fitpassserver.admin.notice.service;
 
+import com.example.fitpassserver.admin.notice.converter.NoticeAdminConverter;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.admin.notice.exception.NoticeAdminErrorCode;
 import com.example.fitpassserver.admin.notice.exception.NoticeAdminException;
@@ -15,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class NoticeAdminService {
@@ -31,23 +31,11 @@ public class NoticeAdminService {
     public Map<String, Object> getNoticeAdminList(String keyword,Pageable pageable) {
         Page<Notice> noticePage;
         if (keyword != null && !keyword.trim().isEmpty()) {
-            // 🔹 검색어가 있을 경우 검색 기능 적용
             noticePage = noticeRepository.findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable);
         } else {
-            // 🔹 검색어가 없으면 전체 목록 조회
             noticePage = noticeRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
-        List<NoticeAdminResDTO> noticeList = noticePage.getContent().stream()
-                .map(notice -> new NoticeAdminResDTO(
-                        notice.getId(),
-                        noticeService.getNoticeImage(notice.getId()),
-                        notice.getTitle(),
-                        notice.getType().getValue(),
-                        notice.getCreatedAt().toLocalDate(),
-                        notice.isDraft() ? "임시저장" : "게시중",
-                        notice.isHomeSlide()
-                ))
-                .collect(Collectors.toList());
+        List<NoticeAdminResDTO> noticeList = NoticeAdminConverter.toNoticeAdminResDTOList(noticePage.getContent(), noticeService);
 
         Map<String, Object> response = new HashMap<>();
         response.put("totalPages", noticePage.getTotalPages());

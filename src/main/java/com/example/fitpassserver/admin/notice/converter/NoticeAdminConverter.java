@@ -1,0 +1,27 @@
+package com.example.fitpassserver.admin.notice.converter;
+
+import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
+import com.example.fitpassserver.domain.notice.entity.Notice;
+import com.example.fitpassserver.domain.notice.service.NoticeService;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class NoticeAdminConverter {
+    public static NoticeAdminResDTO toNoticeAdminResDTO(Notice notice, NoticeService noticeService) {
+        return new NoticeAdminResDTO(
+                notice.getId(),
+                noticeService.getNoticeImage(notice.getId()),
+                notice.getTitle(),
+                notice.getType().getValue(),
+                notice.getCreatedAt().toLocalDate(),
+                notice.isDraft() ? "임시저장" : "게시중",
+                notice.isHomeSlide()
+        );
+    }
+    public static List<NoticeAdminResDTO> toNoticeAdminResDTOList(List<Notice> notices, NoticeService noticeService) {
+        return notices.stream()
+                .map(notice -> toNoticeAdminResDTO(notice, noticeService))
+                .collect(Collectors.toList());
+    }
+}
