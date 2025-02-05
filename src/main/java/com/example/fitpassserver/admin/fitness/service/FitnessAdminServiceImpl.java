@@ -37,42 +37,53 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     @Override
     public Long createFitness(Member member, MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.CreateFitnessDTO dto) throws IOException {
 
+
+        // 우선 Fitness 엔티티를 생성 (fitnessId 필요)
+        Fitness fitness = FitnessAdminConverter.toEntity(dto);
+        // 어드민 매핑
+        if(member.getRole().equals(Role.ADMIN)){
+            fitness.setAdmin(member);
+        }
+        fitnessRepository.save(fitness); // ID 생성됨
+        Long fitnessId = fitness.getId(); // 생성된 ID 가져오기
+
         // 메인 이미지 업로드 - key만 저장
-        String mainImageKey = generateImageKey(mainImage.getOriginalFilename());
+        String mainImageKey = generateMainImageKey(fitnessId, mainImage.getOriginalFilename());
         s3Service.uploadFile(mainImage, mainImageKey);
+        fitness.setMainImage(mainImageKey);
 
         // 추가 이미지 업로드 - key만 저장
         List<String> additionalImageUrls = new ArrayList<>();
         if(additionalImages != null && !additionalImages.isEmpty()){
             for(MultipartFile image : additionalImages){
-                String imageKey = generateImageKey(image.getOriginalFilename());
+                String imageKey = generateAdditionalImageKey(fitnessId, image.getOriginalFilename());
                 s3Service.uploadFile(image, imageKey);
                 additionalImageUrls.add(imageKey);
             }
         }
-        // 시설 엔티티 생성
-        Fitness fitness = FitnessAdminConverter.toEntity(dto, mainImageKey, additionalImageUrls);
 
         // 카테고리 생성
         List<Category> categoryList = CategoryConverter.toEntityList(dto.getCategoryList(), fitness);
         fitness.setCategoryList(categoryList);
 
-        // 어드민 매핑
-        if(member.getRole().equals(Role.ADMIN)){
-            fitness.setAdmin(member);
-        }
-        // 시설 저장
-        fitnessRepository.save(fitness);
 
         if(!additionalImageUrls.isEmpty()){
             List<FitnessImage> fitnessImages = FitnessImageConverter.saveFitnessImage(additionalImageUrls, fitness);
             fitnessImageRepository.saveAll(fitnessImages);
+            fitness.setAdditionalImages(fitnessImages);
         }
+
+        // 시설 저장
+        fitnessRepository.save(fitness);
 
         return fitness.getId();
     }
 
-    private String generateImageKey(String originalFilename){
-        return UUID.randomUUID().toString() + "_" + originalFilename;
+    private String generateMainImageKey(Long fitnessId, String originalFilename){
+        return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
     }
+    private String generateAdditionalImageKey(Long fitnessId, String originalFilename){
+        return String.format("fitness/%d/additional/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
+    }
+
 }

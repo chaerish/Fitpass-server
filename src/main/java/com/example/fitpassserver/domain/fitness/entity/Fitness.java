@@ -87,4 +87,11 @@ public class Fitness extends BaseEntity {
         this.categoryList = categoryList;
     }
 
+    public void setMainImage(String mainImageKey){
+        this.fitnessImage = mainImageKey;
+    }
+
+    public void setAdditionalImages(List<FitnessImage> fitnessImageList){
+        this.additionalImages = fitnessImageList;
+    }
 }

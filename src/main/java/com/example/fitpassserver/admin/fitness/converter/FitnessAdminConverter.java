@@ -7,10 +7,9 @@ import java.util.List;
 
 public class FitnessAdminConverter {
 
-    public static Fitness toEntity(FitnessAdminRequestDTO.CreateFitnessDTO dto, String mainImageKey, List<String> additionalImages){
+    public static Fitness toEntity(FitnessAdminRequestDTO.CreateFitnessDTO dto){
         return Fitness.builder()
                 .name(dto.getFitnessName())
-                .fitnessImage(mainImageKey)
                 .address(dto.getAddress())
                 .phoneNumber(dto.getPhoneNumber())
                 .fee(dto.getFee())
