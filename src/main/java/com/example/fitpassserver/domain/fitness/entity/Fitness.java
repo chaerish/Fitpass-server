@@ -65,10 +65,6 @@ public class Fitness extends BaseEntity {
     @Column(name = "is_purchasable")
     private Boolean isPurchasable;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member admin;
-
     @Column(name = "total_fee")
     private Integer totalFee;
 
@@ -78,10 +74,6 @@ public class Fitness extends BaseEntity {
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
-
-    public void setAdmin(Member member){
-        this.admin = member;
-    }
 
     public void setCategoryList(List<Category> categoryList){
         this.categoryList = categoryList;
