@@ -2,13 +2,13 @@ package com.example.fitpassserver.domain.fitness.converter;
 
 import com.example.fitpassserver.domain.fitness.dto.MemberFitnessRequestDTO;
 import com.example.fitpassserver.domain.fitness.dto.MemberFitnessResponseDTO;
+import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.service.FitnessImageService;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 
 import java.util.ArrayList;
 import java.util.List;

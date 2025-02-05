@@ -1,13 +1,10 @@
 package com.example.fitpassserver.admin.fitness.dto.request;
 
-import com.example.fitpassserver.domain.fitness.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 

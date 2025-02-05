@@ -3,21 +3,16 @@ package com.example.fitpassserver.admin.fitness.controller;
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
 import com.example.fitpassserver.admin.fitness.dto.response.FitnessAdminResponseDTO;
 import com.example.fitpassserver.admin.fitness.service.FitnessAdminService;
-import com.example.fitpassserver.domain.member.annotation.CurrentMember;
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.DataInput;
 import java.io.IOException;
 import java.util.List;
 

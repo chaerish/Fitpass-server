@@ -1,6 +1,5 @@
 package com.example.fitpassserver.domain.fitness.repository;
 
-import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
@@ -8,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 

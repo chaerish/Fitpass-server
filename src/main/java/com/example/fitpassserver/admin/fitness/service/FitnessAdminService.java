@@ -2,8 +2,6 @@ package com.example.fitpassserver.admin.fitness.service;
 
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
 import com.example.fitpassserver.admin.fitness.dto.response.FitnessAdminResponseDTO;
-import com.example.fitpassserver.domain.member.entity.Member;
-import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

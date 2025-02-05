@@ -1,9 +1,11 @@
 package com.example.fitpassserver.admin.fitness.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.List;
 
 public class FitnessAdminResponseDTO {

@@ -1,6 +1,5 @@
 package com.example.fitpassserver.domain.fitness.entity;
 
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
