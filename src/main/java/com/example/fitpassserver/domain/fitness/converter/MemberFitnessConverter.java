@@ -63,6 +63,7 @@ public class MemberFitnessConverter {
         List<MemberFitnessResDTO.MemberFitnessPreviewDTO> none = new ArrayList<>();
         List<MemberFitnessResDTO.MemberFitnessPreviewDTO> progress = new ArrayList<>();
         List<MemberFitnessResDTO.MemberFitnessPreviewDTO> done = new ArrayList<>();
+        List<MemberFitnessResDTO.MemberFitnessPreviewDTO> reviewed = new ArrayList<>();
 
         for (MemberFitness memberFitness : memberFitnessList) {
             MemberFitnessResDTO.MemberFitnessPreviewDTO dto = toDto(memberFitness, fitnessImageService);
@@ -76,6 +77,8 @@ public class MemberFitnessConverter {
                 case DONE:
                     done.add(dto);
                     break;
+                case REVIEWED:
+                    reviewed.add(dto);
             }
         }
 
@@ -83,6 +86,7 @@ public class MemberFitnessConverter {
                 .none(none)
                 .progress(progress)
                 .done(done)
+                .reviewed(reviewed)
                 .build();
     }
 }

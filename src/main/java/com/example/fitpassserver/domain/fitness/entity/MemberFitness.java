@@ -45,4 +45,8 @@ public class MemberFitness extends BaseEntity {
     public void done() {
         this.status = Status.DONE;
     }
+
+    public void setStatus(Status status){
+        this.status = status;
+    }
 }

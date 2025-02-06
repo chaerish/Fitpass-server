@@ -49,6 +49,8 @@ public class ReviewService {
         review.setFitness(pass.getFitness());
         reviewRepository.save(review);
 
+        pass.setStatus(Status.REVIEWED);
+
         return review.getId();
     }
 
