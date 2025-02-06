@@ -76,9 +76,8 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     }
 
     @Override
-    public FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String sort, String sortDirection, String searchType, String keyword) {
-        Sort sorting = createSort(sort, sortDirection);
-        PageRequest pageRequest = PageRequest.of(page, size, sorting);
+    public FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<Fitness> fitnessPage;
         if (StringUtils.isEmpty(searchType) || StringUtils.isEmpty(keyword)) {
@@ -101,23 +100,6 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         }
 
         return FitnessAdminConverter.from(fitnessPage);
-    }
-
-    private Sort createSort(String sort, String sortDirection) {
-        Sort.Direction direction = "ASC".equalsIgnoreCase(sortDirection) ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-        if (StringUtils.isEmpty(sort)) {
-            return Sort.by(direction, "createdAt");
-        }
-
-        return switch (sort) {
-            case "name" -> Sort.by(direction, "name");
-            case "category" -> Sort.by(direction, "categoryList");
-            case "totalFee" -> Sort.by(direction, "totalFee");
-            case "phoneNumber" -> Sort.by(direction, "phoneNumber");
-            case "status" -> Sort.by(direction, "isPurchasable");
-            default -> Sort.by(direction, "createdAt");
-        };
     }
 
     private String generateMainImageKey(Long fitnessId, String originalFilename){

@@ -53,17 +53,13 @@ public class FitnessAdminController {
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기 (기본값: 10)", example = "10")
             @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "정렬 기준 필드 (예: name, category, totalFee, phoneNumber, createdAt, status)", example = "createdAt")
-            @RequestParam(required = false) String sort,
-            @Parameter(description = "정렬 방식 (ASC 또는 DESC, 기본값 DESC)", example = "DESC")
-            @RequestParam(defaultValue = "DESC") String sortDirection, // ASC 또는 DESC (기본값 DESC)
             @Parameter(description = "검색 유형 (예: name, category, phoneNumber)", example = "name")
             @RequestParam(required = false) String searchType, // 시설명, 카테고리, 전화번호 중 하나 선택
             @Parameter(description = "검색 키워드", example = "피트니스")
             @RequestParam(required = false) String keyword // 검색어
     ){
 
-        FitnessAdminResponseDTO.FitnessListDTO result = fitnessAdminService.getFitnessList(page, size, sort, sortDirection, searchType, keyword);
+        FitnessAdminResponseDTO.FitnessListDTO result = fitnessAdminService.getFitnessList(page, size, searchType, keyword);
         return ApiResponse.onSuccess(result);
     }
 
