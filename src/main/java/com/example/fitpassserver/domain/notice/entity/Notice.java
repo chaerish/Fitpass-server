@@ -32,9 +32,17 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private NoticeType type;
 
+    @Column(nullable = false)
+    private boolean isHomeSlide; // true: 홈 슬라이드 게시, false: 미게시
+
+    @Column(nullable = false)
+    private boolean isDraft;  // true: 임시저장, false: 정식 등록
+
     // 🔹 조회수 증가 메서드 추가
     public void increaseViews() {
         this.views += 1;
     }
-
+    public void setHomeSlide(boolean isHomeSlide) {
+        this.isHomeSlide = isHomeSlide;
+    }
 }
