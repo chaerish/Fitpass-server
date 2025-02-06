@@ -61,6 +61,9 @@ public class MemberFitnessResDTO {
 
         @Schema(description = "DONE 상태의 패스 리스트")
         private List<MemberFitnessPreviewDTO> done;
+
+        @Schema(description = "REVIEWED 상태의 패스 리스트")
+        private List<MemberFitnessPreviewDTO> reviewed;
     }
 
 }
