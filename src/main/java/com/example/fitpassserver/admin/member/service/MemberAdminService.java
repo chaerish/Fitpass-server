@@ -4,5 +4,5 @@ import com.example.fitpassserver.admin.member.dto.response.MemberAdminResponseDT
 import org.springframework.data.domain.Page;
 
 public interface MemberAdminService {
-    MemberAdminResponseDTO.MemberPagesDTO getMembersInfo(int page, int size, String sortBy);
+    MemberAdminResponseDTO.MemberPagesDTO getMembersInfo(int page, int size, String searchType, String keyword);
 }

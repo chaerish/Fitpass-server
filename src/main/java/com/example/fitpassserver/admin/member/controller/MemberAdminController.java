@@ -27,9 +27,10 @@ public class MemberAdminController {
     public ApiResponse<?> getMembersPage(
             @Parameter(description = "현재 인증된 사용자 정보", hidden = true) @CurrentMember Member member,
             @Parameter(description = "페이지 시작 오프셋 (기본값: 0)", example = "0") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "페이지 당 엘리먼트 개수 (기본값: 10)", example = "10") @RequestParam(defaultValue = "5") int size,
-            @Parameter(description = "정렬 기준 (기본값: id)", example = "id") @RequestParam(defaultValue = "id") String sortBy) {
-        MemberAdminResponseDTO.MemberPagesDTO membersInfo = memberAdminService.getMembersInfo(page, size, sortBy);
+            @Parameter(description = "페이지 당 엘리먼트 개수 (기본값: 10)", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "검색 유형 (예: name, loginId, phoneNumber)", example = "name") @RequestParam(required = false) String searchType,
+            @Parameter(description = "검색 키워드", example = "핏패스") @RequestParam(required = false) String keyword) {
+        MemberAdminResponseDTO.MemberPagesDTO membersInfo = memberAdminService.getMembersInfo(page, size, searchType, keyword);
         return ApiResponse.onSuccess(membersInfo);
     }
 
