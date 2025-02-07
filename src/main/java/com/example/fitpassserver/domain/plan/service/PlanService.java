@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.plan.service;
 
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -53,5 +54,19 @@ public class PlanService {
             throw new PlanException(PlanErrorCode.PLAN_PAYMENT_BAD_REQUEST);
         }
         return plan;
+    }
+
+    public String changeSubscription(Member member, PlanChangeRequestDTO dto) {
+        Plan plan = getPlan(member);
+        PlanType planType = PlanType.getPlanType(dto.planName());
+        if (planType == null) {
+            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
+        }
+        if (plan.getPlanType().getName().equals(dto.planName())) {
+            throw new PlanException(PlanErrorCode.PLAN_CHANGE_DUPLICATE_ERROR);
+        }
+        plan.changePlanType(planType);
+        planRepository.save(plan);
+        return planType.getName();
     }
 }

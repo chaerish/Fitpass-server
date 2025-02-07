@@ -28,11 +28,13 @@ public class SmsCertificationUtil {
     private static final String PASS_MESSAGE_FORMAT = "[FitPass]\n[%s] 시설 패스 결제하였습니다.\n%s코인을 사용했습니다.\n";
     private static final String PLAN_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜을 결제하였습니다.\n%s원을 결제 완료되었습니다.\n";
     private static final String INSUFFICIENT_FUND_FORMAT = "[FitPass]\n[%s] 플랜 정기 결제에 실패하였습니다.\n잔액이 부족합니다.\n";
+    private static final String PLAN_CHANGE_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜으로 변경 되었습니다.\n다음 결제날부터 적용됩니다.\n";
 
 
     @PostConstruct // 의존성 주입이 완료된 후 초기화를 수행하는 메서드
     public void init() {
-        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret, "https://api.coolsms.co.kr"); // 메시지 서비스 초기화
+        this.messageService = NurigoApp.INSTANCE.initialize(apiKey, apiSecret,
+                "https://api.coolsms.co.kr"); // 메시지 서비스 초기화
     }
 
     // 단일 메시지 발송
@@ -63,6 +65,11 @@ public class SmsCertificationUtil {
     // 플랜 잔액 부족 메시지 발송
     public void sendPlanInsufficientFundsAlert(String to, String name) {
         sendPaymentSMS(to, String.format(INSUFFICIENT_FUND_FORMAT, name));
+    }
+
+    // 플랜 변경 메세지 발송
+    public void sendPlanChangeAlert(String to, String name) {
+        sendPaymentSMS(to, String.format(PLAN_CHANGE_MESSAGE_FORMAT, name));
     }
 
     // 메시지 초기 설정

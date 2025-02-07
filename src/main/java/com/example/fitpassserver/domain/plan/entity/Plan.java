@@ -65,4 +65,5 @@ public class Plan extends BaseEntity {
     public void updatePlanDate() {
         this.planDate = LocalDate.now();
     }
+    
 }
