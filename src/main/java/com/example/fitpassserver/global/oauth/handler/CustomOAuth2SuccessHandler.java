@@ -6,10 +6,10 @@ import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.principal.CustomOAuth2User;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -45,6 +45,8 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         Member member = memberRepository.findById(oAuth2User.getId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        member.updateLastLoginAt(LocalDateTime.now());
 
         String accessToken = jwtProvider.createAccessToken(member);
         String refreshToken = jwtProvider.createRefreshToken(member);

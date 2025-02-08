@@ -42,11 +42,12 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
 
         Member createdMember = getMember(extractAttributes);
 
-        Profile profile = Profile.builder()
-                .member(createdMember)
-                .pictureKey("none")
-                .pictureUrl("none")
-                .build();
+        Profile profile = profileRepository.findProfileByMemberId(createdMember.getId())
+                .orElseGet(() -> Profile.builder()
+                        .member(createdMember)
+                        .pictureKey("none")
+                        .pictureUrl("none")
+                        .build());
 
         profileRepository.save(profile);
 
