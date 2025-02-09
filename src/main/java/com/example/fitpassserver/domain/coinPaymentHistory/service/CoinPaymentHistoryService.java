@@ -52,12 +52,12 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public void createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
         PlanType type = PlanType.getPlanType(dto.item_name());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
         }
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod("카카오페이 정기 결제") //todo: 수정
                 .isAgree(true)
                 .tid(dto.tid())
