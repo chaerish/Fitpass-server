@@ -15,6 +15,8 @@ import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

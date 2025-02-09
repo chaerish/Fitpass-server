@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -24,4 +25,14 @@ public interface FitnessRepository extends JpaRepository<Fitness, Long> {
     List<Fitness> findNextByNameContaining(@Param("keyword") String keyword, @Param("cursor") Long cursor, Pageable pageable);
 
     Optional<Fitness> findFitnessById(Long Id);
+
+    // 시설명으로 검색
+    Page<Fitness> findByNameContaining(String name, Pageable pageable);
+
+    // 카테고리로 검색
+    @Query("SELECT f FROM Fitness f JOIN f.categoryList c WHERE c.categoryName LIKE %:category%")
+    Page<Fitness> findByCategoryList_NameContaining(String category, Pageable pageable);
+
+    // 전화번호로 검색
+    Page<Fitness> findByPhoneNumberContaining(String phoneNumber, Pageable pageable);
 }
