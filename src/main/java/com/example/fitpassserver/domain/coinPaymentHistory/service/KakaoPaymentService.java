@@ -253,7 +253,7 @@ public class KakaoPaymentService {
     }
 
     //정기 구독 취소
-    public KakaoCancelResponseDTO subscriptionCancel(Member member) {
+    public KakaoCancelResponseDTO cancelSubscription(Member member) {
         Plan plan = planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
         );

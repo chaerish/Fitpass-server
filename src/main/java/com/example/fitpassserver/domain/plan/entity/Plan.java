@@ -78,4 +78,5 @@ public class Plan extends BaseEntity {
     public void updatePlanDate() {
         this.planDate = planDate.plusMonths(1);
     }
+    
 }
