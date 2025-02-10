@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.plan.entity;
 
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -45,6 +46,13 @@ public class Plan extends BaseEntity {
     private String sid;
     @Column(name = "payment_count", nullable = false)
     private int paymentCount;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus;
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
     public void changePlanType(PlanType planType) {
         this.planType = planType;
@@ -62,8 +70,13 @@ public class Plan extends BaseEntity {
         return paymentCount >= 1 && this.planType.equals(PlanType.NONE);
     }
 
+    public boolean isTargetForCancel() {
+        return LocalDate.now().isEqual(planDate.plusMonths(1).plusDays(4)) && this.paymentStatus.equals(
+                PaymentStatus.INSUFFICIENT);
+    }
+
     public void updatePlanDate() {
-        this.planDate = LocalDate.now();
+        this.planDate = planDate.plusMonths(1);
     }
     
 }

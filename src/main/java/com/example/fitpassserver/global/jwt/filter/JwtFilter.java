@@ -13,6 +13,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,7 +22,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -35,7 +35,8 @@ public class JwtFilter extends OncePerRequestFilter {
     );
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
         String requestPath = request.getRequestURI();
 
         // JWT 검증 우회 경로 확인
@@ -52,7 +53,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 UserDetails userDetails = principalDetailsService.loadUserByUsername(loginId);
 
                 if (userDetails != null) {
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+                    Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                            userDetails.getPassword(), userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
                     throw new MemberException(MemberErrorCode.NOT_FOUND);
@@ -65,7 +67,8 @@ public class JwtFilter extends OncePerRequestFilter {
             response.setStatus(code.getReasonHttpStatus().getHttpStatus().value());
             response.setContentType("application/json; charset=UTF-8");
 
-            ApiResponse<Object> customResponse = ApiResponse.onFailure( code.getReasonHttpStatus().getCode(), code.getReasonHttpStatus().getMessage(), "");
+            ApiResponse<Object> customResponse = ApiResponse.onFailure(code.getReasonHttpStatus().getCode(),
+                    code.getReasonHttpStatus().getMessage(), "");
 
             ObjectMapper om = new ObjectMapper();
             om.writeValue(response.getOutputStream(), customResponse);
