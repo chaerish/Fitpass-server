@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -19,4 +20,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByName(String name);
 
+    int countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime greaterThan, LocalDateTime lessThan);
 }

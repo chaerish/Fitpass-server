@@ -1,4 +1,7 @@
 package com.example.fitpassserver.admin.dashboard.service;
 
-public class DashboardAdminService {
+import com.example.fitpassserver.admin.dashboard.entity.DashBoard;
+
+public interface DashboardAdminService {
+    DashBoard createDashBoardData();
 }
