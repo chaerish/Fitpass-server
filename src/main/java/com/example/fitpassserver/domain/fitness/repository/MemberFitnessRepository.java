@@ -13,5 +13,5 @@ public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Lo
 
     List<MemberFitness> findByStatusAndActiveTimeBefore(Status status, LocalDateTime time);
 
-    boolean existsByMemberAndStatusIsNot(Member member, Status status);
+    boolean existsByMemberAndStatusIn(Member member, List<Status> status);
 }
