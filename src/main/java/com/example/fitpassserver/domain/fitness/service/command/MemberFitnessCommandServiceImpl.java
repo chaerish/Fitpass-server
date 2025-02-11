@@ -56,9 +56,9 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
                 new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
         // 이미 구매한 패스가 존재하는 경우 예외 처리
-        if (memberFitnessRepository.existsByMemberAndStatusIsNot(member, Status.DONE)) {
-            throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
-        }
+//        if (memberFitnessRepository.existsByMemberAndStatusIsNot(member, Status.DONE)) {
+//            throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
+//        }
 
         MemberFitness memberFitness = createMemberFitness(member, fitness, dto);
 
