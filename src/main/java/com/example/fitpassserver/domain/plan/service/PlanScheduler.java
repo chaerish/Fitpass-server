@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.plan.service;
 
+import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
@@ -63,7 +64,8 @@ public class PlanScheduler {
         SubscriptionResponseDTO response = paymentService.request(plan);
         CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPaymentByScheduler(member, response);
         updatePlanInfo(plan);
-        coinService.createSubscriptionNewCoin(plan.getMember(), history, plan);
+        Coin coin = coinService.createSubscriptionNewCoin(plan.getMember(), history, plan);
+        coinPaymentHistoryService.approve(history, coin);
         planRepository.save(plan);
     }
 
