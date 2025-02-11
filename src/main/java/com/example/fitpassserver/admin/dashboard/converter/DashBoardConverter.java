@@ -38,9 +38,9 @@ public class DashBoardConverter {
     public static DashBoardResponseDTO.DashBoardInfoListDTO toDashBoardInfoListDTO(Page<DashBoard> dashBoardList) {
         return DashBoardResponseDTO.DashBoardInfoListDTO.builder()
                 .items(dashBoardList.getContent().stream().map(DashBoardConverter::toDashBoardInfoDTO).toList())
-                .pageNo(dashBoardList.getNumber())
+                .pageNo(dashBoardList.getNumber() + 1)
                 .totalPage(dashBoardList.getTotalPages())
-                .size(dashBoardList.getSize())
+                .size(dashBoardList.getNumberOfElements())
                 .build();
     }
 }

@@ -7,6 +7,11 @@ import com.example.fitpassserver.admin.dashboard.util.VisitorUtil;
 import com.example.fitpassserver.domain.fitness.repository.MemberFitnessRepository;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DashboardAdminServiceImpl implements DashboardAdminService {
@@ -38,7 +44,7 @@ public class DashboardAdminServiceImpl implements DashboardAdminService {
         int newMemberCount = memberRepository.countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(greaterThan, lessThan);
         int usePass = memberFitnessRepository.countAllByActiveTimeGreaterThanEqualAndActiveTimeLessThan(greaterThan, lessThan);
         int buyPass = memberFitnessRepository.countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(greaterThan, lessThan);
-        return dashBoardRepository.save(
+        DashBoard dashboard = dashBoardRepository.save(
                 DashBoardConverter.toDashBoard(
                         date,
                         newMemberCount,
@@ -48,6 +54,19 @@ public class DashboardAdminServiceImpl implements DashboardAdminService {
                         usePass
                 )
         );
+        log.info("Admin DashBoard: Dashboard 생성({})", date);
+        return dashboard;
+    }
+
+    @Override
+    public Page<DashBoard> getDashboards(int page, int size) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "date");
+        return getDashboardsWithPaging(page, size, sort);
+    }
+
+    private Page<DashBoard> getDashboardsWithPaging(int page, int size, Sort sort) {
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        return dashBoardRepository.findAll(pageable);
     }
 
     private int getVisitCount() {
