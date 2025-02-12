@@ -31,7 +31,6 @@ public class NoticeAdminConverter {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .type(request.getType())
-                .isDraft(request.isDraft())
                 .build();
     }
 }

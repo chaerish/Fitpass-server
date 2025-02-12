@@ -66,75 +66,68 @@ public class NoticeAdminService {
         noticeRepository.save(notice);
     }
 
-    // 🔹 공지사항 "임시저장"
     @Transactional
-    public NoticeAdminResDTO saveNoticeDraft(MultipartFile mainImage, NoticeAdminReqDTO request) throws IOException {
+    public NoticeAdminResDTO saveNotice(NoticeAdminReqDTO request, MultipartFile image, boolean isDraft) throws IOException {
+        validateRequest(request, image, isDraft);
+
+        String imageUrl = (image != null) ? uploadNoticeImage(image) : null;
         Notice notice;
-        String imageKey = (mainImage != null && !mainImage.isEmpty()) ? uploadNoticeImage(mainImage) : null;
 
         if (request.getId() != null) {
+            // 기존 공지 수정
             notice = noticeRepository.findById(request.getId())
                     .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
-
-            notice = Notice.builder()
-                    .id(notice.getId())
-                    .title(request.getTitle() != null ? request.getTitle() : notice.getTitle())
-                    .content(request.getContent() != null ? request.getContent() : notice.getContent())
-                    .type(request.getType() != null ? request.getType() : notice.getType())
-                    .noticeImage(imageKey != null ? imageKey : notice.getNoticeImage())
-                    .isDraft(true)
-                    .build();
+            notice = updateNotice(notice, request, imageUrl, isDraft);
         } else {
-            notice = NoticeAdminConverter.toEntity(request);
-            notice.setNoticeImage(imageKey);
-            notice.setDraft(true);
+            // 새 공지 저장
+            notice = createNewNotice(request, imageUrl, isDraft);
         }
 
-        Notice savedNotice = noticeRepository.save(notice);
-        return NoticeAdminConverter.toNoticeAdminResDTO(savedNotice, noticeService);
+        notice = noticeRepository.save(notice); // 🔹 저장된 엔티티를 반환받아야 함
+        return NoticeAdminConverter.toNoticeAdminResDTO(notice, noticeService); // 🔹 변환 후 반환
     }
 
-    // 🔹 공지사항 "정식 등록"
-    @Transactional
-    public NoticeAdminResDTO publishNotice(MultipartFile mainImage, NoticeAdminReqDTO request) throws IOException {
-        validateNotice(request);
 
-        Notice notice;
-        String imageKey = (mainImage != null && !mainImage.isEmpty()) ? uploadNoticeImage(mainImage) : null;
-
-        if (request.getId() != null) {
-            notice = noticeRepository.findById(request.getId())
-                    .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
-
-            notice = Notice.builder()
-                    .id(notice.getId())
-                    .title(request.getTitle())
-                    .content(request.getContent())
-                    .type(request.getType())
-                    .noticeImage(imageKey != null ? imageKey : notice.getNoticeImage())
-                    .isDraft(false)
-                    .build();
-        } else {
-            notice = NoticeAdminConverter.toEntity(request);
-            notice.setNoticeImage(imageKey);
-            notice.setDraft(false);
+    private void validateRequest(NoticeAdminReqDTO request, MultipartFile image, boolean isDraft) {
+        if (!isDraft) { // 정식 등록일 때만 검증
+            if (request.getTitle() == null || request.getTitle().isBlank()) {
+                throw new NoticeAdminException(NoticeAdminErrorCode.TITLE_REQUIRED);
+            }
+            if (request.getContent() == null || request.getContent().isBlank()) {
+                throw new NoticeAdminException(NoticeAdminErrorCode.CONTENT_REQUIRED);
+            }
+            if (request.getType() == null) {
+                throw new NoticeAdminException(NoticeAdminErrorCode.TYPE_REQUIRED);
+            }
+            if (image == null || image.isEmpty()) {
+                throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_LIMIT_EXCEEDED);
+            }
         }
-
-        Notice savedNotice = noticeRepository.save(notice);
-        return NoticeAdminConverter.toNoticeAdminResDTO(savedNotice, noticeService);
     }
 
-    // ✅ 필수값 검증 (정식 등록 시)
-    private void validateNotice(NoticeAdminReqDTO request) {
-        if (StringUtils.isBlank(request.getTitle())) {
-            throw new NoticeAdminException(NoticeAdminErrorCode.TITLE_REQUIRED);
-        }
-        if (StringUtils.isBlank(request.getContent())) {
-            throw new NoticeAdminException(NoticeAdminErrorCode.CONTENT_REQUIRED);
-        }
-        if (request.getType() == null) {
-            throw new NoticeAdminException(NoticeAdminErrorCode.TYPE_REQUIRED);
-        }
+    private Notice createNewNotice(NoticeAdminReqDTO request, String imageUrl, boolean isDraft) {
+        return Notice.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .type(request.getType())
+                .noticeImage(imageUrl)
+                .isDraft(isDraft)
+                .isHomeSlide(false) // 자동으로 false 설정
+                .views(0L)
+                .build();
+    }
+
+    private Notice updateNotice(Notice notice, NoticeAdminReqDTO request, String imageUrl, boolean isDraft) {
+        return Notice.builder()
+                .id(notice.getId())
+                .title(request.getTitle())
+                .content(request.getContent())
+                .type(request.getType())
+                .noticeImage(imageUrl != null ? imageUrl : notice.getNoticeImage()) // 기존 이미지 유지
+                .isDraft(isDraft)
+                .isHomeSlide(false) // 자동으로 false 설정
+                .views(notice.getViews()) // 기존 조회수 유지
+                .build();
     }
 
     // 🔹 공지사항 이미지 업로드

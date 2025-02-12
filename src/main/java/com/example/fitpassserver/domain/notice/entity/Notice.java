@@ -30,7 +30,7 @@ public class Notice extends BaseEntity {
     private String noticeImage;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private NoticeType type;
 
     @Column(nullable = false)

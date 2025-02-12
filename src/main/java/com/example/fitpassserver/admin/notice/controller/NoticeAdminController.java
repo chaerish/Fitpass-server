@@ -5,8 +5,7 @@ import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.admin.notice.service.NoticeAdminService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Map;
 
+@Tag(name = "Notice Admin", description = "공지사항 관리자 API")
 @RestController
 @RequestMapping("/admin/notice")
 public class NoticeAdminController {
@@ -36,6 +36,7 @@ public class NoticeAdminController {
         Map<String, Object> noticeList = noticeAdminService.getNoticeAdminList(keyword, pageable);
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeList));
     }
+
     @Operation(summary = "홈 슬라이드 게시 체크박스", description = "홈 슬라이드에 게시 할건지에 대한 값을 저장 true = 게시")
     @PatchMapping("/{noticeId}/home-slide-check")
     public ResponseEntity<ApiResponse<Void>> updateHomeSlide(
@@ -46,24 +47,23 @@ public class NoticeAdminController {
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 
-    // 임시저장 API
+    @Operation(summary = "공지사항 임시저장")
     @PostMapping(value = "/draft", consumes = {"multipart/form-data"})
-    @Operation(summary = "공지사항 임시저장", description = "공지사항을 임시저장합니다.")
-    public ResponseEntity<NoticeAdminResDTO> saveDraft(
-            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
-            @RequestPart(value = "request") @Valid NoticeAdminReqDTO request) throws IOException {
-
-        NoticeAdminResDTO response = noticeAdminService.saveNoticeDraft(mainImage, request);
-        return ResponseEntity.ok(response);
+    public ApiResponse<NoticeAdminResDTO> saveDraft(
+            @RequestPart("request") NoticeAdminReqDTO request,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) throws IOException {
+        NoticeAdminResDTO noticeId = noticeAdminService.saveNotice(request, image, true);
+        return ApiResponse.onSuccess(noticeId);
     }
 
-    // 정식 등록 API
-    @PostMapping(value = "/publish", consumes = {"multipart/form-data"})
-    @Operation(summary = "공지사항 등록", description = "공지사항을 등록합니다.")
-    public ResponseEntity<NoticeAdminResDTO> publishNotice(
-            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
-            @RequestPart(value = "request") @Valid NoticeAdminReqDTO request) throws IOException {
-        NoticeAdminResDTO response = noticeAdminService.publishNotice(mainImage, request);
-        return ResponseEntity.ok(response);
+    @Operation(summary = "공지사항 저장 (정식 등록)")
+    @PostMapping(value = "/save", consumes = {"multipart/form-data"})
+    public ApiResponse<NoticeAdminResDTO> saveNotice(
+            @RequestPart("request") NoticeAdminReqDTO request,
+            @RequestPart("image") MultipartFile image
+    ) throws IOException {
+        NoticeAdminResDTO response = noticeAdminService.saveNotice(request, image, false);
+        return ApiResponse.onSuccess(response);
     }
 }
