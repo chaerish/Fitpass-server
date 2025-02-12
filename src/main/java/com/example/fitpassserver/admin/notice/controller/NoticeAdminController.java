@@ -1,12 +1,18 @@
 package com.example.fitpassserver.admin.notice.controller;
 
+import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
+import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.admin.notice.service.NoticeAdminService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.IOException;
 import java.util.Map;
 
 @RestController
@@ -38,5 +44,26 @@ public class NoticeAdminController {
     ) {
         noticeAdminService.updateHomeSlideStatus(noticeId, isHomeSlide);
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
+    }
+
+    // 임시저장 API
+    @PostMapping(value = "/draft", consumes = {"multipart/form-data"})
+    @Operation(summary = "공지사항 임시저장", description = "공지사항을 임시저장합니다.")
+    public ResponseEntity<NoticeAdminResDTO> saveDraft(
+            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
+            @RequestPart(value = "request") @Valid NoticeAdminReqDTO request) throws IOException {
+
+        NoticeAdminResDTO response = noticeAdminService.saveNoticeDraft(mainImage, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // 정식 등록 API
+    @PostMapping(value = "/publish", consumes = {"multipart/form-data"})
+    @Operation(summary = "공지사항 등록", description = "공지사항을 등록합니다.")
+    public ResponseEntity<NoticeAdminResDTO> publishNotice(
+            @RequestPart(value = "mainImage", required = false) MultipartFile mainImage,
+            @RequestPart(value = "request") @Valid NoticeAdminReqDTO request) throws IOException {
+        NoticeAdminResDTO response = noticeAdminService.publishNotice(mainImage, request);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,4 @@
 package com.example.fitpassserver.admin.notice.dto.response;
-
 import java.time.LocalDate;
 
 public record NoticeAdminResDTO (
