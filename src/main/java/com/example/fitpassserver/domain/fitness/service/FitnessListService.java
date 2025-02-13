@@ -2,8 +2,8 @@ package com.example.fitpassserver.domain.fitness.service;
 
 import com.example.fitpassserver.domain.fitness.controller.response.CursorPaginationResponse;
 import com.example.fitpassserver.domain.fitness.controller.response.FitnessListResponse;
-import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.Category;
+import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.stream.Collectors;
 

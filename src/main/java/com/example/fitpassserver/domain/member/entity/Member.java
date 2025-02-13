@@ -92,6 +92,9 @@ public class Member extends BaseEntity {
     @Column(name = "is_additional_info")
     private boolean isAdditionalInfo;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
     private List<Coin> CoinList = new ArrayList<>();
@@ -146,5 +149,9 @@ public class Member extends BaseEntity {
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
+    }
+
+    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
     }
 }

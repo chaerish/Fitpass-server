@@ -1,19 +1,19 @@
 package com.example.fitpassserver.domain.fitness.controller;
 
 
-import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
-import com.example.fitpassserver.domain.fitness.service.MemberFitnessService;
 import com.example.fitpassserver.domain.fitness.converter.MemberFitnessConverter;
 import com.example.fitpassserver.domain.fitness.dto.MemberFitnessRequestDTO;
 import com.example.fitpassserver.domain.fitness.dto.MemberFitnessResponseDTO;
+import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
+import com.example.fitpassserver.domain.fitness.service.MemberFitnessService;
 import com.example.fitpassserver.domain.fitness.service.command.MemberFitnessCommandService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

@@ -135,7 +135,7 @@ public class KakaoPaymentService {
     }
 
     //정기 결제 두번째 회차
-    public SubscriptionResponseDTO ready(Plan plan) {
+    public SubscriptionResponseDTO request(Plan plan) {
         if (plan.getSid() == null) {
             throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
         }
@@ -167,17 +167,17 @@ public class KakaoPaymentService {
                                             int errorCode = root.path("error_code").asInt();
                                             String methodResultCode = root.path("extras").path("method_result_code")
                                                     .asText();
-
                                             // 금액 부족 에러 처리
                                             if (errorCode == -782 && "8008".equals(methodResultCode)) {
-                                                smsCertificationUtil.sendPlanInsufficientFundsAlert(
-                                                        plan.getMember().getPhoneNumber(),
-                                                        plan.getPlanType().getName());
+                                                return Mono.error(
+                                                        new PlanException(PlanErrorCode.PLAN_INSUFFICIENT_FUNDS));
+                                            } else { //그 이외 카카오페이 결제 오류
+                                                return Mono.error(
+                                                        new PlanException(PlanErrorCode.KAKAO_PAY_ERROR));
                                             }
                                         } catch (Exception e) {
                                             log.error("Parsing Error: {}", e.getMessage());
                                         }
-
                                         return Mono.error(
                                                 new RuntimeException("구독 실패 이유: " + errorBody));
                                     });
@@ -253,7 +253,7 @@ public class KakaoPaymentService {
     }
 
     //정기 구독 취소
-    public KakaoCancelResponseDTO subscriptionCancel(Member member) {
+    public KakaoCancelResponseDTO cancelSubscription(Member member) {
         Plan plan = planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
         );

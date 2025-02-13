@@ -61,8 +61,28 @@ public class Fitness extends BaseEntity {
     @Column(name = "is_recommend", nullable = false)
     private Boolean isRecommend;
 
+    @Column(name = "is_purchasable")
+    private Boolean isPurchasable;
+
+    @Column(name = "total_fee")
+    private Integer totalFee;
+
+    @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FitnessImage> additionalImages = new ArrayList<>();
+
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
 
+    public void setCategoryList(List<Category> categoryList){
+        this.categoryList = categoryList;
+    }
+
+    public void setMainImage(String mainImageKey){
+        this.fitnessImage = mainImageKey;
+    }
+
+    public void setAdditionalImages(List<FitnessImage> fitnessImageList){
+        this.additionalImages = fitnessImageList;
+    }
 }

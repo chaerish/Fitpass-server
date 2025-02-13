@@ -14,6 +14,7 @@ import com.example.fitpassserver.domain.member.sms.service.SmsService;
 import com.example.fitpassserver.domain.profile.entity.Profile;
 import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
      * 로그인
      **/
     @Override
+    @Transactional
     public MemberResponseDTO.MemberTokenDTO login(MemberRequestDTO.LoginDTO dto) {
         Member member = memberRepository.findByLoginId(dto.getLoginId())
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
@@ -88,6 +90,8 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
             throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
         }
+
+        member.updateLastLoginAt(LocalDateTime.now());
 
         return MemberResponseDTO.MemberTokenDTO.builder()
                 .accessToken(jwtProvider.createAccessToken(member))
