@@ -4,7 +4,6 @@ import com.example.fitpassserver.admin.payment.dto.response.CoinPaymentHistoryRe
 import com.example.fitpassserver.admin.payment.dto.response.PassPaymentHistoryResponseDTO;
 import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
-import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
@@ -49,7 +48,7 @@ public class PaymentHistoryAdminConverter {
                             .account(member.getLoginId())
                             .phoneNumber(member.getPhoneNumber())
                             .fitnessName(pass.getFitness().getName())
-                            .coinCount(getCoinCount(pass.getFitness()))
+                            .coinCount(pass.getFitness().getTotalFee())
                             .createdAt(pass.getCreatedAt())
                             .passStatus(pass.getStatus().getValue())
                             .activeTime(pass.getActiveTime())
@@ -62,9 +61,5 @@ public class PaymentHistoryAdminConverter {
                 .totalPages(memberFitnesses.getTotalPages())
                 .number(memberFitnesses.getNumber())
                 .build();
-    }
-
-    private static int getCoinCount(Fitness fitness) {
-        return fitness.getFinalFee();
     }
 }

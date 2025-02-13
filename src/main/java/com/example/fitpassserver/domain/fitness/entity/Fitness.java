@@ -96,8 +96,4 @@ public class Fitness extends BaseEntity {
     public void setAdditionalImages(List<FitnessImage> fitnessImageList) {
         this.additionalImages = fitnessImageList;
     }
-
-    public int getFinalFee() {
-        return fee - discount;
-    }
 }
