@@ -1,41 +1,26 @@
 package com.example.fitpassserver.domain.plan.entity;
 
+import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
+import com.example.fitpassserver.domain.plan.exception.PlanException;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.util.Arrays;
+
+@Getter
+@AllArgsConstructor
 public enum PlanType {
-    NONE("플랜 없음", 0, 0),
-    BASIC("베이직", 50000, 90),
-    STANDARD("스탠다드", 70000, 135),
-    PRO("프로", 100000, 200);
+    NONE("플랜 없음"),
+    BASIC("배이직"),
+    STANDARD("스탠다드"),
+    PRO("프로");
 
-    PlanType(String name, int price, int coinQuantity) {
-        this.name = name;
-        this.price = price;
-        this.coinQuantity = coinQuantity;
-    }
-
-    private String name;
-    private int price;
-    private int coinQuantity;
+    private final String name;
 
     public static PlanType getPlanType(String name) {
-        PlanType type = null;
-        for (PlanType planType : PlanType.values()) {
-            if (planType.name.equals(name)) {
-                return planType;
-            }
-
-        }
-        return type;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getPrice() {
-        return price;
-    }
-
-    public int getCoinQuantity() {
-        return coinQuantity;
+        return Arrays.stream(values())
+                .filter(planType -> planType.name.equalsIgnoreCase(name))
+                .findFirst()
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
     }
 }

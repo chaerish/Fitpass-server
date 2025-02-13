@@ -10,14 +10,20 @@ import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHis
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
-import java.time.LocalDate;
+import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
+import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
+import com.example.fitpassserver.domain.plan.exception.PlanException;
+import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
 public class CoinService {
     private final CoinRepository coinRepository;
+    private final PlanTypeRepository planTypeRepository;
 
     //결제 성공시 Coin 엔티티 증가
     public Coin createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
@@ -44,10 +50,13 @@ public class CoinService {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
         }
         PlanType planType = plan.getPlanType();
+        PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(planType)
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+
         return coinRepository.save(Coin.builder()
                 .member(member)
                 .planType(planType)
-                .count((long) planType.getCoinQuantity())
+                .count((long) planTypeEntity.getCoinQuantity())
                 .expiredDate(LocalDate.now().plusDays(30))
                 .history(history)
                 .build());
