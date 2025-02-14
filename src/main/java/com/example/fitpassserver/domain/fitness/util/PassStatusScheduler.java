@@ -19,6 +19,7 @@ import java.util.List;
 public class PassStatusScheduler {
 
     private final MemberFitnessRepository memberFitnessRepository;
+    private final MemberFitnessCommandService memberFitnessCommandService;
 
 //    @Async
 //    @Scheduled(fixedRate = 60000) // 1분마다 실행
@@ -29,5 +30,16 @@ public class PassStatusScheduler {
 //        memberFitnessRepository.saveAll(memberFitnessList);
 //    }
 
+    @Async
+    @Scheduled(fixedRate = 60000)
+    public void cancelAfter24Hours() {
+        List<MemberFitness> cancelList = memberFitnessRepository.findByStatusAndActiveTimeBefore(Status.NONE, LocalDateTime.now().minusHours(24));
+        if (!cancelList.isEmpty()) {
+            cancelList.forEach(memberFitness -> {
+                MemberFitnessRequestDTO.CancelMemberFitnessRequestDTO dto = new MemberFitnessRequestDTO.CancelMemberFitnessRequestDTO(memberFitness.getId());
+                memberFitnessCommandService.cancelFitness(memberFitness.getMember(), dto);
+            });
+        }
 
+    }
 }

@@ -15,6 +15,7 @@ public enum MemberFitnessErrorCode implements BaseErrorCode {
     NOT_IN_PROGRESS_PASS(HttpStatus.BAD_REQUEST, "PASS400_4", "패스가 활성화 상태가 아닙니다."),
     ALREADY_IN_PROGRESS(HttpStatus.BAD_REQUEST, "PASS_400_5", "패스가 이미 활성화되었습니다."),
     ALREADY_USED_PASS(HttpStatus.BAD_REQUEST, "PASS400_6", "이미 사용이 완료된 패스입니다."),
+    ALREADY_BUY_PASS_TODAY(HttpStatus.BAD_REQUEST, "PASS400_7", "오늘 이미 패스를 구매했습니다."),
     ;
 
     private final HttpStatus status;
