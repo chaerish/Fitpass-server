@@ -20,7 +20,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/management")
-@Tag(name = "코인/구독 상품관리 어드민 API", description = "구독/코인 상품관리 api입니다.")
+@Tag(name = "코인/구독 상품관리 어드민 API", description = "구독/코인 상품관리 API입니다.")
 public class ManagementAdminController {
     private final ManagementAdminService managementAdminService;
 
