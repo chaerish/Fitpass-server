@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.plan.service;
 
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
@@ -29,6 +30,7 @@ public class PlanService {
                 .planType(PlanType.getPlanType(planName))
                 .planDate(LocalDate.now())
                 .sid(sid)
+                .paymentStatus(PaymentStatus.SUCCESS)
                 .paymentCount(1)
                 .member(member)
                 .build());
@@ -42,10 +44,9 @@ public class PlanService {
     }
 
     public Plan getPlan(Member member) {
-        Plan plan = planRepository.findByMember(member).orElseThrow(
+        return planRepository.findByMember(member).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
         );
-        return plan;
     }
 
     public Plan getRegularPaymentPlan(Member member) {

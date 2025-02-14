@@ -27,7 +27,8 @@ public class SmsCertificationUtil {
     private static final String COIN_MESSAGE_FORMAT = "[FitPass]\n%s원 결제 되었습니다.\n코인 %s개를 구매하셨습니다.\n";
     private static final String PASS_MESSAGE_FORMAT = "[FitPass]\n[%s] 시설 패스 결제하였습니다.\n%s코인을 사용했습니다.\n";
     private static final String PLAN_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜을 결제하였습니다.\n%s원을 결제 완료되었습니다.\n";
-    private static final String INSUFFICIENT_FUND_FORMAT = "[FitPass]\n[%s] 플랜 정기 결제에 실패하였습니다.\n잔액이 부족합니다.\n";
+    private static final String INSUFFICIENT_FUND_FORMAT = "[FitPass]\n[%s] 결제에 실패했습니다. \n결제일 포함 3일째까지 계속 결제가 시도되며 결제일 포함 4일째 결제 실패시 자동 구독 취소됩니다. 감사합니다.\n";
+    private static final String CANCEL_PLAN_FORMAT = "[FitPass]\n[%s] 결제에 실패했습니다. \n결제일 포함 4일째 결제에 실패했으므로 구독이 자동으로 해지되었습니다. 감사합니다.\n";
     private static final String PLAN_CHANGE_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜으로 변경 되었습니다.\n다음 결제날부터 적용됩니다.\n";
 
 
@@ -70,6 +71,11 @@ public class SmsCertificationUtil {
     // 플랜 변경 메세지 발송
     public void sendPlanChangeAlert(String to, String name) {
         sendPaymentSMS(to, String.format(PLAN_CHANGE_MESSAGE_FORMAT, name));
+    }
+
+    // 플랜 취소 메세지 발송
+    public void sendPlanCancelAlert(String to, String name) {
+        sendPaymentSMS(to, String.format(CANCEL_PLAN_FORMAT, name));
     }
 
     // 메시지 초기 설정
