@@ -1,10 +1,11 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.service;
 
 import com.example.fitpassserver.domain.coin.entity.Coin;
-import com.example.fitpassserver.domain.coin.entity.CoinType;
+import com.example.fitpassserver.domain.coin.entity.CoinTypeEntity;
 import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
+import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
@@ -35,23 +36,22 @@ import java.time.LocalDateTime;
 public class CoinPaymentHistoryService {
     private final CoinPaymentRepository coinPaymentRepository;
     private final PlanTypeRepository planTypeRepository;
+    private final CoinTypeRepository coinTypeRepository;
     private final CoinRepository coinRepository;
     private final PlanRepository planRepository;
 
     public void createNewCoinPayment(Member member, String tid, CoinSinglePayRequestDTO dto) {
         int price = dto.totalAmount();
         int quantity = dto.quantity();
-        CoinType type = CoinType.getCoinType(price, quantity);
-        if (type == null) {
-            throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
-        }
+        CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
+                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
         coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(dto.methodName())
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.READY)
                 .tid(tid)
                 .member(member)
-                .coinCount(((long) type.getCount() * quantity))
+                .coinCount(((long) coinType.getCoinQuantity() * quantity))
                 .paymentPrice(dto.totalAmount())
                 .build());
     }
