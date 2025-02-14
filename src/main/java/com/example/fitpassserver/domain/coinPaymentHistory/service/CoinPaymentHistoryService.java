@@ -56,24 +56,6 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
-        PlanType type = PlanType.getPlanType(dto.item_name());
-        if (type == null) {
-            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
-        }
-        PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
-                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
-        return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod("카카오페이 정기 결제") //todo: 수정
-                .isAgree(true)
-                .tid(dto.tid())
-                .coinCount((long) planType.getCoinQuantity())
-                .paymentStatus(PaymentStatus.READY)
-                .member(member)
-                .paymentPrice(dto.amount().total())
-                .build());
-    }
-
     public void createNewCoinPaymentByPlan(Member member, String tid, PlanSubScriptionRequestDTO dto) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
@@ -90,6 +72,24 @@ public class CoinPaymentHistoryService {
                 .paymentStatus(PaymentStatus.READY)
                 .member(member)
                 .paymentPrice(dto.totalAmount())
+                .build());
+    }
+
+    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
+        PlanType type = PlanType.getPlanType(dto.item_name());
+        if (type == null) {
+            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
+        }
+        PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+                .isAgree(true)
+                .tid(dto.tid())
+                .coinCount((long) planType.getCoinQuantity())
+                .paymentStatus(PaymentStatus.READY)
+                .member(member)
+                .paymentPrice(dto.amount().total())
                 .build());
     }
 
