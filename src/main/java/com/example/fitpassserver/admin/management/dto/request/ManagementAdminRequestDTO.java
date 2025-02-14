@@ -1,5 +1,6 @@
 package com.example.fitpassserver.admin.management.dto.request;
 
+import com.example.fitpassserver.domain.plan.entity.PlanType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +14,7 @@ public class ManagementAdminRequestDTO {
     @NoArgsConstructor
     public static class UpdateCoinManagementDTO {
         @Schema(description = "플랜 이름", example = "BASIC")
-        private String name;
+        private PlanType planType;
 
         @Schema(description = "월 가격", example = "10000")
         private int price;

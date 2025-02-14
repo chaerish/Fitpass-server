@@ -10,8 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface PlanTypeRepository extends JpaRepository<PlanTypeEntity, Long> {
-    Optional<PlanTypeEntity> findByName(String name);
-
     Optional<PlanTypeEntity> findByPlanType(PlanType planType);
 
     List<PlanTypeEntity> findAll();

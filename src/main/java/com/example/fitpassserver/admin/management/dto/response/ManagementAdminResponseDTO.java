@@ -1,5 +1,6 @@
 package com.example.fitpassserver.admin.management.dto.response;
 
+import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -14,7 +15,7 @@ public class ManagementAdminResponseDTO {
     @NoArgsConstructor
     public static class PlanInfoDTO {
         @Schema(description = "플랜 이름", example = "BASIC")
-        private String name;
+        private PlanType planType;
 
         @Schema(description = "월 가격", example = "10000")
         private int price;
@@ -29,7 +30,7 @@ public class ManagementAdminResponseDTO {
         private String expirationPeriod;
 
         public PlanInfoDTO(PlanTypeEntity plan) {
-            this.name = plan.getName();
+            this.planType = plan.getPlanType();
             this.price = plan.getPrice();
             this.coinQuantity = plan.getCoinQuantity();
             this.coinAddition = plan.getCoinAddition();

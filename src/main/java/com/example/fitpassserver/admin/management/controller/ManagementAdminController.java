@@ -51,21 +51,21 @@ public class ManagementAdminController {
                                     summary = "플랜 업데이트 요청 예시",
                                     value = "[\n" +
                                             "  {\n" +
-                                            "    \"name\": \"BASIC\",\n" +
+                                            "    \"planType\": \"BASIC\",\n" +
                                             "    \"price\": 10000,\n" +
                                             "    \"coinQuantity\": 100,\n" +
                                             "    \"coinAddition\": 10,\n" +
                                             "    \"expirationPeriod\": \"30일\"\n" +
                                             "  },\n" +
                                             "  {\n" +
-                                            "    \"name\": \"STANDARD\",\n" +
+                                            "    \"planType\": \"STANDARD\",\n" +
                                             "    \"price\": 15000,\n" +
                                             "    \"coinQuantity\": 150,\n" +
                                             "    \"coinAddition\": 15,\n" +
                                             "    \"expirationPeriod\": \"30일\"\n" +
                                             "  },\n" +
                                             "  {\n" +
-                                            "    \"name\": \"PRO\",\n" +
+                                            "    \"planType\": \"PRO\",\n" +
                                             "    \"price\": 20000,\n" +
                                             "    \"coinQuantity\": 200,\n" +
                                             "    \"coinAddition\": 20,\n" +

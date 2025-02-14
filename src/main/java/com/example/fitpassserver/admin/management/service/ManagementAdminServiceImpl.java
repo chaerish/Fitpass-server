@@ -21,11 +21,11 @@ public class ManagementAdminServiceImpl implements ManagementAdminService {
     @Transactional
     public void updateAllPlans(List<ManagementAdminRequestDTO.UpdateCoinManagementDTO> requestList) {
         for (ManagementAdminRequestDTO.UpdateCoinManagementDTO request : requestList) {
-            PlanTypeEntity planTypeEntity = planTypeRepository.findByName(request.getName())
-                    .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+            PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(request.getPlanType())
+                    .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_PAYMENT_BAD_REQUEST));
 
             planTypeEntity.updatePlan(
-                    request.getName(),
+                    request.getPlanType(),
                     request.getPrice(),
                     request.getCoinQuantity(),
                     request.getCoinAddition(),

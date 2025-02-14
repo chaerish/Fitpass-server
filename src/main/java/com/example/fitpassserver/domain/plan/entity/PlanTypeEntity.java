@@ -8,15 +8,12 @@ import lombok.*;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@Table(name = "plan_type")
+@Table(name = "plan_type_admin")
 public class PlanTypeEntity {
     @Id
     @Enumerated(EnumType.STRING)
     @Column(name = "plan_type", nullable = false, unique = true)
     private PlanType planType;
-
-    @Column(name = "name", nullable = false)
-    private String name;
 
     @Column(name = "price", nullable = false)
     private int price;
@@ -31,8 +28,8 @@ public class PlanTypeEntity {
     private String expirationPeriod;
 
 
-    public void updatePlan(String name, int price, int coinQuantity, int coinAddition, String expirationPeriod) {
-        this.name = name;
+    public void updatePlan(PlanType planType, int price, int coinQuantity, int coinAddition, String expirationPeriod) {
+        this.planType = planType;
         this.price = price;
         this.coinQuantity = coinQuantity;
         this.coinAddition = coinAddition;
