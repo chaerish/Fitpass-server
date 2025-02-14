@@ -14,11 +14,12 @@ import com.example.fitpassserver.domain.member.sms.service.SmsService;
 import com.example.fitpassserver.domain.profile.entity.Profile;
 import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -94,6 +95,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         member.updateLastLoginAt(LocalDateTime.now());
 
         return MemberResponseDTO.MemberTokenDTO.builder()
+                .role(member.getRole())
                 .accessToken(jwtProvider.createAccessToken(member))
                 .refreshToken(jwtProvider.createRefreshToken(member))
                 .build();
