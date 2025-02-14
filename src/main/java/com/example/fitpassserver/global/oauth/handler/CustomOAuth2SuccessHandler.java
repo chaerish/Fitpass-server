@@ -50,9 +50,11 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
         String accessToken = jwtProvider.createAccessToken(member);
         String refreshToken = jwtProvider.createRefreshToken(member);
+        String memberRole = member.getRole().toString();
 
         addCookie(response, "accessToken", accessToken, (int) (accessExpiration / 1000));
         addCookie(response, "refreshToken", refreshToken, (int) (refreshExpiration / 1000));
+        addCookie(response, "memberRole", memberRole, (int) (accessExpiration / 1000));
 
         if (!member.isAdditionalInfo()) {
             addCookie(response, "status", "register", 60 * 5);
