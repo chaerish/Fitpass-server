@@ -63,7 +63,7 @@ public class CoinPaymentHistoryService {
         }
         PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
-        
+
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod("카카오페이 정기 결제") //todo: 수정
                 .isAgree(true)
