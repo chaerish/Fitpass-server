@@ -11,15 +11,13 @@ import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
-import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.*;
 import com.example.fitpassserver.domain.plan.entity.Plan;
+import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanRepository;
+import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +35,8 @@ import reactor.core.publisher.Mono;
 @Service
 @RequiredArgsConstructor
 public class KakaoPaymentService {
+    private final PlanTypeRepository planTypeRepository;
+
     @Value("${kakaopay.secret-key}")
     private String secretKey;
     @Value("${kakaopay.cid}")
@@ -139,6 +139,9 @@ public class KakaoPaymentService {
         if (plan.getSid() == null) {
             throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
         }
+        PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(plan.getPlanType())
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+
         WebClient kakao = getKakaoClient();
         SubscriptionRequestDTO request = new SubscriptionRequestDTO(
                 monthlyRegularCid,
@@ -147,7 +150,7 @@ public class KakaoPaymentService {
                 userId,
                 plan.getPlanType().getName(),
                 1,
-                plan.getPlanType().getPrice(),
+                planTypeEntity.getPrice(),
                 0
         );
         Mono<SubscriptionResponseDTO> response = kakao.post()
