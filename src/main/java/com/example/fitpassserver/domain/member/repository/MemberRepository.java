@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.time.LocalDateTime;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findAllByName(String name);
@@ -22,6 +23,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Optional<Member> findByProviderId(String providerId);
 
     boolean existsByName(String name);
+
+    int countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime greaterThan, LocalDateTime lessThan);
 
     Page<Member> findByNameContaining(String name, Pageable pageable);
 
