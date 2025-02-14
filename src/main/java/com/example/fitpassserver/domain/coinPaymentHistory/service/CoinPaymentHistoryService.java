@@ -58,12 +58,11 @@ public class CoinPaymentHistoryService {
 
     public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
         PlanType type = PlanType.getPlanType(dto.item_name());
-        PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
-                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
         }
-
+        PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod("카카오페이 정기 결제") //todo: 수정
                 .isAgree(true)
