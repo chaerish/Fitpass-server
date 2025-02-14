@@ -3,6 +3,7 @@ package com.example.fitpassserver.domain.fitness.service;
 
 import com.example.fitpassserver.domain.fitness.converter.MemberFitnessConverter;
 import com.example.fitpassserver.domain.fitness.dto.response.MemberFitnessResDTO;
+import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,14 +38,25 @@ public class MemberFitnessService {
          }
      }
 
-    public MemberFitnessResDTO.MemberFitnessGroupDTO getPassList(String id){
+    public MemberFitnessResDTO.MemberFitnessGroupDTO getPassList(String id) {
         // 유저 찾기
-        Member member = memberRepository.findByLoginId(id).orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        Member member = memberRepository.findByLoginId(id)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-
-        // 해당 유저의 패스 찾기 -> 리포지토리 메서드 추가
+        // 해당 유저의 패스 찾기
         List<MemberFitness> memberFitnessList = memberFitnessRepository.findAllByMember(member);
-        return MemberFitnessConverter.toGroupDto(memberFitnessList, fitnessImageService);
+
+        // 모든 Fitness ID에 대한 이미지 미리 조회
+        Map<Long, String> imageUrlMap = memberFitnessList.stream()
+                .map(MemberFitness::getFitness)
+                .map(Fitness::getId)
+                .distinct()
+                .collect(Collectors.toMap(
+                        fitnessId -> fitnessId,
+                        fitnessImageService::getFitnessImage
+                ));
+
+        return MemberFitnessConverter.toGroupDto(memberFitnessList, imageUrlMap);
     }
 
     public void usePass(Member member, Long passId, boolean isAgree){
@@ -62,11 +76,16 @@ public class MemberFitnessService {
         memberFitness.use();
     }
 
-    public MemberFitnessResDTO.MemberFitnessPreviewDTO getPass(Member member, Long passId){
-        MemberFitness memberFitness = memberFitnessRepository.findById(passId).orElseThrow(() -> new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
+    public MemberFitnessResDTO.MemberFitnessPreviewDTO getPass(Member member, Long passId) {
+        MemberFitness memberFitness = memberFitnessRepository.findById(passId)
+                .orElseThrow(() -> new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
         checkMember(member, memberFitness);
 
-        return MemberFitnessConverter.toDto(memberFitness, fitnessImageService);
+        // 이미지 URL 조회
+        String imageUrl = fitnessImageService.getFitnessImage(memberFitness.getFitness().getId());
+
+        return MemberFitnessConverter.toDto(memberFitness, imageUrl);
     }
+
 }
