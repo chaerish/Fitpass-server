@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.profile.dto.ProfileResponseDTO;
 import com.example.fitpassserver.domain.profile.service.ProfileService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import java.io.IOException;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth/profile")
+@Tag(name = "프로필 API", description = "프로필 조회 및 변경 API입니다.")
 public class ProfileController {
 
     private final ProfileService profileService;

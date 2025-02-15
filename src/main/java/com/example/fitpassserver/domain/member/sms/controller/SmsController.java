@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.member.sms.dto.SmsRequestDTO;
 import com.example.fitpassserver.domain.member.sms.service.SmsService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("")
+@Tag(name = "인증번호 API", description = "인증번호 발송 및 인증 API입니다.")
 public class SmsController {
 
     private final SmsService smsService;
