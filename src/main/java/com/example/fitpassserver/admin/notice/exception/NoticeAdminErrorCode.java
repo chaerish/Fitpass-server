@@ -14,7 +14,7 @@ public enum NoticeAdminErrorCode implements BaseErrorCode {
     HOME_SLIDE_DRAFT_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
             "NOTICE400", "임시저장된 공지사항은 홈 슬라이드에 설정할 수 없습니다."),
     TITLE_REQUIRED(HttpStatus.BAD_REQUEST,
-            "NOTICE401", "정식 등록 시 제목은 필수입니다."),
+            "NOTICE401", "제목은 필수입니다."),
     CONTENT_REQUIRED(HttpStatus.BAD_REQUEST,
             "NOTICE402", "정식 등록 시 내용은 필수입니다."),
     TYPE_REQUIRED(HttpStatus.BAD_REQUEST,

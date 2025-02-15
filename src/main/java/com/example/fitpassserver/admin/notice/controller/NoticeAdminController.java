@@ -12,9 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-@Tag(name = "Notice Admin", description = "공지사항 관리자 API")
+@Tag(name = "Notice 어드민 API", description = "공지사항 관리자 API")
 @RestController
 @RequestMapping("/admin/notice")
 public class NoticeAdminController {
@@ -64,6 +66,16 @@ public class NoticeAdminController {
             @RequestPart("image") MultipartFile image
     ) throws IOException {
         NoticeAdminResDTO response = noticeAdminService.saveNotice(request, image, false);
+        return ApiResponse.onSuccess(response);
+    }
+
+    @Operation(summary = "임시 저장된 공지사항 목록 조회")
+    @GetMapping(value = "/draftList")
+    public ApiResponse<Map<String, Object>> getDraftList() {
+        List<String> draftTitles = noticeAdminService.getDraftNotices();
+        Map<String, Object> response = new HashMap<>();
+        response.put("titles", draftTitles);
+        response.put("count", draftTitles.size());
         return ApiResponse.onSuccess(response);
     }
 }

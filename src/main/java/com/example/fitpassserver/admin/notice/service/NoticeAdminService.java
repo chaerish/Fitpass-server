@@ -11,7 +11,6 @@ import com.example.fitpassserver.domain.notice.exception.NoticeException;
 import com.example.fitpassserver.domain.notice.repository.NoticeRepository;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
-import com.nimbusds.oauth2.sdk.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,9 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -89,10 +89,10 @@ public class NoticeAdminService {
 
 
     private void validateRequest(NoticeAdminReqDTO request, MultipartFile image, boolean isDraft) {
-        if (!isDraft) { // 정식 등록일 때만 검증
-            if (request.getTitle() == null || request.getTitle().isBlank()) {
-                throw new NoticeAdminException(NoticeAdminErrorCode.TITLE_REQUIRED);
-            }
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new NoticeAdminException(NoticeAdminErrorCode.TITLE_REQUIRED);
+        }
+        if (!isDraft) { // 정식 등록일 때만 추가 검증
             if (request.getContent() == null || request.getContent().isBlank()) {
                 throw new NoticeAdminException(NoticeAdminErrorCode.CONTENT_REQUIRED);
             }
@@ -141,4 +141,13 @@ public class NoticeAdminService {
     private String generateNoticeImageKey(String originalFilename) {
         return String.format("notice/%s/%s", UUID.randomUUID(), originalFilename);
     }
+  
+    // 임시저장 중인 공지사항 조회
+    public List<String> getDraftNotices() {
+        return noticeRepository.findByIsDraftTrue()
+                .stream()
+                .map(Notice::getTitle)
+                .collect(Collectors.toList());
+    }
+
 }
