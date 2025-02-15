@@ -74,6 +74,7 @@ public class MemberFitnessService {
         }
 
         memberFitness.use();
+        memberFitnessRepository.createEventSchedulerUpdateStatusIsProgress(memberFitness.getId());
     }
 
     public MemberFitnessResDTO.MemberFitnessPreviewDTO getPass(Member member, Long passId) {

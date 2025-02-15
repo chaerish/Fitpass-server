@@ -9,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Long> {
+public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Long>, MemberFitnessCustomRepository {
     List<MemberFitness> findAllByMember(Member member);
 
     Page<MemberFitness> findAllByMemberIn(Pageable pageable, List<Member> member);
@@ -18,7 +18,11 @@ public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Lo
 
     boolean existsByMemberAndStatusIn(Member member, List<Status> status);
 
+    boolean existsByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
     int countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime greaterThan, LocalDateTime lessThan);
 
     int countAllByActiveTimeGreaterThanEqualAndActiveTimeLessThan(LocalDateTime greaterThan, LocalDateTime lessThan);
+
+    List<MemberFitness> findAllByStatusIsAndCreatedAtLessThan(Status status, LocalDateTime createdAt);
 }
