@@ -33,6 +33,7 @@ public class DashboardAdminServiceImpl implements DashboardAdminService {
     public void schedule() {
         createDashBoardData();
         visitorUtil.clear();
+        visitorUtil.initializePageView();
     }
 
 
@@ -73,9 +74,8 @@ public class DashboardAdminServiceImpl implements DashboardAdminService {
         return visitorUtil.getVisitCount();
     }
 
-    // TODO: 구현 예정
     private int getPageView() {
-        return 0;
+        return visitorUtil.getPageView();
     }
 
 }
