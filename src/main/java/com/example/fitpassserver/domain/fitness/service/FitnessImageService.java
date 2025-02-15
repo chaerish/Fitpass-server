@@ -25,4 +25,14 @@ public class FitnessImageService {
             return "none";
         }
     }
+
+    /* 피트니스 추가 이미지 조회 */
+    public String getAdditionalImage(Long fitnessId) {
+        Fitness fitness = fitnessRepository.findById(fitnessId)
+                .orElseThrow(() -> new FitnessException(FitnessErrorCode.FITNESS_IMAGE_NOT_FOUND));
+
+        return fitness.getAdditionalImages().isEmpty()
+                ? null // 🔹 추가 이미지가 없으면 null 반환
+                : s3Service.getGetS3Url(fitnessId, fitness.getAdditionalImages().get(0).getImageKey()).getPreSignedUrl();
+    }
 }

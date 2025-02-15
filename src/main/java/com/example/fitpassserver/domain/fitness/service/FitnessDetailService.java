@@ -31,6 +31,8 @@ public class FitnessDetailService {
         );
         String imageUrl = fitnessImageService.getFitnessImage(fitnessId);
 
+        String additionalImageUrl = fitnessImageService.getAdditionalImage(fitnessId);
+
         String categories = fitness.getCategoryList().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.joining(", "));
@@ -50,6 +52,7 @@ public class FitnessDetailService {
                 .imageUrl(imageUrl)
                 .fitnessLatitude(fitness.getLatitude())
                 .fitnessLongitude(fitness.getLongitude())
+                .additionalImage(additionalImageUrl)
                 .build();
     }
 }

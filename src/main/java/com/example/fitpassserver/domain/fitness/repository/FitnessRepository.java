@@ -14,15 +14,21 @@ import java.util.Optional;
 @Repository
 public interface FitnessRepository extends JpaRepository<Fitness, Long> {
     List<Fitness> findByIsRecommendTrue();
-    Page<Fitness> findByCategoryList_CategoryName(String categoryName, Pageable pageable);
-    Page<Fitness> findByCategoryList_CategoryNameAndIdGreaterThan(
-            String categoryName, Long cursor, Pageable pageable
-    );
-    @Query("SELECT f FROM Fitness f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :keyword, '%')) ORDER BY f.id ASC")
-    List<Fitness> findTopByNameContaining(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT f FROM Fitness f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND f.id > :cursor ORDER BY f.id ASC")
-    List<Fitness> findNextByNameContaining(@Param("keyword") String keyword, @Param("cursor") Long cursor, Pageable pageable);
+    //카테고리로 검색
+    Page<Fitness> findByCategoryList_CategoryNameAndIsPurchasableTrue(
+            String categoryName, Pageable pageable);
+
+    Page<Fitness> findByCategoryList_CategoryNameAndIdGreaterThanAndIsPurchasableTrue(
+            String categoryName, Long cursor, Pageable pageable);
+
+    //시설명으로 검색, 구매 가능한 것만 id 순으로
+    @Query("SELECT f FROM Fitness f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND f.isPurchasable = true ORDER BY f.id ASC")
+    List<Fitness> findTopByNameContainingAndIsPurchasableTrue(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT f FROM Fitness f WHERE LOWER(f.name) LIKE LOWER(CONCAT('%', :keyword, '%')) AND f.id > :cursor AND f.isPurchasable = true ORDER BY f.id ASC")
+    List<Fitness> findNextByNameContainingAndIsPurchasableTrue(@Param("keyword") String keyword, @Param("cursor") Long cursor, Pageable pageable);
+
 
     Optional<Fitness> findFitnessById(Long Id);
 

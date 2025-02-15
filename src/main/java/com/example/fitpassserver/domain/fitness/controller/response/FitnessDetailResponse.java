@@ -20,4 +20,5 @@ public class FitnessDetailResponse {
     private String imageUrl;
     private Double fitnessLatitude;
     private Double fitnessLongitude;
+    private String additionalImage;
 }
