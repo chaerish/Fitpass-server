@@ -11,6 +11,7 @@ import com.example.fitpassserver.domain.fitness.entity.FitnessImage;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -34,10 +35,10 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
+    private final ObjectMapper objectMapper;
 
     @Override
     public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.CreateFitnessDTO dto) throws IOException {
-
         // 우선 Fitness 엔티티를 생성 (fitnessId 필요)
         Fitness fitness = FitnessAdminConverter.toEntity(dto);
         fitnessRepository.save(fitness); // ID 생성됨
