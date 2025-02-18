@@ -11,11 +11,13 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PlanRepository extends JpaRepository<Plan, Long> {
-    List<Plan> findAllByPlanDateLessThanEqual(LocalDate now);
+    List<Plan> findAllByPlanDateLessThanEqualAndPlanTypeIsNot(LocalDate now, PlanType planType);
 
     Optional<Plan> findByMember(Member member);
 
     Optional<Plan> findByMemberId(Long memberId);
+
+    boolean existsByMember(Member member);
 
     boolean existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(Member member, PlanType planType);
 }

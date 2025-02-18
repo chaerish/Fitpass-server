@@ -19,7 +19,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Getter
@@ -27,7 +26,6 @@ import org.hibernate.annotations.SQLRestriction;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "plan")
-@SQLRestriction("plan_type <> 'NONE'") //<> 같지않다
 public class Plan extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,5 +76,5 @@ public class Plan extends BaseEntity {
     public void updatePlanDate() {
         this.planDate = planDate.plusMonths(1);
     }
-    
+
 }
