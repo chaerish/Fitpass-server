@@ -14,6 +14,7 @@ import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionRespo
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
+import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.service.PlanService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -78,7 +79,8 @@ public class PlanPaymentController {
     @Operation(summary = "정기 결제 비활성화", description = "정기 결제를 비활성화 하기 위해 요청합니다.")
     @PostMapping("/deactivate")
     public ApiResponse<KakaoCancelResponseDTO> cancelSubscriptionPay(@CurrentMember Member member) {
-        KakaoCancelResponseDTO response = paymentService.cancelSubscription(member);
+        Plan plan = planService.checkSubscriptionAndGetPlan(member);
+        KakaoCancelResponseDTO response = paymentService.cancelSubscription(plan);
         planService.cancelNewPlan(member);
         return ApiResponse.onSuccess(response);
     }

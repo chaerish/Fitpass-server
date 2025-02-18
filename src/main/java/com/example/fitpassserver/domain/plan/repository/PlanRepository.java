@@ -15,6 +15,8 @@ public interface PlanRepository extends JpaRepository<Plan, Long> {
 
     Optional<Plan> findByMember(Member member);
 
+    Optional<Plan> findByMemberAndPlanTypeIsNot(Member member, PlanType planType);
+
     Optional<Plan> findByMemberId(Long memberId);
 
     boolean existsByMember(Member member);
