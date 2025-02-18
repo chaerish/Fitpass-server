@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum KakaoPayErrorCode implements BaseErrorCode {
+    NO_TID_ERROR(HttpStatus.BAD_REQUEST, "TID400", "tid 를 찾을 수 없습니다."),
     ALREADY_SUCCESS_ERROR(HttpStatus.BAD_REQUEST, "KAKAOPAY400", "사용자의 tid 를 찾을 수 없습니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "KAKAOPAY404", "사용자의 tid 를 찾을 수 없습니다.");
     private final HttpStatus status;
