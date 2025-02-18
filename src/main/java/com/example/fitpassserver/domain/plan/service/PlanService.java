@@ -25,7 +25,16 @@ public class PlanService {
         }
     }
 
+    @Transactional
     public Plan createNewPlan(Member member, String planName, String sid) {
+        if (planRepository.existsByMember(member)) {
+            Plan plan = planRepository.findByMember(member).orElseThrow(
+                    () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
+            );
+            plan.changePlanType(PlanType.getPlanType(planName));
+            planRepository.save(plan);
+            return plan;
+        }
         return planRepository.save(Plan.builder()
                 .planType(PlanType.getPlanType(planName))
                 .planDate(LocalDate.now())
