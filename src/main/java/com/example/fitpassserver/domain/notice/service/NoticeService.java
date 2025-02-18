@@ -28,7 +28,7 @@ public class NoticeService {
     }
 
     public Map<String, Object> getNoticeList(Pageable pageable) {
-        Page<Notice> noticePage = noticeRepository.findAll(pageable);
+        Page<Notice> noticePage = noticeRepository.findPublishedNoticesSorted(pageable);
         List<NoticeListResponse> content = noticePage.getContent().stream()
                 .map(notice -> new NoticeListResponse(
                         notice.getId(),
