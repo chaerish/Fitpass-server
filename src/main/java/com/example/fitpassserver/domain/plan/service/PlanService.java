@@ -25,24 +25,21 @@ public class PlanService {
         }
     }
 
-    @Transactional
     public Plan createNewPlan(Member member, String planName, String sid) {
-        if (planRepository.existsByMember(member)) {
-            Plan plan = planRepository.findByMember(member).orElseThrow(
-                    () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
-            );
-            plan.changePlanType(PlanType.getPlanType(planName));
-            planRepository.save(plan);
-            return plan;
+        Plan plan = planRepository.findByMember(member).orElse(null);
+        if (plan == null) {
+            return planRepository.save(Plan.builder()
+                    .planType(PlanType.getPlanType(planName))
+                    .planDate(LocalDate.now())
+                    .sid(sid)
+                    .paymentStatus(PaymentStatus.SUCCESS)
+                    .paymentCount(1)
+                    .member(member)
+                    .build());
         }
-        return planRepository.save(Plan.builder()
-                .planType(PlanType.getPlanType(planName))
-                .planDate(LocalDate.now())
-                .sid(sid)
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .paymentCount(1)
-                .member(member)
-                .build());
+        plan.changePlanType(PlanType.getPlanType(planName));
+        planRepository.save(plan);
+        return plan;
     }
 
     @Transactional
@@ -58,10 +55,12 @@ public class PlanService {
         );
     }
 
-    public Plan getRegularPaymentPlan(Member member) {
-        Plan plan = getPlan(member);
-        if (!plan.isRegularPlan()) {
-            throw new PlanException(PlanErrorCode.PLAN_PAYMENT_BAD_REQUEST);
+    public Plan checkSubscriptionAndGetPlan(Member member) {
+        Plan plan = planRepository.findByMemberAndPlanTypeIsNot(member, PlanType.NONE).orElseThrow(
+                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
+        );
+        if (plan.isRegularPlan()) {
+            throw new PlanException(PlanErrorCode.SUBSCRIPTION_ALREADY_STOP);
         }
         return plan;
     }

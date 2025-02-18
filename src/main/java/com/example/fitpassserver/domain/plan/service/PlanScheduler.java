@@ -85,7 +85,7 @@ public class PlanScheduler {
     @Transactional
     public void cancel(Plan plan) {
         plan.setPaymentStatus(PaymentStatus.CANCEL);
-        paymentService.cancelSubscription(plan.getMember());
+        paymentService.cancelSubscription(plan);
         plan.changePlanType(PlanType.NONE);
         smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
         planRepository.save(plan);
