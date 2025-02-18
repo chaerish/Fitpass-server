@@ -19,5 +19,7 @@ public interface CoinPaymentRepository extends JpaRepository<CoinPaymentHistory,
 
     Page<CoinPaymentHistory> findAll(Pageable pageable);
 
+    List<CoinPaymentHistory> findByCoinInAndPaymentStatus(List<Coin> coins, PaymentStatus paymentStatus);
+
     CoinPaymentHistory findByCoinAndPaymentStatus(Coin coin, PaymentStatus paymentStatus);
 }

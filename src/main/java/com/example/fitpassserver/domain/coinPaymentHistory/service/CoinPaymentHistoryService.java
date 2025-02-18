@@ -22,14 +22,15 @@ import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanRepository;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -78,10 +79,10 @@ public class CoinPaymentHistoryService {
     public void createNewCoinPaymentByPlan(Member member, String tid, PlanSubScriptionRequestDTO dto) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
-            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
+            throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
         }
         PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
-                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND));
 
         coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod("카카오페이 정기 결제") //todo: 수정
@@ -112,27 +113,23 @@ public class CoinPaymentHistoryService {
                     createdAt, member, pageable);
         }
         boolean isSubscribing = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
-
+        List<Coin> coins = coinPaymentHistories.getContent();
         return CoinPaymentHistoryResponseListDTO.builder()
-                .items(coinPaymentHistories.getContent().stream()
-                        .map(coin -> CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO.toCoinPaymentHistoryResponseDTO(
-                                coin,
-                                coinPaymentRepository.findByCoinAndPaymentStatus(coin, PaymentStatus.SUCCESS)))
+                .items(coins.stream()
+                        .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
                         .toList())
                 .isSubscribing(isSubscribing)
                 .hasNext(coinPaymentHistories.hasNext())
-                .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent()
-                        .get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
+                .cursor(coinPaymentHistories.hasNext() ?
+                        Optional.ofNullable(
+                                        coinPaymentHistories.getContent().get(coinPaymentHistories.getNumberOfElements() - 1)
+                                                .getHistory())
+                                .map(CoinPaymentHistory::getId)
+                                .orElse(null)
+                        : null)
                 .size(coinPaymentHistories.getNumberOfElements())
                 .build();
     }
-
-//    public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
-//        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
-//                .orElseThrow(
-//                        () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
-//                );
-//    }
 
     public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
         return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
