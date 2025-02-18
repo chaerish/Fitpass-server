@@ -15,6 +15,7 @@ import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/fitness")
+@Tag(name = "피트니스 API", description = "피트니스 API입니다.")
 public class FitnessController {
     private final FitnessRecommendService fitnessRecommendService;
     private final FitnessSearchService fitnessSearchService;

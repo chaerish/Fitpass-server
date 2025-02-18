@@ -2,7 +2,9 @@ package com.example.fitpassserver.admin.notice.service;
 
 import com.example.fitpassserver.admin.notice.converter.NoticeAdminConverter;
 import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
+import com.example.fitpassserver.admin.notice.dto.response.AdminNoticeDetailDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
+import com.example.fitpassserver.admin.notice.dto.response.NoticeDraftResDTO;
 import com.example.fitpassserver.admin.notice.exception.NoticeAdminErrorCode;
 import com.example.fitpassserver.admin.notice.exception.NoticeAdminException;
 import com.example.fitpassserver.domain.notice.entity.Notice;
@@ -10,6 +12,7 @@ import com.example.fitpassserver.domain.notice.exception.NoticeErrorCode;
 import com.example.fitpassserver.domain.notice.exception.NoticeException;
 import com.example.fitpassserver.domain.notice.repository.NoticeRepository;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
+import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -141,13 +145,37 @@ public class NoticeAdminService {
     private String generateNoticeImageKey(String originalFilename) {
         return String.format("notice/%s/%s", UUID.randomUUID(), originalFilename);
     }
-  
+
     // 임시저장 중인 공지사항 조회
-    public List<String> getDraftNotices() {
+    public List<NoticeDraftResDTO> getDraftNotices() {
         return noticeRepository.findByIsDraftTrue()
                 .stream()
-                .map(Notice::getTitle)
+                .map(notice -> new NoticeDraftResDTO(notice.getId(), notice.getTitle()))
                 .collect(Collectors.toList());
     }
 
+    public AdminNoticeDetailDTO getAdminNoticeDetail(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
+        String imageUrl = getNoticeImage(notice.getId());
+
+        return new AdminNoticeDetailDTO(
+                notice.getId(),
+                notice.getTitle(),
+                notice.getContent(),
+                imageUrl,
+                notice.getType().name()
+        );
+    }
+
+    public String getNoticeImage(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_IMAGE_NOT_FOUND));
+
+        if (notice.getNoticeImage() != null && !notice.getNoticeImage().equals("none")) {
+            return s3Service.getGetS3Url(noticeId, notice.getNoticeImage()).getPreSignedUrl();
+        } else {
+            return "none";
+        }
+    }
 }

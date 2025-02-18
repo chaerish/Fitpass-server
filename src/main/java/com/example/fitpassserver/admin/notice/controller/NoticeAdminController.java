@@ -1,7 +1,9 @@
 package com.example.fitpassserver.admin.notice.controller;
 
 import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
+import com.example.fitpassserver.admin.notice.dto.response.AdminNoticeDetailDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
+import com.example.fitpassserver.admin.notice.dto.response.NoticeDraftResDTO;
 import com.example.fitpassserver.admin.notice.service.NoticeAdminService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Tag(name = "Notice 어드민 API", description = "공지사항 관리자 API")
 @RestController
@@ -72,10 +75,17 @@ public class NoticeAdminController {
     @Operation(summary = "임시 저장된 공지사항 목록 조회")
     @GetMapping(value = "/draftList")
     public ApiResponse<Map<String, Object>> getDraftList() {
-        List<String> draftTitles = noticeAdminService.getDraftNotices();
+        List<NoticeDraftResDTO> draftNotices = noticeAdminService.getDraftNotices();
         Map<String, Object> response = new HashMap<>();
-        response.put("titles", draftTitles);
-        response.put("count", draftTitles.size());
+        response.put("notices", draftNotices);
+        response.put("count", draftNotices.size());
         return ApiResponse.onSuccess(response);
     }
+    @Operation(summary = "특정 ID의 공지사항 조회")
+    @GetMapping("/{id}")
+    public ApiResponse<AdminNoticeDetailDTO> getAdminNoticeDetail(@PathVariable Long id) {
+        return ApiResponse.onSuccess(noticeAdminService.getAdminNoticeDetail(id));
+    }
+
+
 }
