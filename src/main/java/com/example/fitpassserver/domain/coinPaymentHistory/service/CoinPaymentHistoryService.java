@@ -6,15 +6,15 @@ import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayException;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
@@ -40,20 +40,20 @@ public class CoinPaymentHistoryService {
     private final CoinTypeRepository coinTypeRepository;
     private final CoinRepository coinRepository;
     private final PlanRepository planRepository;
+    private final String KAKAOPAY = "kakaopay";
 
-    public void createNewCoinPayment(Member member, String tid, CoinSinglePayRequestDTO dto) {
-        int price = dto.totalAmount();
-        int quantity = dto.quantity();
+    public CoinPaymentHistory createNewCoinPayment(Member member, String tid, KakaoPaymentApproveDTO dto) {
+        int price = dto.amount().total();
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod(dto.methodName())
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.READY)
                 .tid(tid)
                 .member(member)
-                .coinCount(((long) coinType.getCoinQuantity() * quantity))
-                .paymentPrice(dto.totalAmount())
+                .coinCount(((long) coinType.getCoinQuantity() * dto.quantity()))
+                .paymentPrice(dto.amount().total())
                 .build());
     }
 
@@ -66,7 +66,7 @@ public class CoinPaymentHistoryService {
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
 
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .tid(dto.tid())
                 .coinCount((long) planType.getCoinQuantity())
@@ -76,7 +76,7 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public void createNewCoinPaymentByPlan(Member member, String tid, PlanSubScriptionRequestDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, String tid, PlanSubscriptionResponseDTO dto) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
@@ -84,14 +84,14 @@ public class CoinPaymentHistoryService {
         PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND));
 
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .tid(tid)
                 .coinCount((long) planType.getCoinQuantity())
                 .paymentStatus(PaymentStatus.READY)
                 .member(member)
-                .paymentPrice(dto.totalAmount())
+                .paymentPrice(dto.amount().total())
                 .build());
     }
 
