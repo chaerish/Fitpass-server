@@ -6,12 +6,15 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubSc
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePayApproveRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
-import com.example.fitpassserver.domain.plan.dto.response.*;
+import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -28,6 +31,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -91,16 +95,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/ready")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> {
-                            // HTTP 에러 발생 시 본문 읽기
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        return Mono.error(
-                                                new RuntimeException("구독 실패 이유: " + errorBody));
-                                    });
-                        })
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(KakaoPaymentResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -127,6 +122,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/ready")
                 .bodyValue(request)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(FirstSubscriptionResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -157,35 +153,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/subscription")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(
-                        HttpStatusCode::isError,
-                        clientResponse -> {
-                            // HTTP 에러 발생 시 본문 읽기
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        try {
-                                            ObjectMapper objectMapper = new ObjectMapper();
-                                            JsonNode root = objectMapper.readTree(errorBody);
-                                            int errorCode = root.path("error_code").asInt();
-                                            String methodResultCode = root.path("extras").path("method_result_code")
-                                                    .asText();
-                                            // 금액 부족 에러 처리
-                                            if (errorCode == -782 && "8008".equals(methodResultCode)) {
-                                                return Mono.error(
-                                                        new PlanException(PlanErrorCode.PLAN_INSUFFICIENT_FUNDS));
-                                            } else { //그 이외 카카오페이 결제 오류
-                                                return Mono.error(
-                                                        new PlanException(PlanErrorCode.KAKAO_PAY_ERROR));
-                                            }
-                                        } catch (Exception e) {
-                                            log.error("Parsing Error: {}", e.getMessage());
-                                        }
-                                        return Mono.error(
-                                                new RuntimeException("구독 실패 이유: " + errorBody));
-                                    });
-                        }
-                )
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(SubscriptionResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -210,15 +178,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/approve")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> {
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        return Mono.error(
-                                                new RuntimeException("실패 이유: " + errorBody));
-                                    });
-                        })
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(KakaoPaymentApproveDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -239,15 +199,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/approve")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> {
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        return Mono.error(
-                                                new RuntimeException("실패 이유: " + errorBody));
-                                    });
-                        })
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(PlanSubscriptionResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
@@ -256,10 +208,7 @@ public class KakaoPaymentService {
     }
 
     //정기 구독 취소
-    public KakaoCancelResponseDTO cancelSubscription(Member member) {
-        Plan plan = planRepository.findByMember(member).orElseThrow(
-                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
-        );
+    public KakaoCancelResponseDTO cancelSubscription(Plan plan) {
         WebClient kakao = getKakaoClient();
         SubscriptionCancelRequestDTO request = new SubscriptionCancelRequestDTO(
                 monthlyCid,
@@ -269,15 +218,7 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/manage/subscription/inactive")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> {
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        return Mono.error(
-                                                new RuntimeException("실패 이유: " + errorBody));
-                                    });
-                        })
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(KakaoCancelResponseDTO.class)
                 .doOnError((e) -> {
 
@@ -297,21 +238,38 @@ public class KakaoPaymentService {
                 .uri(BASE_URL + "/manage/subscription/status")
                 .bodyValue(request)
                 .retrieve()
-                .onStatus(HttpStatusCode::isError,
-                        clientResponse -> {
-                            return clientResponse.bodyToMono(String.class)
-                                    .flatMap(errorBody -> {
-                                        log.error("API Error Response: {}", errorBody);
-                                        return Mono.error(
-                                                new RuntimeException("구독 실패 이유: " + errorBody));
-                                    });
-                        })
+                .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(SIDCheckResponseDTO.class)
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
                 });
         return response.block();
 
+    }
+
+    private Mono<? extends Throwable> handleError(ClientResponse clientResponse) {
+        return clientResponse.bodyToMono(String.class)
+                .flatMap(errorBody -> {
+                    log.error("API Error Response: {}", errorBody);
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        JsonNode root = objectMapper.readTree(errorBody);
+                        int errorCode = root.path("error_code").asInt();
+                        String methodResultCode = root.path("extras").path("method_result_code")
+                                .asText();
+                        if (errorCode == -782 && "8008".equals(methodResultCode)) {
+                            return Mono.error(
+                                    new PlanException(PlanErrorCode.PLAN_INSUFFICIENT_FUNDS));
+                        } else {
+                            return Mono.error(
+                                    new PlanException(PlanErrorCode.KAKAO_PAY_ERROR));
+                        }
+                    } catch (Exception e) {
+                        log.error("Parsing Error: {}", e.getMessage());
+                    }
+                    return Mono.error(
+                            new RuntimeException("구독 실패 이유: " + errorBody));
+                });
     }
 
 

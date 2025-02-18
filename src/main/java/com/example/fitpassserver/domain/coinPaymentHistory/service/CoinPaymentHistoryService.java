@@ -132,10 +132,14 @@ public class CoinPaymentHistoryService {
     }
 
     public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
-        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
+        CoinPaymentHistory history = coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
                 .orElseThrow(
                         () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
                 );
+        if (history.isSuccess()) {
+            throw new KakaoPayException(KakaoPayErrorCode.ALREADY_SUCCESS_ERROR);
+        }
+        return history;
     }
 
     @Transactional
