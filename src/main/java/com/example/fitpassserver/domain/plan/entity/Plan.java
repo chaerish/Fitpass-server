@@ -65,7 +65,7 @@ public class Plan extends BaseEntity {
     }
 
     public boolean isRegularPlan() {
-        return paymentCount >= 1 && this.planType.equals(PlanType.NONE);
+        return paymentCount >= 1 && !this.planType.equals(PlanType.NONE);
     }
 
     public boolean isTargetForCancel() {
