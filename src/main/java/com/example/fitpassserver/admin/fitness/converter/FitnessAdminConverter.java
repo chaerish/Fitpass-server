@@ -6,12 +6,38 @@ import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import org.springframework.data.domain.Page;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class FitnessAdminConverter {
 
+    // Map을 형식화된 String으로 변환하는 메소드
+    private static String convertMapToFormattedString(Map<String, String> timeMap) {
+        if (timeMap == null) return null;
+
+        StringBuilder sb = new StringBuilder();
+        boolean isFirst = true;
+
+        // 요일 순서대로 정렬하기 위한 리스트
+        List<String> days = Arrays.asList("월", "화", "수", "목", "금", "토", "일");
+
+        for (String day : days) {
+            if (timeMap.containsKey(day)) {
+                if (!isFirst) {
+                    sb.append("\n");  // 개행 문자 추가
+                }
+                sb.append(day).append(" ").append(timeMap.get(day));  // 요일 + 공백 + 시간
+                isFirst = false;
+            }
+        }
+
+        return sb.toString();
+    }
+
     public static Fitness toEntity(FitnessAdminRequestDTO.CreateFitnessDTO dto){
+
         return Fitness.builder()
                 .name(dto.getFitnessName())
                 .address(dto.getAddress())
@@ -20,7 +46,7 @@ public class FitnessAdminConverter {
                 .totalFee(dto.getTotalFee())
                 .isPurchasable(dto.isPurchasable())
                 .notice(dto.getNotice())
-                .time(dto.getTime())
+                .time(convertMapToFormattedString(dto.getTime()))
                 .howToUse(dto.getHowToUse())
                 .etc(dto.getEtc())
                 .latitude(dto.getLatitude())

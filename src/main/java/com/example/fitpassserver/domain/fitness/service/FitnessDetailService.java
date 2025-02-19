@@ -38,14 +38,14 @@ public class FitnessDetailService {
                 .map(Category::getCategoryName)
                 .collect(Collectors.joining(", "));
 
-        return FitnessDetailResponse.builder()
+            return FitnessDetailResponse.builder()
                 .fitnessId(fitness.getId())
                 .fitnessName(fitness.getName())
                 .address(fitness.getAddress())
                 .phoneNumber(fitness.getPhoneNumber())
                 .categoryName(categories)
                 .notice(fitness.getNotice())
-                .time(fitness.getTime())
+                .time(fitness.getTime())  // 변환된 time을 String으로 저장하여 전달
                 .howToUse(fitness.getHowToUse())
                 .etc(fitness.getEtc())
                 .fee(fitness.getFee())
@@ -56,4 +56,6 @@ public class FitnessDetailService {
                 .additionalImages(additionalImageUrls)
                 .build();
     }
+
+
 }

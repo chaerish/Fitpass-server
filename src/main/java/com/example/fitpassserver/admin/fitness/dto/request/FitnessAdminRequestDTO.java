@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FitnessAdminRequestDTO {
     @Getter
@@ -22,7 +23,7 @@ public class FitnessAdminRequestDTO {
         public List<String> categoryList = new ArrayList<>();
         public boolean isPurchasable;
         private String notice;
-        private String time;
+        private Map<String, String > time;
         private String howToUse;
         private String etc;
         private Double latitude;
