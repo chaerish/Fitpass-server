@@ -58,7 +58,7 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto, Coin coin) {
         PlanType type = PlanType.getPlanType(dto.item_name());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
@@ -68,16 +68,18 @@ public class CoinPaymentHistoryService {
 
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(KAKAOPAY)
+                .paymentStatus(PaymentStatus.SUCCESS)
                 .isAgree(true)
                 .tid(dto.tid())
                 .coinCount(planType.getCoinQuantity())
-                .paymentStatus(PaymentStatus.READY)
+                .coin(coin)
                 .member(member)
                 .paymentPrice(dto.amount().total())
                 .build());
     }
 
-    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, String tid, PlanSubscriptionResponseDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, PlanSubscriptionResponseDTO dto,
+                                                         Coin coin) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
@@ -88,9 +90,10 @@ public class CoinPaymentHistoryService {
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(KAKAOPAY)
                 .isAgree(true)
-                .tid(tid)
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .coin(coin)
+                .tid(dto.tid())
                 .coinCount(planType.getCoinQuantity())
-                .paymentStatus(PaymentStatus.READY)
                 .member(member)
                 .paymentPrice(dto.amount().total())
                 .build());

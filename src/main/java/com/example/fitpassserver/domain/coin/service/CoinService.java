@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -60,11 +59,7 @@ public class CoinService {
     }
 
 
-    @Transactional
-    public Coin createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
-        if (!history.getMember().getId().equals(member.getId())) {
-            throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
-        }
+    public Coin createSubscriptionNewCoin(Member member, Plan plan) {
         PlanType planType = plan.getPlanType();
         PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(planType)
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
@@ -74,7 +69,6 @@ public class CoinService {
                 .planType(planType)
                 .count((long) planTypeEntity.getCoinQuantity())
                 .expiredDate(LocalDate.now().plusDays(DEAD_LINE))
-                .history(history)
                 .build());
     }
 }

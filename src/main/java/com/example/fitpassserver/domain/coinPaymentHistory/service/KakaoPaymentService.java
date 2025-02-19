@@ -9,6 +9,8 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.dto.event.PlanSuccessEvent;
+import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprovedEvent;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
@@ -135,7 +137,7 @@ public class KakaoPaymentService {
     }
 
     //정기 결제 두번째 회차
-    public SubscriptionResponseDTO request(Plan plan) {
+    public void subscribe(Plan plan) {
         if (plan.getSid() == null) {
             throw new PlanException(PlanErrorCode.SID_NOT_FOUND);
         }
@@ -162,7 +164,8 @@ public class KakaoPaymentService {
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
                 });
-        return response.block();
+        SubscriptionResponseDTO dto = response.block();
+        eventPublisher.publishEvent(new RegularSubscriptionApprovedEvent(plan, dto));
     }
 
     /*
@@ -193,7 +196,7 @@ public class KakaoPaymentService {
         return dto;
     }
 
-    public PlanSubscriptionResponseDTO approveSubscription(String pgToken, String tid) {
+    public PlanSubscriptionResponseDTO approveSubscription(Member member, String pgToken, String tid) {
         WebClient kakao = getKakaoClient();
         SinglePayApproveRequestDTO request = new SinglePayApproveRequestDTO(
                 monthlyCid,
@@ -211,7 +214,9 @@ public class KakaoPaymentService {
                 .doOnError((e) -> {
                     log.error("API Error {}", e.getMessage());
                 });
-        return response.block();
+        PlanSubscriptionResponseDTO dto = response.block();
+        eventPublisher.publishEvent(new PlanSuccessEvent(member, dto));
+        return dto;
     }
 
     //정기 구독 취소
