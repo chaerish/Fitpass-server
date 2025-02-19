@@ -53,9 +53,14 @@ public class Coin extends BaseEntity {
     @JoinColumn(name = "history_id")
     private CoinPaymentHistory history;
 
+    public void setHistory(CoinPaymentHistory history) {
+        this.history = history;
+    }
+
     public void decreaseCount(Long count) {
         this.count -= count;
     }
+
     public void increaseCount(Long count) {
         this.count += count;
     }

@@ -5,13 +5,11 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSingl
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,7 +32,6 @@ public class CoinPaymentController {
     private final KakaoPaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
-    private final SmsCertificationUtil smsCertificationUtil;
     private final CoinPaymentHistoryRedisService coinPaymentHistoryRedisService;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
@@ -52,11 +49,8 @@ public class CoinPaymentController {
                                                                 @RequestParam("pg_token") String pgToken) {
         String memberId = member.getId().toString();
         String tid = coinPaymentHistoryRedisService.getTid(memberId);
-        KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, tid);
-        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPayment(member, tid, dto);
-        coinPaymentHistoryService.approve(history, coinService.createNewCoin(member, history, dto));
-        smsCertificationUtil.sendCoinPaymentSMS(member.getPhoneNumber(), dto.quantity(), dto.amount().total());
-        coinPaymentHistoryRedisService.deleteTid(memberId);
+        KakaoPaymentApproveDTO dto = paymentService.approve(member, pgToken, tid);  //카카오 페이 결제 요청
+        coinPaymentHistoryRedisService.deleteTid(memberId); //레디스에 저장되어있던 tid 삭제
         return ApiResponse.onSuccess(dto);
     }
 
