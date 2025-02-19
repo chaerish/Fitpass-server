@@ -1,14 +1,10 @@
 package com.example.fitpassserver.domain.plan.service;
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
-import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -40,7 +36,7 @@ public class PlanScheduler {
                 LocalDate.now().minusMonths(1), PlanType.NONE);
         for (Plan plan : planToProcess) {
             try {
-                processPay(plan);
+                paymentService.subscribe(plan);
             } catch (PlanException e) {
                 if (e.getBaseErrorCode() == PlanErrorCode.PLAN_INSUFFICIENT_FUNDS) {
                     log.error("plan ID: {} - 잔액 부족으로 결제 실패: {}", plan.getId(), e.getMessage(), e);
@@ -59,22 +55,6 @@ public class PlanScheduler {
         }
     }
 
-    @Transactional
-    public void processPay(Plan plan) throws PlanException {
-        Member member = plan.getMember();
-        SubscriptionResponseDTO response = paymentService.request(plan);
-        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPaymentByScheduler(member, response);
-        updatePlanInfo(plan);
-        Coin coin = coinService.createSubscriptionNewCoin(plan.getMember(), history, plan);
-        coinPaymentHistoryService.approve(history, coin);
-        planRepository.save(plan);
-    }
-
-    private static void updatePlanInfo(Plan plan) {
-        plan.updatePlanDate();
-        plan.setPaymentStatus(PaymentStatus.SUCCESS);
-        plan.addPaymentCount();
-    }
 
     @Transactional
     public void insufficient(Plan plan) {
@@ -105,7 +85,7 @@ public class PlanScheduler {
                 LocalDate.now().minusMonths(1), PlanType.NONE);
         for (Plan plan : planToProcess) {
             try {
-                processPay(plan);
+                paymentService.subscribe(plan);
             } catch (PlanException e) {
                 if (e.getBaseErrorCode() == PlanErrorCode.PLAN_INSUFFICIENT_FUNDS) {
                     insufficient(plan);
