@@ -17,13 +17,12 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     Page<Notice> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<Notice> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
     long countByIsHomeSlideTrue();
-    List<Notice> findByIsDraftTrue();
+    List<Notice> findByIsDraftTrueOrderByCreatedAtDesc();
 
     @Query("""
         SELECT n FROM Notice n
         WHERE n.isDraft = false
-        ORDER BY 
-            CASE WHEN n.updatedAt IS NOT NULL THEN n.updatedAt ELSE n.createdAt END DESC
+        ORDER BY n.createdAt DESC
     """)
     Page<Notice> findPublishedNoticesSorted(Pageable pageable);
 }
