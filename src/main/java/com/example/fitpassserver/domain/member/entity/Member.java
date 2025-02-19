@@ -45,10 +45,12 @@ public class Member extends BaseEntity {
 //    private String email;
 
     @Column(name = "latitude")
-    private Double latitude;
+    @Builder.Default
+    private Double latitude = 37.5665;
 
     @Column(name = "longitude")
-    private Double longitude;
+    @Builder.Default
+    private Double longitude = 126.9780;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
