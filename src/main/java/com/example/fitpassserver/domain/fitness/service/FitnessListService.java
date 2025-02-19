@@ -71,11 +71,11 @@ public class FitnessListService {
         Pageable pageable = PageRequest.of(0, size, sortingCriteria);
         List<Fitness> fitnessList;
         if (cursor != null) {
-            fitnessList = fitnessRepository.findByCategoryList_CategoryNameAndIdGreaterThan(
+            fitnessList = fitnessRepository.findByCategoryList_CategoryNameAndIdGreaterThanAndIsPurchasableTrue(
                     categoryName, cursor, pageable
             ).getContent();
         } else {
-            fitnessList = fitnessRepository.findByCategoryList_CategoryName(
+            fitnessList = fitnessRepository.findByCategoryList_CategoryNameAndIsPurchasableTrue(
                     categoryName, pageable
             ).getContent();
         }

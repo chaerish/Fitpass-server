@@ -10,6 +10,7 @@ import com.example.fitpassserver.domain.fitness.util.DistanceCalculator;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,6 +32,8 @@ public class FitnessDetailService {
         );
         String imageUrl = fitnessImageService.getFitnessImage(fitnessId);
 
+        List<String> additionalImageUrls = fitnessImageService.getAdditionalImages(fitnessId);
+
         String categories = fitness.getCategoryList().stream()
                 .map(Category::getCategoryName)
                 .collect(Collectors.joining(", "));
@@ -50,6 +53,7 @@ public class FitnessDetailService {
                 .imageUrl(imageUrl)
                 .fitnessLatitude(fitness.getLatitude())
                 .fitnessLongitude(fitness.getLongitude())
+                .additionalImages(additionalImageUrls)
                 .build();
     }
 }

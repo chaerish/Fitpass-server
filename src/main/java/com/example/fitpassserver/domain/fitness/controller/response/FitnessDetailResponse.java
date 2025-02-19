@@ -3,6 +3,8 @@ package com.example.fitpassserver.domain.fitness.controller.response;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 public class FitnessDetailResponse {
@@ -20,4 +22,5 @@ public class FitnessDetailResponse {
     private String imageUrl;
     private Double fitnessLatitude;
     private Double fitnessLongitude;
+    private List<String> additionalImages;
 }

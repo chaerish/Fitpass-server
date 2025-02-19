@@ -30,8 +30,8 @@ public class FitnessSearchService {
         Pageable pageable = PageRequest.of(0, size);
 
         List<Fitness> fitnessList = (cursor == null)
-                ? fitnessRepository.findTopByNameContaining(keyword, pageable)
-                : fitnessRepository.findNextByNameContaining(keyword, cursor, pageable);
+                ? fitnessRepository.findTopByNameContainingAndIsPurchasableTrue(keyword, pageable)
+                : fitnessRepository.findNextByNameContainingAndIsPurchasableTrue(keyword, cursor, pageable);
 
         List<FitnessSearchResponse> responses = fitnessList.stream()
                 .map(fitness -> {
