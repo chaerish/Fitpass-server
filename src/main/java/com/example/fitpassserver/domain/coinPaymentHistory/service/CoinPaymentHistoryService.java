@@ -6,15 +6,15 @@ import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.KakaoPayException;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
@@ -22,14 +22,15 @@ import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanRepository;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -39,20 +40,20 @@ public class CoinPaymentHistoryService {
     private final CoinTypeRepository coinTypeRepository;
     private final CoinRepository coinRepository;
     private final PlanRepository planRepository;
+    private final String KAKAOPAY = "kakaopay";
 
-    public void createNewCoinPayment(Member member, String tid, CoinSinglePayRequestDTO dto) {
-        int price = dto.totalAmount();
-        int quantity = dto.quantity();
+    public CoinPaymentHistory createNewCoinPayment(Member member, String tid, KakaoPaymentApproveDTO dto) {
+        int price = dto.amount().total();
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod(dto.methodName())
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.READY)
                 .tid(tid)
                 .member(member)
-                .coinCount(((long) coinType.getCoinQuantity() * quantity))
-                .paymentPrice(dto.totalAmount())
+                .coinCount(((long) coinType.getCoinQuantity() * dto.quantity()))
+                .paymentPrice(dto.amount().total())
                 .build());
     }
 
@@ -65,7 +66,7 @@ public class CoinPaymentHistoryService {
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
 
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .tid(dto.tid())
                 .coinCount((long) planType.getCoinQuantity())
@@ -75,22 +76,22 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    public void createNewCoinPaymentByPlan(Member member, String tid, PlanSubScriptionRequestDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, String tid, PlanSubscriptionResponseDTO dto) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
-            throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
+            throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
         }
         PlanTypeEntity planType = planTypeRepository.findByPlanType(type)
-                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
+                .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND));
 
-        coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod("카카오페이 정기 결제") //todo: 수정
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(KAKAOPAY)
                 .isAgree(true)
                 .tid(tid)
                 .coinCount((long) planType.getCoinQuantity())
                 .paymentStatus(PaymentStatus.READY)
                 .member(member)
-                .paymentPrice(dto.totalAmount())
+                .paymentPrice(dto.amount().total())
                 .build());
     }
 
@@ -112,33 +113,33 @@ public class CoinPaymentHistoryService {
                     createdAt, member, pageable);
         }
         boolean isSubscribing = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
-
+        List<Coin> coins = coinPaymentHistories.getContent();
         return CoinPaymentHistoryResponseListDTO.builder()
-                .items(coinPaymentHistories.getContent().stream()
-                        .map(coin -> CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO.toCoinPaymentHistoryResponseDTO(
-                                coin,
-                                coinPaymentRepository.findByCoinAndPaymentStatus(coin, PaymentStatus.SUCCESS)))
+                .items(coins.stream()
+                        .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
                         .toList())
                 .isSubscribing(isSubscribing)
                 .hasNext(coinPaymentHistories.hasNext())
-                .cursor(coinPaymentHistories.hasNext() ? coinPaymentHistories.getContent()
-                        .get(coinPaymentHistories.getNumberOfElements() - 1).getHistory().getId() : null)
+                .cursor(coinPaymentHistories.hasNext() ?
+                        Optional.ofNullable(
+                                        coinPaymentHistories.getContent().get(coinPaymentHistories.getNumberOfElements() - 1)
+                                                .getHistory())
+                                .map(CoinPaymentHistory::getId)
+                                .orElse(null)
+                        : null)
                 .size(coinPaymentHistories.getNumberOfElements())
                 .build();
     }
 
-//    public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
-//        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
-//                .orElseThrow(
-//                        () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
-//                );
-//    }
-
     public CoinPaymentHistory getCurrentTidCoinPaymentHistory(Member member) {
-        return coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
+        CoinPaymentHistory history = coinPaymentRepository.findFirst1ByMemberOrderByCreatedAtDesc(member)
                 .orElseThrow(
                         () -> new KakaoPayException(KakaoPayErrorCode.MEMBER_NOT_FOUND)
                 );
+        if (history.isSuccess()) {
+            throw new KakaoPayException(KakaoPayErrorCode.ALREADY_SUCCESS_ERROR);
+        }
+        return history;
     }
 
     @Transactional

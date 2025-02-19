@@ -2,16 +2,15 @@ package com.example.fitpassserver.domain.plan.entity;
 
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
+import java.util.Arrays;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.Arrays;
 
 @Getter
 @AllArgsConstructor
 public enum PlanType {
     NONE("플랜 없음"),
-    BASIC("배이직"),
+    BASIC("베이직"),
     STANDARD("스탠다드"),
     PRO("프로");
 

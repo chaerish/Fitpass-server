@@ -1,5 +1,6 @@
 package com.example.fitpassserver.admin.notice.converter;
 
+import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.domain.notice.entity.Notice;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
@@ -14,7 +15,7 @@ public class NoticeAdminConverter {
                 noticeService.getNoticeImage(notice.getId()),
                 notice.getTitle(),
                 notice.getType().getValue(),
-                notice.getCreatedAt().toLocalDate(),
+                notice.getCreatedAt(),
                 notice.isDraft() ? "임시저장" : "게시중",
                 notice.isHomeSlide()
         );
@@ -23,5 +24,13 @@ public class NoticeAdminConverter {
         return notices.stream()
                 .map(notice -> toNoticeAdminResDTO(notice, noticeService))
                 .collect(Collectors.toList());
+    }
+
+    public static Notice toEntity(NoticeAdminReqDTO request) {
+        return Notice.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .type(request.getType())
+                .build();
     }
 }

@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaym
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
@@ -34,13 +35,14 @@ public class CoinPaymentController {
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
     private final SmsCertificationUtil smsCertificationUtil;
+    private final CoinPaymentHistoryRedisService coinPaymentHistoryRedisService;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
     @PostMapping("/request")
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
                                                                  @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPayment(member, response.tid(), body);
+        coinPaymentHistoryRedisService.saveTid(member.getId().toString(), response.tid());
         return ApiResponse.onSuccess(response);
     }
 
@@ -48,10 +50,13 @@ public class CoinPaymentController {
     @PostMapping("/success")
     public ApiResponse<KakaoPaymentApproveDTO> approveSinglePay(@CurrentMember Member member,
                                                                 @RequestParam("pg_token") String pgToken) {
-        CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
-        KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, history.getTid());
+        String memberId = member.getId().toString();
+        String tid = coinPaymentHistoryRedisService.getTid(memberId);
+        KakaoPaymentApproveDTO dto = paymentService.approve(pgToken, tid);
+        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPayment(member, tid, dto);
         coinPaymentHistoryService.approve(history, coinService.createNewCoin(member, history, dto));
         smsCertificationUtil.sendCoinPaymentSMS(member.getPhoneNumber(), dto.quantity(), dto.amount().total());
+        coinPaymentHistoryRedisService.deleteTid(memberId);
         return ApiResponse.onSuccess(dto);
     }
 

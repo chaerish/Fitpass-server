@@ -14,6 +14,8 @@ import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionRespo
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
+import com.example.fitpassserver.domain.plan.entity.Plan;
+import com.example.fitpassserver.domain.plan.service.PlanRedisService;
 import com.example.fitpassserver.domain.plan.service.PlanService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,13 +39,14 @@ public class PlanPaymentController {
     private final CoinService coinService;
     private final PlanService planService;
     private final SmsCertificationUtil smsCertificationUtil;
+    private final PlanRedisService planRedisService;
 
     @Operation(summary = "코인 정기 결제 1회차 요청", description = "가장 처음 플랜을 등록시, 코인 정기 결제(플랜 구매)를 요청합니다.")
     @PostMapping("/first-request")
     public ApiResponse<FirstSubscriptionResponseDTO> requestFirstSubscriptionPay(@CurrentMember Member member,
                                                                                  @RequestBody @Valid PlanSubScriptionRequestDTO body) {
         FirstSubscriptionResponseDTO response = paymentService.ready(body);
-        coinPaymentHistoryService.createNewCoinPaymentByPlan(member, response.tid(), body);
+        planRedisService.saveTid(member.getId().toString(), response.tid());
         return ApiResponse.onSuccess(response);
     }
 
@@ -52,12 +55,15 @@ public class PlanPaymentController {
     public ApiResponse<PlanSubscriptionResponseDTO> approveSinglePay(@CurrentMember Member member,
                                                                      @RequestParam("pg_token") String pgToken) {
         planService.checkOriginalPlan(member);
-        CoinPaymentHistory history = coinPaymentHistoryService.getCurrentTidCoinPaymentHistory(member);
-        PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(pgToken, history.getTid());
+        String memberId = member.getId().toString();
+        String tid = planRedisService.getTid(memberId);
+        PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(pgToken, tid);
+        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPaymentByPlan(member, tid, dto);
         Coin coin = coinService.createSubscriptionNewCoin(member, history,
                 planService.createNewPlan(member, dto.itemName(), dto.sid()));
         coinPaymentHistoryService.approve(history, coin);
         smsCertificationUtil.sendPlanPaymentSMS(member.getPhoneNumber(), dto.itemName(), dto.amount().total());
+        planRedisService.deleteTid(memberId);
         return ApiResponse.onSuccess(dto);
     }
 
@@ -78,7 +84,8 @@ public class PlanPaymentController {
     @Operation(summary = "정기 결제 비활성화", description = "정기 결제를 비활성화 하기 위해 요청합니다.")
     @PostMapping("/deactivate")
     public ApiResponse<KakaoCancelResponseDTO> cancelSubscriptionPay(@CurrentMember Member member) {
-        KakaoCancelResponseDTO response = paymentService.cancelSubscription(member);
+        Plan plan = planService.checkSubscriptionAndGetPlan(member);
+        KakaoCancelResponseDTO response = paymentService.cancelSubscription(plan);
         planService.cancelNewPlan(member);
         return ApiResponse.onSuccess(response);
     }

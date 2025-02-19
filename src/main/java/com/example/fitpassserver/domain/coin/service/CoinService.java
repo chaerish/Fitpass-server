@@ -15,10 +15,10 @@ import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,7 @@ public class CoinService {
     private final CoinRepository coinRepository;
     private final PlanTypeRepository planTypeRepository;
     private final CoinTypeRepository coinTypeRepository;
+    private final int DEAD_LINE = 30;
 
     //결제 성공시 Coin 엔티티 증가
     public Coin createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
@@ -50,6 +51,7 @@ public class CoinService {
                 .build());
     }
 
+    @Transactional
     public Coin createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
         if (!history.getMember().getId().equals(member.getId())) {
             throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
@@ -62,7 +64,7 @@ public class CoinService {
                 .member(member)
                 .planType(planType)
                 .count((long) planTypeEntity.getCoinQuantity())
-                .expiredDate(LocalDate.now().plusDays(30))
+                .expiredDate(LocalDate.now().plusDays(DEAD_LINE))
                 .history(history)
                 .build());
     }

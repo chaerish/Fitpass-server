@@ -25,16 +25,18 @@ public class Notice extends BaseEntity {
     @Builder.Default
     private Long views = 0L;
 
+    @Setter
     @Column(name = "notice_image")
     private String noticeImage;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column
     private NoticeType type;
 
     @Column(nullable = false)
     private boolean isHomeSlide; // true: 홈 슬라이드 게시, false: 미게시
 
+    @Setter
     @Column(nullable = false)
     private boolean isDraft;  // true: 임시저장, false: 정식 등록
 

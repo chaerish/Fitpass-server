@@ -65,4 +65,8 @@ public class CoinPaymentHistory extends BaseEntity {
     public void changeStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
+
+    public boolean isSuccess() {
+        return this.paymentStatus.equals(PaymentStatus.SUCCESS);
+    }
 }

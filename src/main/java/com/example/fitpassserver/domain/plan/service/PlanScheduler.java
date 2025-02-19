@@ -36,7 +36,8 @@ public class PlanScheduler {
     @Scheduled(cron = "0 0 0 * * ?")
     @Async
     public void regularPay() {
-        List<Plan> planToProcess = planRepository.findAllByPlanDateLessThanEqual(LocalDate.now().minusMonths(1));
+        List<Plan> planToProcess = planRepository.findAllByPlanDateLessThanEqualAndPlanTypeIsNot(
+                LocalDate.now().minusMonths(1), PlanType.NONE);
         for (Plan plan : planToProcess) {
             try {
                 processPay(plan);
@@ -84,7 +85,7 @@ public class PlanScheduler {
     @Transactional
     public void cancel(Plan plan) {
         plan.setPaymentStatus(PaymentStatus.CANCEL);
-        paymentService.cancelSubscription(plan.getMember());
+        paymentService.cancelSubscription(plan);
         plan.changePlanType(PlanType.NONE);
         smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
         planRepository.save(plan);
@@ -100,7 +101,8 @@ public class PlanScheduler {
     @Scheduled(cron = "0 0 9 * * ?")
     @Async
     public void retryRegularPay() {
-        List<Plan> planToProcess = planRepository.findAllByPlanDateLessThanEqual(LocalDate.now().minusMonths(1));
+        List<Plan> planToProcess = planRepository.findAllByPlanDateLessThanEqualAndPlanTypeIsNot(
+                LocalDate.now().minusMonths(1), PlanType.NONE);
         for (Plan plan : planToProcess) {
             try {
                 processPay(plan);
