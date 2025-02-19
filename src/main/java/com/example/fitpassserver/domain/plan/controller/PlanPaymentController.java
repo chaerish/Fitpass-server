@@ -1,9 +1,7 @@
 package com.example.fitpassserver.domain.plan.controller;
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
@@ -57,12 +55,7 @@ public class PlanPaymentController {
         planService.checkOriginalPlan(member);
         String memberId = member.getId().toString();
         String tid = planRedisService.getTid(memberId);
-        PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(pgToken, tid);
-        CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPaymentByPlan(member, tid, dto);
-        Coin coin = coinService.createSubscriptionNewCoin(member, history,
-                planService.createNewPlan(member, dto.itemName(), dto.sid()));
-        coinPaymentHistoryService.approve(history, coin);
-        smsCertificationUtil.sendPlanPaymentSMS(member.getPhoneNumber(), dto.itemName(), dto.amount().total());
+        PlanSubscriptionResponseDTO dto = paymentService.approveSubscription(member, pgToken, tid);
         planRedisService.deleteTid(memberId);
         return ApiResponse.onSuccess(dto);
     }

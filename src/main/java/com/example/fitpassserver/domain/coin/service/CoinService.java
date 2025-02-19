@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.member.entity.Member;
@@ -17,8 +18,8 @@ import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,10 +27,12 @@ public class CoinService {
     private final CoinRepository coinRepository;
     private final PlanTypeRepository planTypeRepository;
     private final CoinTypeRepository coinTypeRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final int DEAD_LINE = 30;
 
     //결제 성공시 Coin 엔티티 증가
-    public Coin createNewCoin(Member member, CoinPaymentHistory history, KakaoPaymentApproveDTO dto) {
+
+    public Coin createNewCoin(Member member, KakaoPaymentApproveDTO dto) {
         int price = dto.amount().total();
         int quantity = dto.quantity();
 
@@ -39,23 +42,24 @@ public class CoinService {
         if (coinType == null) {
             throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
         }
-        if (!history.getMember().getId().equals(member.getId())) {
-            throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
-        }
         return coinRepository.save(Coin.builder()
                 .member(member)
                 .count(((long) coinType.getCoinQuantity() * quantity))
                 .expiredDate(LocalDate.now().plusDays(coinType.getExpirationPeriod()))
-                .history(history)
                 .planType(PlanType.NONE)
                 .build());
     }
 
-    @Transactional
-    public Coin createSubscriptionNewCoin(Member member, CoinPaymentHistory history, Plan plan) {
-        if (!history.getMember().getId().equals(member.getId())) {
-            throw new CoinException(CoinErrorCode.COIN_UNAUTHORIZED_ERROR);
-        }
+    public void setCoinAndCoinPayment(Coin coin, CoinPaymentHistory history) {
+        coin.setHistory(history);
+        coinRepository.save(coin);
+        eventPublisher.publishEvent(
+                new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(), history.getCoinCount(),
+                        history.getPaymentPrice()));
+    }
+
+
+    public Coin createSubscriptionNewCoin(Member member, Plan plan) {
         PlanType planType = plan.getPlanType();
         PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(planType)
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
@@ -65,7 +69,6 @@ public class CoinService {
                 .planType(planType)
                 .count((long) planTypeEntity.getCoinQuantity())
                 .expiredDate(LocalDate.now().plusDays(DEAD_LINE))
-                .history(history)
                 .build());
     }
 }

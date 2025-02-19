@@ -77,4 +77,10 @@ public class Plan extends BaseEntity {
         this.planDate = planDate.plusMonths(1);
     }
 
+    public void updatePlanSubscriptionInfo() {
+        updatePlanDate();
+        setPaymentStatus(PaymentStatus.SUCCESS);
+        addPaymentCount();
+    }
+
 }

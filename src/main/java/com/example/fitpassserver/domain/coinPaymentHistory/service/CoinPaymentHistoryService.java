@@ -42,22 +42,23 @@ public class CoinPaymentHistoryService {
     private final PlanRepository planRepository;
     private final String KAKAOPAY = "kakaopay";
 
-    public CoinPaymentHistory createNewCoinPayment(Member member, String tid, KakaoPaymentApproveDTO dto) {
+    public CoinPaymentHistory createNewCoinPayment(Member member, KakaoPaymentApproveDTO dto, Coin coin) {
         int price = dto.amount().total();
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(KAKAOPAY)
                 .isAgree(true)
-                .paymentStatus(PaymentStatus.READY)
-                .tid(tid)
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .tid(dto.tid())
+                .coin(coin)
                 .member(member)
-                .coinCount(((long) coinType.getCoinQuantity() * dto.quantity()))
+                .coinCount((coinType.getCoinQuantity() * dto.quantity()))
                 .paymentPrice(dto.amount().total())
                 .build());
     }
 
-    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto, Coin coin) {
         PlanType type = PlanType.getPlanType(dto.item_name());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NOT_FOUND);
@@ -67,16 +68,18 @@ public class CoinPaymentHistoryService {
 
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(KAKAOPAY)
+                .paymentStatus(PaymentStatus.SUCCESS)
                 .isAgree(true)
                 .tid(dto.tid())
-                .coinCount((long) planType.getCoinQuantity())
-                .paymentStatus(PaymentStatus.READY)
+                .coinCount(planType.getCoinQuantity())
+                .coin(coin)
                 .member(member)
                 .paymentPrice(dto.amount().total())
                 .build());
     }
 
-    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, String tid, PlanSubscriptionResponseDTO dto) {
+    public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, PlanSubscriptionResponseDTO dto,
+                                                         Coin coin) {
         PlanType type = PlanType.getPlanType(dto.itemName());
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
@@ -87,9 +90,10 @@ public class CoinPaymentHistoryService {
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
                 .paymentMethod(KAKAOPAY)
                 .isAgree(true)
-                .tid(tid)
-                .coinCount((long) planType.getCoinQuantity())
-                .paymentStatus(PaymentStatus.READY)
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .coin(coin)
+                .tid(dto.tid())
+                .coinCount(planType.getCoinQuantity())
                 .member(member)
                 .paymentPrice(dto.amount().total())
                 .build());
@@ -140,13 +144,6 @@ public class CoinPaymentHistoryService {
             throw new KakaoPayException(KakaoPayErrorCode.ALREADY_SUCCESS_ERROR);
         }
         return history;
-    }
-
-    @Transactional
-    public void approve(CoinPaymentHistory history, Coin coin) {
-        history.setCoin(coin);
-        history.changeStatus(PaymentStatus.SUCCESS);
-        coinPaymentRepository.save(history);
     }
 
     @Transactional

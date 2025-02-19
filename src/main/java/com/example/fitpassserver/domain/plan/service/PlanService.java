@@ -1,7 +1,9 @@
 package com.example.fitpassserver.domain.plan.service;
 
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
@@ -10,6 +12,7 @@ import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanRepository;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class PlanService {
     private final PlanRepository planRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public void checkOriginalPlan(Member member) {
         boolean flag = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
@@ -59,7 +63,7 @@ public class PlanService {
         Plan plan = planRepository.findByMemberAndPlanTypeIsNot(member, PlanType.NONE).orElseThrow(
                 () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
         );
-        if (plan.isRegularPlan()) {
+        if (!plan.isRegularPlan()) {
             throw new PlanException(PlanErrorCode.SUBSCRIPTION_ALREADY_STOP);
         }
         return plan;
@@ -77,5 +81,13 @@ public class PlanService {
         plan.changePlanType(planType);
         planRepository.save(plan);
         return planType.getName();
+    }
+
+    public void updatePlanInfo(Plan plan, CoinPaymentHistory history) {
+        plan.updatePlanSubscriptionInfo();
+        planRepository.save(plan);
+        eventPublisher.publishEvent(
+                new PlanPaymentAllSuccessEvent(plan.getMember().getPhoneNumber(), plan.getPlanType().getName(),
+                        history.getPaymentPrice()));
     }
 }

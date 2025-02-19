@@ -53,7 +53,7 @@ public class CoinPaymentHistory extends BaseEntity {
     private Integer paymentPrice;
 
     @Column(name = "coin_count", nullable = false)
-    private Long coinCount;
+    private Integer coinCount;
     @OneToOne
     @JoinColumn(name = "coin_id")
     private Coin coin;

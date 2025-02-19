@@ -20,7 +20,7 @@ public record CoinPaymentHistoryResponseListDTO(
             Long id,
             PlanType planType,
             boolean isAgree,
-            Long coinCount,
+            Integer coinCount,
             Integer price,
             LocalDateTime createdAt
     ) {
