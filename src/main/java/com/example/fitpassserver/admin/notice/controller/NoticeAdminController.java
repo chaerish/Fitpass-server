@@ -66,7 +66,7 @@ public class NoticeAdminController {
     @PostMapping(value = "/save", consumes = {"multipart/form-data"})
     public ApiResponse<NoticeAdminResDTO> saveNotice(
             @RequestPart("request") NoticeAdminReqDTO request,
-            @RequestPart("image") MultipartFile image
+            @RequestPart(value = "image",required = false) MultipartFile image
     ) throws IOException {
         NoticeAdminResDTO response = noticeAdminService.saveNotice(request, image, false);
         return ApiResponse.onSuccess(response);

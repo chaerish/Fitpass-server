@@ -103,8 +103,18 @@ public class NoticeAdminService {
             if (request.getType() == null) {
                 throw new NoticeAdminException(NoticeAdminErrorCode.TYPE_REQUIRED);
             }
-            if (image == null || image.isEmpty()) {
-                throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_LIMIT_EXCEEDED);
+            // 🔹 기존 DB에 저장된 이미지 확인
+            boolean hasExistingImage = false;
+            if (request.getId() != null) {
+                Notice existingNotice = noticeRepository.findById(request.getId()).orElse(null);
+                if (existingNotice != null && existingNotice.getNoticeImage() != null) {
+                    hasExistingImage = true; // DB에 기존 이미지 있음
+                }
+            }
+
+            // 🔹 새로운 이미지가 없고, 기존 DB에도 이미지가 없을 경우 에러 발생
+            if ((image == null || image.isEmpty()) && !hasExistingImage) {
+                throw new NoticeAdminException(NoticeAdminErrorCode.IMAGE_REQUIRED);
             }
         }
     }
@@ -148,7 +158,7 @@ public class NoticeAdminService {
 
     // 임시저장 중인 공지사항 조회
     public List<NoticeDraftResDTO> getDraftNotices() {
-        return noticeRepository.findByIsDraftTrue()
+        return noticeRepository.findByIsDraftTrueOrderByCreatedAtDesc()
                 .stream()
                 .map(notice -> new NoticeDraftResDTO(notice.getId(), notice.getTitle()))
                 .collect(Collectors.toList());
