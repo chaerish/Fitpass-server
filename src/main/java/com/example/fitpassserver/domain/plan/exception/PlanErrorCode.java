@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 @AllArgsConstructor
 public enum PlanErrorCode implements BaseErrorCode {
+    SID_INACTIVE(HttpStatus.BAD_REQUEST, "SID404", "비활성화된 SID 입니다."),
     SID_NOT_FOUND(HttpStatus.NOT_FOUND, "SID404", "구독하고 계신 플랜의 SID 를 찾을 수 없습니다."),
     PLAN_NAME_NOT_FOUND(HttpStatus.NOT_FOUND, "Plan404", "플랜 이름이 올바르지 않습니다."),
     SUBSCRIPTION_ALREADY_STOP(HttpStatus.BAD_REQUEST, "SubScription400", "해당 플랜은 이미 비활성화 되었습니다."),

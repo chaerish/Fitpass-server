@@ -64,8 +64,12 @@ public class Plan extends BaseEntity {
         this.paymentCount += 1;
     }
 
+    public void resetPaymentCount() {
+        this.paymentCount = 0;
+    }
+
     public boolean isRegularPlan() {
-        return paymentCount >= 1 && !this.planType.equals(PlanType.NONE);
+        return paymentCount >= 0 && !this.planType.equals(PlanType.NONE);
     }
 
     public boolean isTargetForCancel() {
@@ -75,6 +79,10 @@ public class Plan extends BaseEntity {
 
     public void updatePlanDate() {
         this.planDate = planDate.plusMonths(1);
+    }
+
+    public void changePlanDate() {
+        this.planDate = LocalDate.now();
     }
 
     public void updatePlanSubscriptionInfo() {

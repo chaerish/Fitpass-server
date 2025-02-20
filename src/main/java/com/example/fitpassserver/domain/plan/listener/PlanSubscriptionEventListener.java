@@ -6,6 +6,10 @@ import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHis
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelSuccessEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelUpdateEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanChangeAllSuccessEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanChangeSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprovedEvent;
@@ -59,6 +63,34 @@ public class PlanSubscriptionEventListener {
                 coin);
         coinService.setCoinAndCoinPayment(coin, history);
         planService.updatePlanInfo(plan, history);
+    }
+
+    @EventListener
+    @Transactional
+    public void handle(PlanChangeSuccessEvent event) {
+        Plan plan = event.plan();
+        planService.changeSubscriptionInfo(plan, event.planType());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    public void handle(PlanChangeAllSuccessEvent event) {
+        smsCertificationUtil.sendPlanChangeAlert(event.phoneNumber(), event.planName());
+        log.info("{} 에게 문자 발송 완료", event.phoneNumber());
+    }
+
+    @EventListener
+    @Transactional
+    public void handle(PlanCancelUpdateEvent event) {
+        planService.cancelNewPlan(event.plan());
+    }
+
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Async
+    public void handle(PlanCancelSuccessEvent event) {
+        smsCertificationUtil.sendPlanInActiveAlert(event.phoneNumber(), event.planName());
+        log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
 }
