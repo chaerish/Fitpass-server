@@ -30,6 +30,7 @@ public class SmsCertificationUtil {
     private static final String INSUFFICIENT_FUND_FORMAT = "[FitPass]\n[%s] 결제에 실패했습니다. \n결제일 포함 3일째까지 계속 결제가 시도되며 결제일 포함 4일째 결제 실패시 자동 구독 취소됩니다. 감사합니다.\n";
     private static final String CANCEL_PLAN_FORMAT = "[FitPass]\n[%s] 결제에 실패했습니다. \n결제일 포함 4일째 결제에 실패했으므로 구독이 자동으로 해지되었습니다. 감사합니다.\n";
     private static final String PLAN_CHANGE_MESSAGE_FORMAT = "[FitPass]\n[%s] 플랜으로 변경 되었습니다.\n다음 결제날부터 적용됩니다.\n";
+    private static final String INACTIVE_PLAN_FORMAT = "[FitPass]\n[%s] 플랜 구독이 비활성화 되었습니다.\n다음 결제날부터 결제되지 않습니다.\n";
 
 
     @PostConstruct // 의존성 주입이 완료된 후 초기화를 수행하는 메서드
@@ -73,9 +74,14 @@ public class SmsCertificationUtil {
         sendPaymentSMS(to, String.format(PLAN_CHANGE_MESSAGE_FORMAT, name));
     }
 
-    // 플랜 취소 메세지 발송
+    // 플랜 강제 취소 메세지 발송
     public void sendPlanCancelAlert(String to, String name) {
         sendPaymentSMS(to, String.format(CANCEL_PLAN_FORMAT, name));
+    }
+
+    // 플랜 비활성화 메세지 발송
+    public void sendPlanInActiveAlert(String to, String name) {
+        sendPaymentSMS(to, String.format(INACTIVE_PLAN_FORMAT, name));
     }
 
     // 메시지 초기 설정
