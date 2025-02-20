@@ -4,6 +4,8 @@ import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDT
 import com.example.fitpassserver.admin.fitness.dto.response.FitnessAdminResponseDTO;
 import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import org.springframework.data.domain.Page;
 
 import java.util.Arrays;
@@ -37,7 +39,9 @@ public class FitnessAdminConverter {
     }
 
     public static Fitness toEntity(FitnessAdminRequestDTO.CreateFitnessDTO dto){
-
+        if(dto.getTotalFee() > dto.getFee()){
+            throw new FitnessException(FitnessErrorCode.INVALID_SALE_PRICE);
+        }
         return Fitness.builder()
                 .name(dto.getFitnessName())
                 .address(dto.getAddress())
@@ -51,6 +55,7 @@ public class FitnessAdminConverter {
                 .etc(dto.getEtc())
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
+                .discount(dto.getFee() - dto.getTotalFee())
                 .distance(0d)
                 .isRecommend(false)
                 .build();
