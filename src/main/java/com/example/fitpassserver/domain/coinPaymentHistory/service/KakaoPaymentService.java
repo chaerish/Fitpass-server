@@ -14,11 +14,7 @@ import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprov
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
-import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
-import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.*;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -26,7 +22,6 @@ import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Service
@@ -269,9 +266,10 @@ public class KakaoPaymentService {
     }
 
     //sid 가 유효한지 체크
-    public boolean sidCheck(Plan plan) {
+    public PlanStatusResponseDTO sidCheck(Plan plan) {
         AtomicBoolean isAvailable = new AtomicBoolean(false);
         AtomicBoolean isOnError = new AtomicBoolean(false);
+        String itemName = plan.getPlanType().getName();
         WebClient kakao = getKakaoClient();
         SIDCheckDTO request = new SIDCheckDTO(
                 monthlyCid,
@@ -291,7 +289,10 @@ public class KakaoPaymentService {
                     log.error("API Error {}", e.getMessage());
                 });
         if (isOnError.get()) {
-            return isAvailable.get();
+            return PlanStatusResponseDTO.builder()
+                    .itemName(itemName)
+                    .available(isAvailable.get())
+                    .build();
         }
         SIDCheckResponseDTO sidCheckResponse = response.block();
         if (sidCheckResponse != null && sidCheckResponse.status().equals(INACTIVE)) {
@@ -299,7 +300,12 @@ public class KakaoPaymentService {
         } else if (sidCheckResponse != null && sidCheckResponse.status().equals(ACTIVE)) {
             isAvailable.set(true);
         }
-        return isAvailable.get();
+
+
+        return PlanStatusResponseDTO.builder()
+                .itemName(itemName)
+                .available(isAvailable.get())
+                .build();
     }
 
     private Mono<? extends Throwable> handleError(ClientResponse clientResponse) {
