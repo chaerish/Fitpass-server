@@ -143,4 +143,24 @@ public class S3Service {
 
     }
 
+    @Transactional(readOnly = true)
+    public S3UrlResponseDTO getPostS3UrlExceptFileName(Long memberId) {
+        // filename 설정하기(profile 경로 + 멤버ID + 랜덤 값)
+        String key = "profile/" + memberId + "/" + UUID.randomUUID();
+
+        // url 유효기간 설정(1시간)
+        Date expiration = getExpiration();
+
+        // presigned url 생성
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                getPostGeneratePresignedUrlRequest(key, expiration);
+
+        URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+
+        return S3UrlResponseDTO.builder()
+                .preSignedUrl(url.toExternalForm())
+                .key(key)
+                .build();
+    }
+
 }

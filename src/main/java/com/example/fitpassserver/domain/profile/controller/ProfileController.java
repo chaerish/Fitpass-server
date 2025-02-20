@@ -5,6 +5,7 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.profile.dto.ProfileResponseDTO;
 import com.example.fitpassserver.domain.profile.service.ProfileService;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
+import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -47,4 +48,23 @@ public class ProfileController {
         return ApiResponse.onSuccess(null);
     }
 
+    /**
+     * presigned url ver
+     **/
+    @GetMapping("/upload-url")
+    @Operation(summary = "프로필 업로드 Presigned URL 요청 API", description = "S3에 업로드할 Presigned URL을 가져오는 API")
+    public ApiResponse<S3UrlResponseDTO> getUploadUrl(
+            @CurrentMember Member member) {
+        return ApiResponse.onSuccess(profileService.getProfileUploadUrl(member));
+    }
+
+    /* 프로필 변경 */
+    @PatchMapping("/update")
+    @Operation(summary = "프로필 변경 API", description = "S3에 업로드 후 받은 key를 백엔드로 전달하는 API(업로드 -> 변경 순으로 사용하면 됩니다.)")
+    public ApiResponse<Long> updateProfile(
+            @CurrentMember Member member,
+            @RequestParam("key") String key) {
+        Long profileId = profileService.updatePresignedUrlProfile(member, key);
+        return ApiResponse.onSuccess(profileId);
+    }
 }
