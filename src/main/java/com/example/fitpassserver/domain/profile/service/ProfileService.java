@@ -17,14 +17,15 @@ import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.io.IOException;
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -122,6 +123,37 @@ public class ProfileService {
         profile.updateProfile("none");
         entityManager.flush();
 
+    }
+
+    /**
+     * presigned url 사용 ver*
+     */
+    @Transactional
+    public Long updatePresignedUrlProfile(Member member, String key) {
+        Long memberId = member.getId();
+        memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        Profile profile = profileRepository.findProfileByMemberId(memberId)
+                .orElseThrow(() -> new ProfileException(ProfileErrorCode.NOT_FOUND));
+
+
+        // 기존 프로필 이미지 삭제
+        if (!"none".equals(profile.getPictureKey())) {
+            s3Service.deleteFile(profile.getId());
+        }
+
+        // 새로운 key 저장
+        profile.updateProfile(key);
+        entityManager.flush();
+
+        return profile.getId();
+    }
+
+    /*presigned url 제공*/
+    @Transactional(readOnly = true)
+    public S3UrlResponseDTO getProfileUploadUrl(Member member) {
+        return s3Service.getPostS3UrlExceptFileName(member.getId());
     }
 
 
