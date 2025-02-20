@@ -12,14 +12,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/admin/management")
 @Tag(name = "코인/구독 상품관리 어드민 API", description = "구독/코인 상품관리 API입니다.")
 public class ManagementAdminController {
     private final ManagementAdminService managementAdminService;
@@ -28,7 +30,7 @@ public class ManagementAdminController {
             summary = "구독 상품 전체 조회",
             description = "구독 상품 조회 위한 api"
     )
-    @GetMapping("/plan")
+    @GetMapping("/management/plan")
     public ApiResponse<List<ManagementAdminResponseDTO.PlanInfoDTO>> getAllPlans() {
         List<ManagementAdminResponseDTO.PlanInfoDTO> plans = managementAdminService.getAllPlans();
         return ApiResponse.onSuccess(plans);
@@ -38,7 +40,7 @@ public class ManagementAdminController {
             summary = "구독 상품 변경",
             description = "구독 상품 변경을 위한 api"
     )
-    @PutMapping("/plan")
+    @PutMapping("/admin/management/plan")
     public ApiResponse<Void> updatePlans(
             @RequestBody @Valid
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -85,7 +87,7 @@ public class ManagementAdminController {
             summary = "코인 상품 전체 조회",
             description = "코인 상품 조회 위한 api"
     )
-    @GetMapping("/coin")
+    @GetMapping("/management/coin")
     public ApiResponse<List<ManagementAdminResponseDTO.CoinInfoDTO>> getAllCoins() {
         List<ManagementAdminResponseDTO.CoinInfoDTO> coins = managementAdminService.getAllCoins();
         return ApiResponse.onSuccess(coins);
@@ -95,7 +97,7 @@ public class ManagementAdminController {
             summary = "코인 상품 변경",
             description = "코인 상품 변경을 위한 api"
     )
-    @PutMapping("/coin")
+    @PutMapping("/admin/management/coin")
     public ApiResponse<Void> updateCoins(
             @RequestBody @Valid
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
