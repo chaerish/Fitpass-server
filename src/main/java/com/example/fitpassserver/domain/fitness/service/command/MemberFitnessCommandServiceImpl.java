@@ -57,16 +57,16 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
                 new FitnessException(FitnessErrorCode.PASS_NOT_FOUND));
 
         // 이미 구매한 패스가 존재하는 경우 예외 처리
-        if (memberFitnessRepository.existsByMemberAndStatusIn(member, List.of(Status.NONE, Status.PROGRESS))) {
-            throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
-        }
+//        if (memberFitnessRepository.existsByMemberAndStatusIn(member, List.of(Status.NONE, Status.PROGRESS))) {
+//            throw new MemberFitnessException(MemberFitnessErrorCode.EXIST_PASS);
+//        }
 
-        LocalDate today = LocalDate.now();
-        LocalDateTime start = LocalDateTime.of(today, LocalTime.MIN);
-        LocalDateTime end = LocalDateTime.of(today, LocalTime.MAX);
-        if (memberFitnessRepository.existsByMemberIsAndCreatedAtBetween(member, start, end)) {
-            throw new MemberFitnessException(MemberFitnessErrorCode.ALREADY_BUY_PASS_TODAY);
-        }
+//        LocalDate today = LocalDate.now();
+//        LocalDateTime start = LocalDateTime.of(today, LocalTime.MIN);
+//        LocalDateTime end = LocalDateTime.of(today, LocalTime.MAX);
+//        if (memberFitnessRepository.existsByMemberIsAndCreatedAtBetween(member, start, end)) {
+//            throw new MemberFitnessException(MemberFitnessErrorCode.ALREADY_BUY_PASS_TODAY);
+//        }
 
         MemberFitness memberFitness = createMemberFitness(member, fitness, dto);
 
