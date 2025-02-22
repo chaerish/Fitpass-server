@@ -1,2 +1,2 @@
 # Fitness-server
-Fit pass server repository
+핏패스 백엔드
