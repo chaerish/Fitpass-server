@@ -62,7 +62,7 @@ public class ReviewService {
         if ("score".equalsIgnoreCase(sortBy)) {
             sort = Sort.by(Sort.Order.desc("score")); // 별점순
         } else {
-            sort = Sort.by(Sort.Order.desc("createdAt")); // 최신순 (기본값)
+            sort = Sort.by(Sort.Order.desc("updatedAt")); // 최신순 (기본값)
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);

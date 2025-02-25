@@ -64,7 +64,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         LocalDate today = LocalDate.now();
         LocalDateTime start = LocalDateTime.of(today, LocalTime.MIN);
         LocalDateTime end = LocalDateTime.of(today, LocalTime.MAX);
-        if (memberFitnessRepository.existsByCreatedAtBetween(start, end)) {
+        if (memberFitnessRepository.existsByMemberIsAndCreatedAtBetween(member, start, end)) {
             throw new MemberFitnessException(MemberFitnessErrorCode.ALREADY_BUY_PASS_TODAY);
         }
 

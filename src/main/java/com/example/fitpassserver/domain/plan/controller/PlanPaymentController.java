@@ -6,10 +6,12 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentS
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.converter.PlanConverter;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.ChangePlanDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanStatusResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.service.PlanRedisService;
@@ -92,13 +94,15 @@ public class PlanPaymentController {
     @PostMapping("/sid-status")
     public ApiResponse<?> checkSidStatus(@CurrentMember Member member) {
         boolean flag = planService.checkValidPlan(member);
+        PlanStatusResponseDTO response = PlanConverter.toNoPlanStatusResultDTO();
         if (flag) {
             Plan plan = planService.getPlan(member);
-            if (!paymentService.sidCheck(plan)) {
+            response = paymentService.sidCheck(plan);
+            if (!response.isAvailable()) {
                 planService.syncPlanStatus(plan);
             }
         }
-        return ApiResponse.onSuccess(flag);
+        return ApiResponse.onSuccess(response);
     }
 
 }

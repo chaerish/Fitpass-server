@@ -16,6 +16,7 @@ import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelReque
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanStatusResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
@@ -269,9 +270,10 @@ public class KakaoPaymentService {
     }
 
     //sid 가 유효한지 체크
-    public boolean sidCheck(Plan plan) {
+    public PlanStatusResponseDTO sidCheck(Plan plan) {
         AtomicBoolean isAvailable = new AtomicBoolean(false);
         AtomicBoolean isOnError = new AtomicBoolean(false);
+        String itemName = plan.getPlanType().getName();
         WebClient kakao = getKakaoClient();
         SIDCheckDTO request = new SIDCheckDTO(
                 monthlyCid,
@@ -291,7 +293,10 @@ public class KakaoPaymentService {
                     log.error("API Error {}", e.getMessage());
                 });
         if (isOnError.get()) {
-            return isAvailable.get();
+            return PlanStatusResponseDTO.builder()
+                    .itemName("NONE")
+                    .available(isAvailable.get())
+                    .build();
         }
         SIDCheckResponseDTO sidCheckResponse = response.block();
         if (sidCheckResponse != null && sidCheckResponse.status().equals(INACTIVE)) {
@@ -299,7 +304,11 @@ public class KakaoPaymentService {
         } else if (sidCheckResponse != null && sidCheckResponse.status().equals(ACTIVE)) {
             isAvailable.set(true);
         }
-        return isAvailable.get();
+
+        return PlanStatusResponseDTO.builder()
+                .itemName(itemName)
+                .available(isAvailable.get())
+                .build();
     }
 
     private Mono<? extends Throwable> handleError(ClientResponse clientResponse) {
