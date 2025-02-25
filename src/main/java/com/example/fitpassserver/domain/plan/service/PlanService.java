@@ -31,11 +31,9 @@ public class PlanService {
     }
 
     @Transactional
-    public void syncPlanStatus(Plan plan, boolean flag) {
-        if (!flag && plan.isRegularPlan()) {
-            plan.changePlanType(PlanType.NONE);
-            planRepository.save(plan);
-        }
+    public void syncPlanStatus(Plan plan) {
+        plan.changePlanType(PlanType.NONE);
+        planRepository.save(plan);
     }
 
     public void checkOriginalPlan(Member member) {

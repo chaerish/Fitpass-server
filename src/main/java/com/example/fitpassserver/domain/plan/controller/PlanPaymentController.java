@@ -6,8 +6,13 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentS
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.converter.PlanConverter;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
-import com.example.fitpassserver.domain.plan.dto.response.*;
+import com.example.fitpassserver.domain.plan.dto.response.ChangePlanDTO;
+import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanStatusResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.service.PlanRedisService;
 import com.example.fitpassserver.domain.plan.service.PlanService;
@@ -17,9 +22,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import static com.example.fitpassserver.domain.plan.converter.PlanConverter.toPlanStatusResultDTO;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/plan/pay")
@@ -87,13 +94,15 @@ public class PlanPaymentController {
     @PostMapping("/sid-status")
     public ApiResponse<?> checkSidStatus(@CurrentMember Member member) {
         boolean flag = planService.checkValidPlan(member);
-        PlanStatusResponseDTO res = toPlanStatusResultDTO(flag);
+        PlanStatusResponseDTO response = PlanConverter.toNoPlanStatusResultDTO();
         if (flag) {
             Plan plan = planService.getPlan(member);
-            res = paymentService.sidCheck(plan);
-            planService.syncPlanStatus(plan, flag);
+            response = paymentService.sidCheck(plan);
+            if (!response.isAvailable()) {
+                planService.syncPlanStatus(plan);
+            }
         }
-        return ApiResponse.onSuccess(res);
+        return ApiResponse.onSuccess(response);
     }
 
 }
