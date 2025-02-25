@@ -94,8 +94,10 @@ public class PlanPaymentController {
         boolean flag = planService.checkValidPlan(member);
         if (flag) {
             Plan plan = planService.getPlan(member);
-            flag = paymentService.sidCheck(plan);
-            planService.syncPlanStatus(plan, flag);
+            boolean sidFlag = paymentService.sidCheck(plan);
+            if (!paymentService.sidCheck(plan)) {
+                planService.syncPlanStatus(plan);
+            }
         }
         return ApiResponse.onSuccess(flag);
     }
