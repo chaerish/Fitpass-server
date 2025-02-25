@@ -18,16 +18,19 @@ public class FitnessPaymentResponse {
     private Long feeAfterPay;
 
     public static FitnessPaymentResponse toFitnessPaymentResponse(Fitness fitness, Long coin, String imageUrl) {
-        int totalFee = fitness.getFee() - fitness.getDiscount();
+        Long feeAfterPay = coin - fitness.getTotalFee();
+        if(feeAfterPay < 0L){
+            feeAfterPay = 0L;
+        }
         return FitnessPaymentResponse.builder()
                 .id(fitness.getId())
                 .fitnessName(fitness.getName())
                 .imageUrl(imageUrl)
                 .fee(fitness.getFee())
                 .discount(fitness.getDiscount())
-                .totalFee(totalFee)
+                .totalFee(fitness.getTotalFee())
                 .feeBeforePay(coin)
-                .feeAfterPay(coin - totalFee)
+                .feeAfterPay(feeAfterPay)
                 .build();
     }
 }

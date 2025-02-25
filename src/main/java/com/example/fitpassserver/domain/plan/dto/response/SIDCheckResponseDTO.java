@@ -3,7 +3,7 @@ package com.example.fitpassserver.domain.plan.dto.response;
 import java.time.LocalDateTime;
 
 public record SIDCheckResponseDTO(
-        String available,
+        Boolean available,
         String cid,
         String sid,
         String status,

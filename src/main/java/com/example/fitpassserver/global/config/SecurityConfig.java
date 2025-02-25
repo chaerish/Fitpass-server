@@ -57,7 +57,9 @@ public class SecurityConfig {
             "/fitness/search",
             "/notice/**",
             "/healthcheck",
-            "/pageView"
+            "/pageView",
+            "/management/plan",
+            "/management/coin"
     };
 
     @Bean

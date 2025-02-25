@@ -18,7 +18,7 @@ public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Lo
 
     boolean existsByMemberAndStatusIn(Member member, List<Status> status);
 
-    boolean existsByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+    boolean existsByMemberIsAndCreatedAtBetween(Member member, LocalDateTime start, LocalDateTime end);
 
     int countAllByCreatedAtGreaterThanEqualAndCreatedAtLessThan(LocalDateTime greaterThan, LocalDateTime lessThan);
 

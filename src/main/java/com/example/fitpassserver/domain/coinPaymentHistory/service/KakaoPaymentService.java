@@ -8,7 +8,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelUpdateEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprovedEvent;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
@@ -16,6 +16,7 @@ import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelReque
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.FirstSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.KakaoCancelResponseDTO;
+import com.example.fitpassserver.domain.plan.dto.response.PlanStatusResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.PlanSubscriptionResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SIDCheckResponseDTO;
 import com.example.fitpassserver.domain.plan.dto.response.SubscriptionResponseDTO;
@@ -23,10 +24,10 @@ import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
-import com.example.fitpassserver.domain.plan.repository.PlanRepository;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -69,8 +70,9 @@ public class KakaoPaymentService {
     private final ApplicationEventPublisher eventPublisher;
 
     private final String BASE_URL = "https://open-api.kakaopay.com/online/v1/payment";
-    private final PlanRepository planRepository;
-    private final SmsCertificationUtil smsCertificationUtil;
+
+    private final static String INACTIVE = "INACTIVE";
+    private final static String ACTIVE = "ACTIVE";
 
     @NotNull
     private WebClient getKakaoClient() {
@@ -219,6 +221,30 @@ public class KakaoPaymentService {
         return dto;
     }
 
+//    //정기 구독 취소
+//    public KakaoCancelResponseDTO cancelSubscription(Plan plan, PlanType planType) {
+//        WebClient kakao = getKakaoClient();
+//        SubscriptionCancelRequestDTO request = new SubscriptionCancelRequestDTO(
+//                monthlyCid,
+//                plan.getSid()
+//        );
+//        Mono<KakaoCancelResponseDTO> response = kakao.post()
+//                .uri(BASE_URL + "/manage/subscription/inactive")
+//                .bodyValue(request)
+//                .retrieve()
+//                .onStatus(HttpStatusCode::isError, this::handleError)
+//                .bodyToMono(KakaoCancelResponseDTO.class)
+//                .doOnError((e) -> {
+//                    if (e.getMessage().equals(PlanErrorCode.SID_INACTIVE.getMessage())) {
+//                        throw new PlanException(PlanErrorCode.SID_INACTIVE);
+//                    }
+//                    log.error("API Error {}", e.getMessage());
+//                });
+//        KakaoCancelResponseDTO dto = response.block();
+//        eventPublisher.publishEvent(new PlanChangeSuccessEvent(plan, planType, dto));
+//        return dto;
+//    }
+
     //정기 구독 취소
     public KakaoCancelResponseDTO cancelSubscription(Plan plan) {
         WebClient kakao = getKakaoClient();
@@ -233,14 +259,21 @@ public class KakaoPaymentService {
                 .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(KakaoCancelResponseDTO.class)
                 .doOnError((e) -> {
-
+                    if (e.getMessage().equals(PlanErrorCode.SID_INACTIVE.getMessage())) {
+                        throw new PlanException(PlanErrorCode.SID_INACTIVE);
+                    }
                     log.error("API Error {}", e.getMessage());
                 });
-        return response.block();
+        KakaoCancelResponseDTO dto = response.block();
+        eventPublisher.publishEvent(new PlanCancelUpdateEvent(plan));
+        return dto;
     }
 
     //sid 가 유효한지 체크
-    public SIDCheckResponseDTO sidCheck(Plan plan) {
+    public PlanStatusResponseDTO sidCheck(Plan plan) {
+        AtomicBoolean isAvailable = new AtomicBoolean(false);
+        AtomicBoolean isOnError = new AtomicBoolean(false);
+        String itemName = plan.getPlanType().getName();
         WebClient kakao = getKakaoClient();
         SIDCheckDTO request = new SIDCheckDTO(
                 monthlyCid,
@@ -253,10 +286,29 @@ public class KakaoPaymentService {
                 .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(SIDCheckResponseDTO.class)
                 .doOnError((e) -> {
+                    if (e.getMessage().equals(PlanErrorCode.SID_INACTIVE.getMessage())) {
+                        isAvailable.set(false);
+                        isOnError.set(true);
+                    }
                     log.error("API Error {}", e.getMessage());
                 });
-        return response.block();
+        if (isOnError.get()) {
+            return PlanStatusResponseDTO.builder()
+                    .itemName("NONE")
+                    .available(isAvailable.get())
+                    .build();
+        }
+        SIDCheckResponseDTO sidCheckResponse = response.block();
+        if (sidCheckResponse != null && sidCheckResponse.status().equals(INACTIVE)) {
+            isAvailable.set(false);
+        } else if (sidCheckResponse != null && sidCheckResponse.status().equals(ACTIVE)) {
+            isAvailable.set(true);
+        }
 
+        return PlanStatusResponseDTO.builder()
+                .itemName(itemName)
+                .available(isAvailable.get())
+                .build();
     }
 
     private Mono<? extends Throwable> handleError(ClientResponse clientResponse) {
@@ -272,6 +324,9 @@ public class KakaoPaymentService {
                         if (errorCode == -782 && "8008".equals(methodResultCode)) {
                             return Mono.error(
                                     new PlanException(PlanErrorCode.PLAN_INSUFFICIENT_FUNDS));
+                        } else if (errorCode == -751) {
+                            return Mono.error(
+                                    new PlanException(PlanErrorCode.SID_INACTIVE));
                         } else {
                             return Mono.error(
                                     new PlanException(PlanErrorCode.KAKAO_PAY_ERROR));
