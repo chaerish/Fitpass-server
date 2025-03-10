@@ -57,7 +57,7 @@ public class CoinService {
         coinRepository.save(coin);
         eventPublisher.publishEvent(
                 new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(), history.getCoinCount(),
-                        history.getPaymentPrice()));
+                        history.getPaymentPrice(), history.getPaymentMethod()));
     }
 
 

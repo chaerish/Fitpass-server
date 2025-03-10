@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
+import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
@@ -27,6 +28,7 @@ public class PlanScheduler {
     private final KakaoPaymentService paymentService;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final SmsCertificationUtil smsCertificationUtil;
+    private final KakaoAlimtalkUtil kakaoAlimtalkUtil;
     private final CoinService coinService;
 
     @Scheduled(cron = "0 0 0 * * ?")
@@ -67,7 +69,8 @@ public class PlanScheduler {
         plan.setPaymentStatus(PaymentStatus.CANCEL);
         paymentService.cancelSubscription(plan);
         plan.changePlanType(PlanType.NONE);
-        smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
+//        smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
+        kakaoAlimtalkUtil.cancelPlanAlimtalk(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
         planRepository.save(plan);
     }
 
@@ -89,7 +92,10 @@ public class PlanScheduler {
             } catch (PlanException e) {
                 if (e.getBaseErrorCode() == PlanErrorCode.PLAN_INSUFFICIENT_FUNDS) {
                     insufficient(plan);
-                    smsCertificationUtil.sendPlanInsufficientFundsAlert(
+//                    smsCertificationUtil.sendPlanInsufficientFundsAlert(
+//                            plan.getMember().getPhoneNumber(),
+//                            plan.getPlanType().getName());
+                    kakaoAlimtalkUtil.paymentFailAlimtalk(
                             plan.getMember().getPhoneNumber(),
                             plan.getPlanType().getName());
                     log.error("plan ID: {} - 잔액 부족으로 결제 실패: {}", plan.getId(), e.getMessage(), e);

@@ -119,6 +119,6 @@ public class PlanService {
         planRepository.save(plan);
         eventPublisher.publishEvent(
                 new PlanPaymentAllSuccessEvent(plan.getMember().getPhoneNumber(), plan.getPlanType().getName(),
-                        history.getPaymentPrice()));
+                        history.getPaymentPrice(), history.getPaymentMethod()));
     }
 }
