@@ -23,6 +23,7 @@ import com.example.fitpassserver.domain.fitnessPaymentHistory.entity.FitnessPaym
 import com.example.fitpassserver.domain.fitnessPaymentHistory.exception.FitnessPaymentHistoryErrorCode;
 import com.example.fitpassserver.domain.fitnessPaymentHistory.exception.FitnessPaymentHistoryException;
 import com.example.fitpassserver.domain.fitnessPaymentHistory.repository.FitnessPaymentHistoryRepository;
+import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +50,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
     private final CoinRepository coinRepository;
     private final CoinUsageHistoryRepository coinUsageHistoryRepository;
     private final SmsCertificationUtil smsCertificationUtil;
+    private final KakaoAlimtalkUtil kakaoAlimtalkUtil;
 
     @Override
     @Transactional
@@ -79,7 +81,8 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
         List<CoinUsageHistory> coinUsageHistories = useCoin(member, fitnessPaymentHistory, price);
 
         // 결제 문자 발송
-        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
+//        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
+        kakaoAlimtalkUtil.passPaymentAlimtalk(member.getPhoneNumber(), Math.toIntExact(price), memberFitness.getFitness().getName());
 
         return memberFitness;
     }
