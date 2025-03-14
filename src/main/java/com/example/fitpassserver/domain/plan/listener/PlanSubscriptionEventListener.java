@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
+import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.dto.event.PlanCancelSuccessEvent;
@@ -30,6 +31,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @Slf4j
 public class PlanSubscriptionEventListener {
     private final SmsCertificationUtil smsCertificationUtil;
+    private final KakaoAlimtalkUtil kakaoAlimtalkUtil;
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
     private final PlanService planService;
@@ -49,7 +51,8 @@ public class PlanSubscriptionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(PlanPaymentAllSuccessEvent event) {
-        smsCertificationUtil.sendPlanPaymentSMS(event.phoneNumber(), event.planName(), event.totalAmount());
+//        smsCertificationUtil.sendPlanPaymentSMS(event.phoneNumber(), event.planName(), event.totalAmount());
+        kakaoAlimtalkUtil.coinPaymentAlimtalk(event.phoneNumber(), event.totalAmount(), event.planName(), event.paymentMethod());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
@@ -75,7 +78,8 @@ public class PlanSubscriptionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(PlanChangeAllSuccessEvent event) {
-        smsCertificationUtil.sendPlanChangeAlert(event.phoneNumber(), event.planName());
+//        smsCertificationUtil.sendPlanChangeAlert(event.phoneNumber(), event.planName());
+        kakaoAlimtalkUtil.planChangeAlimtalk(event.phoneNumber(), event.planName());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
@@ -89,7 +93,8 @@ public class PlanSubscriptionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(PlanCancelSuccessEvent event) {
-        smsCertificationUtil.sendPlanInActiveAlert(event.phoneNumber(), event.planName());
+//        smsCertificationUtil.sendPlanInActiveAlert(event.phoneNumber(), event.planName());
+        kakaoAlimtalkUtil.deactivatePlanAlimtalk(event.phoneNumber(), event.planName());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
