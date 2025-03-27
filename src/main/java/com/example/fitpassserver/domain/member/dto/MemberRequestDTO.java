@@ -41,12 +41,16 @@ public class MemberRequestDTO {
         boolean isTermsAgreed;
 
         @NotNull(message = "필수 동의 사항입니다.")
-        @JsonProperty("locationAgreed")
-        boolean isLocationAgreed;
+        @JsonProperty("personalInformationAgreed")
+        boolean isPersonalInformationAgreed;
 
         @NotNull(message = "필수 동의 사항입니다.")
         @JsonProperty("thirdPartyAgreed")
         boolean isThirdPartyAgreed;
+
+        @NotNull
+        @JsonProperty("locationAgreed")
+        boolean isLocationAgreed;
 
         @NotNull
         @JsonProperty("marketingAgreed")

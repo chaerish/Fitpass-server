@@ -77,6 +77,9 @@ public class Member extends BaseEntity {
     @Column(name = "is_marketing_agreed", nullable = false)
     private Boolean isMarketingAgreed;
 
+    @Column(name = "is_personal_information_agreed", nullable = false)
+    private Boolean isPersonalInformaionAgreed;
+
     @Column(name = "profile_image")
     private String profileImage;
 
