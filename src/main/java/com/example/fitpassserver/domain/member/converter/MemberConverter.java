@@ -13,7 +13,7 @@ public class MemberConverter {
         return MemberResponseDTO.JoinResultDTO.builder()
                 .memberId(member.getId())
                 .createdAt(LocalDateTime.now())
-                .isPersonalInformationAgreed(member.getIsPersonalInformaionAgreed())
+                .isLocationAgreed(member.isLocationAgreed())
                 .build();
     }
 
