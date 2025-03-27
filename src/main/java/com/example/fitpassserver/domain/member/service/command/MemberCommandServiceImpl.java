@@ -96,6 +96,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         return MemberResponseDTO.MemberTokenDTO.builder()
                 .role(member.getRole())
+                .isLocationAgreed(member.isLocationAgreed())
                 .accessToken(jwtProvider.createAccessToken(member))
                 .refreshToken(jwtProvider.createRefreshToken(member))
                 .build();

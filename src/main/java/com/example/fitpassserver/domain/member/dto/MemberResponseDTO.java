@@ -19,6 +19,7 @@ public class MemberResponseDTO {
     @NoArgsConstructor
     public static class MemberTokenDTO {
         Role role;
+        boolean isLocationAgreed;
         String accessToken;
         String refreshToken;
     }
@@ -44,7 +45,7 @@ public class MemberResponseDTO {
     public static class JoinResultDTO {
         Long memberId;
         LocalDateTime createdAt;
-        boolean isPersonalInformationAgreed;
+        boolean isLocationAgreed;
     }
 
 }
