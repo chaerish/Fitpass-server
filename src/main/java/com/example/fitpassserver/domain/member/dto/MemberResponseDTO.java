@@ -44,6 +44,7 @@ public class MemberResponseDTO {
     public static class JoinResultDTO {
         Long memberId;
         LocalDateTime createdAt;
+        boolean isPersonalInformationAgreed;
     }
 
 }

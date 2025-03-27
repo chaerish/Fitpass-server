@@ -52,7 +52,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         }
 
         //필수 동의 사항 검증
-        if (!request.isTermsAgreed() || !request.isLocationAgreed() || !request.isThirdPartyAgreed()) {
+        if (!request.isTermsAgreed() || !request.isPersonalInformationAgreed() || !request.isThirdPartyAgreed()) {
             throw new MemberException(MemberErrorCode.BAD_REQUEST);
         }
 
