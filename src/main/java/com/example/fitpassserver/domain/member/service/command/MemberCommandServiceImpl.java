@@ -46,10 +46,10 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 //        if (memberRepository.existsByPhoneNumber(request.getPhoneNumber())) {
 //            throw new MemberException(MemberErrorCode.DUPLICATE_PHONE_NUMBER);
 //        }
-        //인증했는지 확인
-        if (!smsRepository.hasKey(request.getPhoneNumber())) {
-            throw new MemberException(MemberErrorCode.UNVERIFIED_PHONE_NUMBER);
-        }
+//        //인증했는지 확인
+//        if (!smsRepository.hasKey(request.getPhoneNumber())) {
+//            throw new MemberException(MemberErrorCode.UNVERIFIED_PHONE_NUMBER);
+//        }
 
         //필수 동의 사항 검증
         if (!request.isTermsAgreed() || !request.isPersonalInformationAgreed() || !request.isThirdPartyAgreed()) {
