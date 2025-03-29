@@ -1,5 +1,7 @@
 package com.example.fitpassserver.domain.notice.controller;
 
+import com.example.fitpassserver.domain.member.annotation.CurrentMember;
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeHomeSlideResponse;
 import com.example.fitpassserver.domain.notice.service.NoticeService;
@@ -25,20 +27,21 @@ public class NoticeController {
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getNoticeList(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Map<String, Object> noticePage = noticeService.getNoticeList(PageRequest.of(page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @CurrentMember Member member) {
+        Map<String, Object> noticePage = noticeService.getNoticeList(PageRequest.of(page, size), member.getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(noticePage));
     }
     @Operation(summary = "공지 상세 조회", description = "공지사항 하나를 상세 조회합니다.")
     @GetMapping("/{noticeId}")
-    public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNoticeDetail(@PathVariable Long noticeId) {
-        NoticeDetailResponse noticeDetail = noticeService.getNoticeDetail(noticeId);
+    public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNoticeDetail(@PathVariable Long noticeId, @CurrentMember Member member) {
+        NoticeDetailResponse noticeDetail = noticeService.getNoticeDetail(noticeId, member.getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeDetail));
     }
     @Operation(summary = "홈슬라이드 공지 이미지 조회", description = "홈 슬라이드에 표시될 공지사항 이미지를 조회합니다(최대 3개).")
     @GetMapping("/homeSlide")
-    public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides() {
-        List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides();
+    public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides(@CurrentMember Member member) {
+        List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides(member.getId());
         return ResponseEntity.ok(ApiResponse.onSuccess(homeSlides));
     }
 }

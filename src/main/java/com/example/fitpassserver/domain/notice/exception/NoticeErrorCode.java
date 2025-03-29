@@ -13,6 +13,8 @@ public enum NoticeErrorCode implements BaseErrorCode {
             "NOTICE404", "공지사항이 존재하지 않습니다."),
     NOTICE_IMAGE_NOT_FOUND(HttpStatus.NOT_FOUND,
             "NOTICE404", "공지사항의 이미지가 존재하지 않습니다."),
+    MEMBER_SLIDE_NOT_CHECKED(HttpStatus.BAD_REQUEST,
+            "NOTICE400_1", "사용자 슬라이드 체크박스를 선택하지 않았습니다.")
     ;
 
     private final HttpStatus status;
