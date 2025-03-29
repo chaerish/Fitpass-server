@@ -70,6 +70,20 @@ public class NoticeAdminService {
         noticeRepository.save(notice);
     }
 
+    // 🔹 사용자 페이지 슬라이드 업데이트
+    @Transactional
+    public void updateMemberSlideStatus(Long noticeId, boolean isMemberSlide) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
+
+        if (notice.isDraft()) {
+            throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_DRAFT_NOT_ALLOWED);
+        }
+
+        notice.setMemberSlide(isMemberSlide);
+    }
+
+
     @Transactional
     public NoticeAdminResDTO saveNotice(NoticeAdminReqDTO request, MultipartFile image, boolean isDraft) throws IOException {
         validateRequest(request, image, isDraft);
