@@ -44,14 +44,7 @@ public class NoticeService {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-        Page<Notice> noticePage;
-
-        if (isPrivilegedRole(member.getRole())) {
-            noticePage = noticeRepository.findPublishedNoticesSorted(pageable);
-        } else {
-            // 일반 사용자는 isMemberSlide = true인 공지사항만 볼 수 있음
-            noticePage = noticeRepository.findPublishedNoticesByIsMemberSlideTrue(pageable);
-        }
+        Page<Notice> noticePage = noticeRepository.findPublishedNoticesByIsMemberSlideTrue(pageable);
 
         List<NoticeListResponse> content = noticePage.getContent().stream()
                 .map(notice -> new NoticeListResponse(
@@ -103,14 +96,7 @@ public class NoticeService {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-        List<Notice> homeSlideNotices;
-
-        if(isPrivilegedRole(member.getRole())){
-            homeSlideNotices = noticeRepository.findByIsHomeSlideTrueAndIsDraftFalse();
-        }
-        else {
-            homeSlideNotices = noticeRepository.findNoticeHomeSlideIsMemberSlideTrue();
-        }
+        List<Notice> homeSlideNotices = noticeRepository.findNoticeHomeSlideIsMemberSlideTrue();
 
         return homeSlideNotices.stream()
                 .map(notice -> new NoticeHomeSlideResponse(
