@@ -14,7 +14,7 @@ public class FitnessAdminRequestDTO {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class CreateFitnessDTO {
+    public static class FitnessReqDTO {
         public String fitnessName;
         public String address;
         public String phoneNumber;
@@ -28,6 +28,5 @@ public class FitnessAdminRequestDTO {
         private String etc;
         private Double latitude;
         private Double longitude;
-
     }
 }

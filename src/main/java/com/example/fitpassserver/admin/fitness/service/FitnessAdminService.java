@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 
 public interface FitnessAdminService {
-    Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.CreateFitnessDTO dto) throws IOException;
-    public FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword);
+    Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.FitnessReqDTO dto) throws IOException;
+    FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword);
+    FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long fitnessId, FitnessAdminRequestDTO.FitnessReqDTO dto);
 }

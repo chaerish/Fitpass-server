@@ -8,6 +8,8 @@ import com.example.fitpassserver.domain.fitness.converter.FitnessImageConverter;
 import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.FitnessImage;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
@@ -35,11 +37,17 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
-    private final ObjectMapper objectMapper;
+
+    private String generateMainImageKey(Long fitnessId, String originalFilename){
+        return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
+    }
+    private String generateAdditionalImageKey(Long fitnessId, String originalFilename){
+        return String.format("fitness/%d/additional/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
+    }
 
     @Override
-    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.CreateFitnessDTO dto) throws IOException {
-        // 우선 Fitness 엔티티를 생성 (fitnessId 필요)
+    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.FitnessReqDTO dto) throws IOException {
+        // 우선 Fitness 엔티티를 생성
         Fitness fitness = FitnessAdminConverter.toEntity(dto);
         fitnessRepository.save(fitness); // ID 생성됨
         Long fitnessId = fitness.getId(); // 생성된 ID 가져오기
@@ -103,11 +111,18 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         return FitnessAdminConverter.from(fitnessPage);
     }
 
-    private String generateMainImageKey(Long fitnessId, String originalFilename){
-        return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
-    }
-    private String generateAdditionalImageKey(Long fitnessId, String originalFilename){
-        return String.format("fitness/%d/additional/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
+
+    @Override
+    public FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long fitnessId, FitnessAdminRequestDTO.FitnessReqDTO dto) {
+        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
+                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
+
+        List<Category> categoryList = CategoryConverter.toEntityList(dto.getCategoryList(), fitness);
+        fitness.setCategoryList(categoryList);
+
+        fitness.update(dto, categoryList);
+
+        return FitnessAdminConverter.from(fitness);
     }
 
 }
