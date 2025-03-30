@@ -35,8 +35,8 @@ public class NoticeOwnerController {
 
     @Operation(summary = "공지 상세 조회", description = "공지사항 하나를 상세 조회합니다.")
     @GetMapping("/{noticeId}")
-    public ResponseEntity<ApiResponse<NoticeDetailResponse>> getNoticeDetail(@PathVariable Long noticeId, @CurrentMember Member member) {
+    public ApiResponse<NoticeDetailResponse> getNoticeDetail(@PathVariable Long noticeId, @CurrentMember Member member) {
         NoticeDetailResponse noticeDetail = noticeService.getNoticeDetail(noticeId);
-        return ResponseEntity.ok(ApiResponse.onSuccess(noticeDetail));
+        return ApiResponse.onSuccess(noticeDetail);
     }
 }
