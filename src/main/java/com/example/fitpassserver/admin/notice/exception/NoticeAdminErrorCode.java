@@ -13,6 +13,8 @@ public enum NoticeAdminErrorCode implements BaseErrorCode {
             "NOTICE400", "홈 슬라이드는 최대 3개까지만 설정할 수 있습니다."),
     HOME_SLIDE_DRAFT_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
             "NOTICE400", "임시저장된 공지사항은 홈 슬라이드에 설정할 수 없습니다."),
+    MEMBER_SLIDE_DRAFT_NOT_ALLOWED(HttpStatus.BAD_REQUEST,
+            "NOTICE400", "임시저장된 공지사항은 회원 슬라이드에 설정할 수 없습니다."),
     TITLE_REQUIRED(HttpStatus.BAD_REQUEST,
             "NOTICE401", "제목은 필수입니다."),
     IMAGE_REQUIRED(HttpStatus.BAD_REQUEST,

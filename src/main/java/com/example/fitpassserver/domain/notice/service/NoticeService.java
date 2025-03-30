@@ -1,5 +1,10 @@
 package com.example.fitpassserver.domain.notice.service;
 
+import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.entity.Role;
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeDetailResponse;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeHomeSlideResponse;
 import com.example.fitpassserver.domain.notice.controller.response.NoticeListResponse;
@@ -8,6 +13,8 @@ import com.example.fitpassserver.domain.notice.exception.NoticeErrorCode;
 import com.example.fitpassserver.domain.notice.exception.NoticeException;
 import com.example.fitpassserver.domain.notice.repository.NoticeRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,17 +25,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@Slf4j
 public class NoticeService {
     private final NoticeRepository noticeRepository;
     private final S3Service s3Service;
+    private final MemberRepository memberRepository;
 
-    public NoticeService(NoticeRepository noticeRepository, S3Service s3Service) {
-        this.noticeRepository = noticeRepository;
-        this.s3Service = s3Service;
+
+    // 권한 있는 역할(ADMIN, OWNER)인지 확인하는 메서드
+    private boolean isPrivilegedRole(Role role) {
+        return role.equals(Role.ADMIN) || role.equals(Role.OWNER);
     }
 
-    public Map<String, Object> getNoticeList(Pageable pageable) {
-        Page<Notice> noticePage = noticeRepository.findPublishedNoticesSorted(pageable);
+
+    public Map<String, Object> getNoticeList(Pageable pageable, Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        Page<Notice> noticePage = noticeRepository.findPublishedNoticesByIsMemberSlideTrue(pageable);
+
         List<NoticeListResponse> content = noticePage.getContent().stream()
                 .map(notice -> new NoticeListResponse(
                         notice.getId(),
@@ -45,6 +62,7 @@ public class NoticeService {
     }
 
     public NoticeDetailResponse getNoticeDetail(Long noticeId) {
+
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
 
@@ -66,8 +84,11 @@ public class NoticeService {
 
     //홈슬라이드 게시할 공지사항 조회
     @Transactional(readOnly = true)
-    public List<NoticeHomeSlideResponse> getNoticeHomeSlides() {
-        List<Notice> homeSlideNotices = noticeRepository.findByIsHomeSlideTrueAndIsDraftFalse();
+    public List<NoticeHomeSlideResponse> getNoticeHomeSlides(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        List<Notice> homeSlideNotices = noticeRepository.findNoticeHomeSlideIsMemberSlideTrue();
 
         return homeSlideNotices.stream()
                 .map(notice -> new NoticeHomeSlideResponse(

@@ -52,6 +52,17 @@ public class NoticeAdminController {
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 
+    @Operation(summary = "회원 페이지 슬라이드 게시 체크박스", description = "회원 페이지 슬라이드에 게시 할건지에 대한 값을 저장 true = 게시")
+    @PatchMapping("/{noticeId}/member-slide-check")
+    public ResponseEntity<ApiResponse<Void>> updateHMemberSlide(
+            @PathVariable Long noticeId,
+            @RequestParam boolean isMemberSlide
+    ) {
+        noticeAdminService.updateMemberSlideStatus(noticeId, isMemberSlide);
+        return ResponseEntity.ok(ApiResponse.onSuccess(null));
+    }
+
+
     @Operation(summary = "공지사항 임시저장")
     @PostMapping(value = "/draft", consumes = {"multipart/form-data"})
     public ApiResponse<NoticeAdminResDTO> saveDraft(
