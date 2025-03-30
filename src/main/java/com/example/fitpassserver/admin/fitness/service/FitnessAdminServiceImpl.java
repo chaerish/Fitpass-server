@@ -132,4 +132,15 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         fitnessRepository.deleteById(fitnessId);
     }
 
+
+    @Override
+    public FitnessAdminResponseDTO.FitnessInfoDTO updatePurchaseStatus(Long fitnessId) {
+        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
+                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
+
+        fitness.updatePurchaseStatus();
+
+        return FitnessAdminConverter.from(fitness);
+    }
+
 }

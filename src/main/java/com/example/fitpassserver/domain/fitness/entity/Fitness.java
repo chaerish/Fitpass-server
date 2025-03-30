@@ -120,4 +120,7 @@ public class Fitness extends BaseEntity {
         this.longitude = dto.getLongitude();
     }
 
+    public void updatePurchaseStatus() {
+        this.isPurchasable = !isPurchasable;
+    }
 }

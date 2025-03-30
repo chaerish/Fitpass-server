@@ -12,4 +12,5 @@ public interface FitnessAdminService {
     FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword);
     FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long fitnessId, FitnessAdminRequestDTO.FitnessReqDTO dto);
     void deleteFitness(Long fitnessId);
+    FitnessAdminResponseDTO.FitnessInfoDTO updatePurchaseStatus(Long fitnessId);
 }

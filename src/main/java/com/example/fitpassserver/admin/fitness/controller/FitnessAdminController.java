@@ -89,4 +89,18 @@ public class FitnessAdminController {
         fitnessAdminService.deleteFitness(fitnessId);
         return ApiResponse.onSuccess("시설 삭제가 완료되었습니다.");
     }
+
+
+
+    @Operation(
+            summary = "Fitness 구매 가능 상태 변경",
+            description = "주어진 fitnessId에 해당하는 Fitness의 구매 가능 상태를 변경합니다."
+    )
+    @PatchMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updatePurchaseStatus(
+            @Parameter(description = "구매 가능 상태를 변경할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updatePurchaseStatus(fitnessId);
+        return ApiResponse.onSuccess(result);
+    }
 }
