@@ -61,18 +61,10 @@ public class NoticeService {
         return result;
     }
 
-    public NoticeDetailResponse getNoticeDetail(Long noticeId, Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new MemberException(MemberErrorCode.NOT_FOUND));
+    public NoticeDetailResponse getNoticeDetail(Long noticeId) {
 
         Notice notice = noticeRepository.findById(noticeId)
                 .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
-
-        // 일반 사용자인데 사용자 슬라이드 게시를 체크박스를 안누른 경우
-        if (!isPrivilegedRole(member.getRole()) && !notice.isMemberSlide()) {
-            throw new NoticeException(NoticeErrorCode.MEMBER_SLIDE_NOT_CHECKED);
-        }
-
 
         String imageUrl = getNoticeImage(notice.getId());
 
