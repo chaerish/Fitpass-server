@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/notice")
+@RequestMapping("/owner/notice")
 @RequiredArgsConstructor
 @Tag(name = "Notice 사장님 API")
 public class NoticeOwnerController {
