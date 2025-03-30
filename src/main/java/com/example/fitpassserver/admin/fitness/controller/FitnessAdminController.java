@@ -78,4 +78,15 @@ public class FitnessAdminController {
         return ApiResponse.onSuccess(result);
     }
 
+    @Operation(
+            summary = "Fitness 삭제",
+            description = "주어진 fitnessId에 해당하는 Fitness 정보를 삭제합니다."
+    )
+    @DeleteMapping("/{fitnessId}")
+    public ApiResponse<String> deleteFitness(
+            @Parameter(description = "삭제할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        fitnessAdminService.deleteFitness(fitnessId);
+        return ApiResponse.onSuccess("시설 삭제가 완료되었습니다.");
+    }
 }

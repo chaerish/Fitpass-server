@@ -125,4 +125,11 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         return FitnessAdminConverter.from(fitness);
     }
 
+    @Override
+    public void deleteFitness(Long fitnessId) {
+        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
+                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
+        fitnessRepository.deleteById(fitnessId);
+    }
+
 }

@@ -11,4 +11,5 @@ public interface FitnessAdminService {
     Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.FitnessReqDTO dto) throws IOException;
     FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword);
     FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long fitnessId, FitnessAdminRequestDTO.FitnessReqDTO dto);
+    void deleteFitness(Long fitnessId);
 }
