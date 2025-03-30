@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import retrofit2.http.Path;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,7 +38,7 @@ public class FitnessAdminController {
             @Parameter(description = "추가 이미지 파일 리스트 (선택)", required = false)
             @RequestPart(value = "additionalImages", required = false) List<MultipartFile> additionalImages,
             @Parameter(description = "Fitness 생성 요청 데이터", required = true)
-            @RequestPart FitnessAdminRequestDTO.CreateFitnessDTO request) throws IOException {
+            @RequestPart FitnessAdminRequestDTO.FitnessReqDTO request) throws IOException {
 
         Long fitnessId = fitnessAdminService.createFitness(mainImage, additionalImages, request);
         return ApiResponse.onSuccess(fitnessId);
@@ -63,4 +64,43 @@ public class FitnessAdminController {
         return ApiResponse.onSuccess(result);
     }
 
+    @Operation(
+            summary = "Fitness 수정",
+            description = "주어진 fitnessId에 해당하는 Fitness 정보를 업데이트합니다."
+    )
+    @PutMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updateFitness(
+            @Parameter(description = "수정할 Fitness 정보", required = true)
+            @RequestBody FitnessAdminRequestDTO.FitnessReqDTO request,
+            @Parameter(description = "수정할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updateFitness(fitnessId, request);
+        return ApiResponse.onSuccess(result);
+    }
+
+    @Operation(
+            summary = "Fitness 삭제",
+            description = "주어진 fitnessId에 해당하는 Fitness 정보를 삭제합니다."
+    )
+    @DeleteMapping("/{fitnessId}")
+    public ApiResponse<String> deleteFitness(
+            @Parameter(description = "삭제할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        fitnessAdminService.deleteFitness(fitnessId);
+        return ApiResponse.onSuccess("시설 삭제가 완료되었습니다.");
+    }
+
+
+
+    @Operation(
+            summary = "Fitness 구매 가능 상태 변경",
+            description = "주어진 fitnessId에 해당하는 Fitness의 구매 가능 상태를 변경합니다."
+    )
+    @PatchMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updatePurchaseStatus(
+            @Parameter(description = "구매 가능 상태를 변경할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updatePurchaseStatus(fitnessId);
+        return ApiResponse.onSuccess(result);
+    }
 }

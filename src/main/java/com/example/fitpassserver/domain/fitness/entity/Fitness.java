@@ -1,5 +1,9 @@
 package com.example.fitpassserver.domain.fitness.entity;
 
+import com.example.fitpassserver.admin.fitness.converter.FitnessAdminConverter;
+import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -95,5 +99,28 @@ public class Fitness extends BaseEntity {
 
     public void setAdditionalImages(List<FitnessImage> fitnessImageList) {
         this.additionalImages = fitnessImageList;
+    }
+
+    public void update(FitnessAdminRequestDTO.FitnessReqDTO dto, List<Category> categoryList) {
+        if(dto.getTotalFee() > dto.getFee()){
+            throw new FitnessException(FitnessErrorCode.INVALID_SALE_PRICE);
+        }
+        this.name = dto.getFitnessName();
+        this.address = dto.getAddress();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.fee = dto.getFee();
+        this.totalFee = dto.getTotalFee();
+        this.categoryList = categoryList;
+        this.isPurchasable = dto.isPurchasable();
+        this.notice = dto.getNotice();
+        this.time = FitnessAdminConverter.convertMapToFormattedString(dto.getTime());
+        this.howToUse = dto.getHowToUse();
+        this.etc = dto.getEtc();
+        this.latitude = dto.getLatitude();
+        this.longitude = dto.getLongitude();
+    }
+
+    public void updatePurchaseStatus() {
+        this.isPurchasable = !isPurchasable;
     }
 }
