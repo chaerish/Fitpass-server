@@ -35,7 +35,6 @@ public class CoinService {
 
     public Coin createNewCoin(Member member, KakaoPaymentApproveDTO dto) {
         int price = dto.amount().total();
-        int quantity = dto.quantity();
 
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
@@ -45,7 +44,7 @@ public class CoinService {
         }
         return coinRepository.save(Coin.builder()
                 .member(member)
-                .count(((long) coinType.getCoinQuantity() * quantity))
+                .count(((long) coinType.getCoinQuantity()))
                 .expiredDate(LocalDate.now().plusDays(coinType.getExpirationPeriod()))
                 .planType(PlanType.NONE)
                 .build());
