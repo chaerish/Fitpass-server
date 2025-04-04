@@ -2,6 +2,7 @@ package com.example.fitpassserver.owner.fitness.controller;
 
 
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
+import com.example.fitpassserver.admin.fitness.dto.response.FitnessAdminResponseDTO;
 import com.example.fitpassserver.admin.fitness.service.FitnessAdminService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
@@ -59,5 +60,19 @@ public class FitnessOwnerController {
             @Parameter(description = "한 페이지당 조회할 시설 수", required = true)
             @RequestParam Integer size) {
         return ApiResponse.onSuccess(fitnessOwnerService.getFitnessList(member.getId(), cursor, size));
+    }
+
+    @Operation(
+            summary = "Fitness 수정",
+            description = "주어진 fitnessId에 해당하는 Fitness 정보를 업데이트합니다."
+    )
+    @PutMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updateFitness(
+            @Parameter(description = "수정할 Fitness 정보", required = true)
+            @RequestBody FitnessAdminRequestDTO.FitnessReqDTO request,
+            @Parameter(description = "수정할 Fitness ID", required = true, example = "1")
+            @PathVariable Long fitnessId){
+        FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updateFitness(fitnessId, request);
+        return ApiResponse.onSuccess(result);
     }
 }
