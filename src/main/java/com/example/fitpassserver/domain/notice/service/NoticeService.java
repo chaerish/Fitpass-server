@@ -84,10 +84,7 @@ public class NoticeService {
 
     //홈슬라이드 게시할 공지사항 조회
     @Transactional(readOnly = true)
-    public List<NoticeHomeSlideResponse> getNoticeHomeSlides(Long memberId) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new MemberException(MemberErrorCode.NOT_FOUND));
-
+    public List<NoticeHomeSlideResponse> getNoticeHomeSlides() {
         List<Notice> homeSlideNotices = noticeRepository.findNoticeHomeSlideIsMemberSlideTrue();
 
         return homeSlideNotices.stream()

@@ -40,8 +40,8 @@ public class NoticeController {
     }
     @Operation(summary = "홈슬라이드 공지 이미지 조회", description = "홈 슬라이드에 표시될 공지사항 이미지를 조회합니다(최대 3개).")
     @GetMapping("/homeSlide")
-    public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides(@CurrentMember Member member) {
-        List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides(member.getId());
+    public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides() {
+        List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides();
         return ResponseEntity.ok(ApiResponse.onSuccess(homeSlides));
     }
 }
