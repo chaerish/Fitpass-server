@@ -3,8 +3,6 @@ name: CI/CD
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build:
@@ -54,6 +52,7 @@ jobs:
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
             sudo docker stop fitpass-app || true
             sudo docker rm fitpass-app || true
+            sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest || true
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
             sudo docker run -d \
               --name fitpass-app \
