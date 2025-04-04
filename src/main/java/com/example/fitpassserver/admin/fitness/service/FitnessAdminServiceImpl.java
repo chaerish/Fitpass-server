@@ -13,6 +13,7 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.entity.MemberStatus;
 import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
@@ -85,7 +86,7 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         }
 
         // 전화번호로 사업자 조회
-        Member member = memberRepository.findByPhoneNumberAndDeletedAtIsNull(dto.getPhoneNumber())
+        Member member = memberRepository.findByPhoneNumberAndStatusIs(dto.getPhoneNumber(), MemberStatus.ACTIVE)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.UNREGISTERED_PHONE_NUMBER));
 
         // 해당 전화번호의 사용자가 OWNER, ADMIN인지확인

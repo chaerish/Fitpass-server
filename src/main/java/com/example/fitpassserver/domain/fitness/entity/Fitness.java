@@ -83,7 +83,7 @@ public class Fitness extends BaseEntity {
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
 
