@@ -40,6 +40,9 @@ public class Fitness extends BaseEntity {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "detail_address")
+    private String detailAddress;
+
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
@@ -57,9 +60,6 @@ public class Fitness extends BaseEntity {
 
     @Column(name = "how_to_use")
     private String howToUse;
-
-    @Column(name = "etc")
-    private String etc;
 
     @Column(name = "discount")
     private Integer discount;
@@ -107,6 +107,7 @@ public class Fitness extends BaseEntity {
         }
         this.name = dto.getFitnessName();
         this.address = dto.getAddress();
+        this.detailAddress = dto.getDetailAddress();
         this.phoneNumber = dto.getPhoneNumber();
         this.fee = dto.getFee();
         this.totalFee = dto.getTotalFee();
@@ -115,7 +116,6 @@ public class Fitness extends BaseEntity {
         this.notice = dto.getNotice();
         this.time = FitnessAdminConverter.convertMapToFormattedString(dto.getTime());
         this.howToUse = dto.getHowToUse();
-        this.etc = dto.getEtc();
         this.latitude = dto.getLatitude();
         this.longitude = dto.getLongitude();
     }

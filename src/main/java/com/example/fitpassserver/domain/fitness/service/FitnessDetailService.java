@@ -42,12 +42,12 @@ public class FitnessDetailService {
                 .fitnessId(fitness.getId())
                 .fitnessName(fitness.getName())
                 .address(fitness.getAddress())
+                .detailAddress(fitness.getDetailAddress())
                 .phoneNumber(fitness.getPhoneNumber())
                 .categoryName(categories)
                 .notice(fitness.getNotice())
                 .time(fitness.getTime())  // 변환된 time을 String으로 저장하여 전달
                 .howToUse(fitness.getHowToUse())
-                .etc(fitness.getEtc())
                 .fee(fitness.getFee())
                 .distance(distance)
                 .imageUrl(imageUrl)

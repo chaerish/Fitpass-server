@@ -17,6 +17,7 @@ public class FitnessAdminRequestDTO {
     public static class FitnessReqDTO {
         public String fitnessName;
         public String address;
+        public String detailAddress;
         public String phoneNumber;
         public Integer fee;
         public Integer totalFee;
@@ -25,7 +26,6 @@ public class FitnessAdminRequestDTO {
         private String notice;
         private Map<String, String > time;
         private String howToUse;
-        private String etc;
         private Double latitude;
         private Double longitude;
     }
