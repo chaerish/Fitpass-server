@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -41,4 +42,11 @@ public interface FitnessRepository extends JpaRepository<Fitness, Long> {
 
     // 전화번호로 검색
     Page<Fitness> findByPhoneNumberContaining(String phoneNumber, Pageable pageable);
+
+
+    @Query("SELECT f FROM Fitness f WHERE f.member.id = :memberId ORDER BY f.id DESC")
+    Slice<Fitness> findFirstPageByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+
+    @Query("SELECT f FROM Fitness f WHERE f.member.id = :memberId AND f.id < :cursor ORDER BY f.id DESC")
+    Slice<Fitness> findByMemberAndCursor(@Param("memberId") Long memberId, @Param("cursor") Long cursor, Pageable pageable);
 }

@@ -16,7 +16,13 @@ import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
+import com.example.fitpassserver.owner.fitness.converter.FitnessOwnerConverter;
+import com.example.fitpassserver.owner.fitness.dto.FitnessOwnerResDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -92,5 +98,23 @@ public class FitnessOwnerServiceImpl implements FitnessOwnerService {
         fitnessRepository.save(fitness);
 
         return fitness.getId();
+    }
+
+    @Override
+    public FitnessOwnerResDTO.FitnessListDTO getFitnessList(Long memberId, Long cursor, int size) {
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
+        Slice<Fitness> fitnesses;
+
+        // 커서 체크 로직 수정
+        if (cursor == null || cursor == 0L) {
+            fitnesses = fitnessRepository.findFirstPageByMemberId(memberId, pageable);
+        } else {
+            fitnesses = fitnessRepository.findByMemberAndCursor(memberId, cursor, pageable);
+        }
+
+        return FitnessOwnerConverter.toFitnessPageResDTO(fitnesses);
     }
 }

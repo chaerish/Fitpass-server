@@ -6,6 +6,7 @@ import com.example.fitpassserver.admin.fitness.service.FitnessAdminService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
+import com.example.fitpassserver.owner.fitness.dto.FitnessOwnerResDTO;
 import com.example.fitpassserver.owner.fitness.service.FitnessOwnerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -46,8 +47,17 @@ public class FitnessOwnerController {
         return ApiResponse.onSuccess(fitnessId);
     }
 
+    @Operation(
+            summary = "보유 시설 조회",
+            description = "로그인한 사업자가 등록한 시설들을 조회합니다."
+    )
     @GetMapping
-    public ApiResponse<?> getFitnessList(){
-        return null;
+    public ApiResponse<FitnessOwnerResDTO.FitnessListDTO> getFitnessList(
+            @CurrentMember Member member,
+            @Parameter(description = "페이지네이션 커서 값 (첫 페이지는 0)", required = true)
+            @RequestParam Long cursor,
+            @Parameter(description = "한 페이지당 조회할 시설 수", required = true)
+            @RequestParam Integer size) {
+        return ApiResponse.onSuccess(fitnessOwnerService.getFitnessList(member.getId(), cursor, size));
     }
 }
