@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.member.repository;
 
 import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.entity.MemberStatus;
 import io.lettuce.core.dynamic.annotation.Param;
 import java.util.List;
 import java.util.Optional;
@@ -32,5 +33,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     Page<Member> findByPhoneNumberContaining(String phoneNumber, Pageable pageable);
 
-    Optional<Member> findByPhoneNumberAndDeletedAtIsNull(String phoneNumber);
+    Optional<Member> findByPhoneNumberAndStatusIs(String phoneNumber, MemberStatus status);
+
+    Optional<Member> findByIdAndStatusIs(Long id, MemberStatus status);
 }
