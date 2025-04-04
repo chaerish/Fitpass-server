@@ -4,16 +4,10 @@ import com.example.fitpassserver.admin.fitness.converter.FitnessAdminConverter;
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
+import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.entity.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
@@ -89,6 +83,10 @@ public class Fitness extends BaseEntity {
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "member_id")
+    private Member member;
+
     public void setCategoryList(List<Category> categoryList) {
         this.categoryList = categoryList;
     }
@@ -122,5 +120,9 @@ public class Fitness extends BaseEntity {
 
     public void updatePurchaseStatus() {
         this.isPurchasable = !isPurchasable;
+    }
+
+    public void setMember(Member member) {
+        this.member = member;
     }
 }

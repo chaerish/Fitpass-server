@@ -12,6 +12,11 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
+import com.example.fitpassserver.domain.member.entity.Member;
+import com.example.fitpassserver.domain.member.entity.Role;
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +42,7 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
+    private final MemberRepository memberRepository;
 
     private String generateMainImageKey(Long fitnessId, String originalFilename){
         return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
@@ -77,6 +83,18 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
             fitnessImageRepository.saveAll(fitnessImages);
             fitness.setAdditionalImages(fitnessImages);
         }
+
+        // 전화번호로 사업자 조회
+        Member member = memberRepository.findByPhoneNumberAndDeletedAtIsNull(dto.getPhoneNumber())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.UNREGISTERED_PHONE_NUMBER));
+
+        // 해당 전화번호의 사용자가 OWNER, ADMIN인지확인
+        if(!(member.getRole().equals(Role.OWNER) || member.getRole().equals(Role.ADMIN))){
+            throw new MemberException(MemberErrorCode.INVALID_ROLE);
+        }
+
+        // fitness 맴버 매핑
+        fitness.setMember(member);
 
         // 시설 저장
         fitnessRepository.save(fitness);
