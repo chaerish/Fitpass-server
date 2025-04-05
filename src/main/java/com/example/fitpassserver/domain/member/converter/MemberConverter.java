@@ -17,9 +17,8 @@ public class MemberConverter {
                 .build();
     }
 
-    public static Member toMember(MemberRequestDTO.JoinDTO request) {
+    public static Member toMember(MemberRequestDTO.MemberJoinDTO request) {
         Role role = Role.GUEST;
-
         return Member.builder()
                 .loginId(request.getLoginId())
                 .name(request.getName())

@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.member.dto;
 
+import com.example.fitpassserver.global.common.dto.CommonRequestDTO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,45 +18,10 @@ public class MemberRequestDTO {
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class JoinDTO {
-        @NotBlank(message = "아이디는 필수 입력 값입니다.")
-        @Pattern(regexp = "^[a-zA-Z0-9]{4,12}$", message = "영어와 숫자를 사용하여 4-12자의 아이디를 입력해주세요.")
-        String loginId;
-
-        @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
-        @Pattern(regexp = "^[a-zA-Z0-9]{8,20}$", message = "영어와 숫자를 사용하여 8-20자의 비밀번호를 입력해주세요.")
-        String password;
-
-        @NotBlank(message = "전화번호는 필수 입력 값입니다.")
-        String phoneNumber;
-
-        @NotBlank
-        String name;
-
-        @NotNull
-        @JsonProperty("agree")
-        boolean isAgree;
-
-        @NotNull(message = "필수 동의 사항입니다.")
-        @JsonProperty("termsAgreed")
-        boolean isTermsAgreed;
-
-        @NotNull(message = "필수 동의 사항입니다.")
-        @JsonProperty("personalInformationAgreed")
-        boolean isPersonalInformationAgreed;
-
-        @NotNull(message = "필수 동의 사항입니다.")
-        @JsonProperty("thirdPartyAgreed")
-        boolean isThirdPartyAgreed;
-
+    public static class MemberJoinDTO extends CommonRequestDTO.JoinDTO {
         @NotNull
         @JsonProperty("locationAgreed")
         boolean isLocationAgreed;
-
-        @NotNull
-        @JsonProperty("marketingAgreed")
-        boolean isMarketingAgreed;
-
     }
 
     /**
@@ -108,29 +74,6 @@ public class MemberRequestDTO {
         String password;
     }
 
-    /**
-     * Refresh Token 요청 DTO
-     */
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class RefreshRequest {
-        String refreshToken;
-    }
-
-    /**
-     * 중복 아이디 확인 요청 dto
-     **/
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class CheckLoginIdDTO {
-        @NotBlank(message = "아이디는 필수 입력 값입니다.")
-        @Pattern(regexp = "^[a-zA-Z0-9]{4,12}$", message = "영어와 숫자를 사용하여 4-12자의 아이디를 입력해주세요.")
-        String loginId;
-    }
 
     @Getter
     @Builder

@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.global.common.support.LoginUser;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +25,7 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("status = 'ACTIVE'")
 @Table(name = "member")
-public class Member extends BaseEntity {
+public class Member extends BaseEntity implements LoginUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,7 +55,7 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role;
+    private Role role = Role.MEMBER;
 
     @Column(name = "provider", nullable = true)
     private String provider;
@@ -158,5 +159,25 @@ public class Member extends BaseEntity {
 
     public void updateLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
+    }
+
+    @Override
+    public String getLoginId() {
+        return loginId;
+    }
+
+    @Override
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Role getRole() {
+        return role;
     }
 }
