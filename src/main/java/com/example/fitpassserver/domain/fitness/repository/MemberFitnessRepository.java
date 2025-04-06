@@ -21,7 +21,7 @@ public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Lo
             """)
     Page<Object[]> findMonthlyRevenueSummary(@Param("fitnessId") Long fitnessId, Pageable pageable);
 
-    Page<MemberFitness> findAllByFitnessId(Long fitnessId, Pageable pageable);
+    Page<MemberFitness> findAllByFitnessIdAndStatusIsNot(Long fitnessId, Pageable pageable, Status status);
 
     List<MemberFitness> findAllByMember(Member member);
 

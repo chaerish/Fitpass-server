@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.coin.entity.CoinType;
 import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
+import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
@@ -28,8 +29,8 @@ public class FitnessHistoryServiceImpl implements FitnessHistoryService {
         Fitness fitness = fitnessRepository.findFitnessById(fitnessId).orElseThrow(
                 () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND)
         );
-        Page<MemberFitness> memberFitnessPages = memberFitnessRepository.findAllByFitnessId(fitnessId,
-                PageRequest.of(page, size));
+        Page<MemberFitness> memberFitnessPages = memberFitnessRepository.findAllByFitnessIdAndStatusIsNot(fitnessId,
+                PageRequest.of(page, size), Status.NONE);
         return FitnessHistoryConverter.to(memberFitnessPages);
     }
 
