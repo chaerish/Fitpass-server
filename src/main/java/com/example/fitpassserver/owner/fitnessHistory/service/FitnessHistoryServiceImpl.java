@@ -26,9 +26,6 @@ public class FitnessHistoryServiceImpl implements FitnessHistoryService {
 
     @Override
     public UsageHistoryResponseDTO getFitnessUsageHistory(Long fitnessId, int page, int size) {
-        Fitness fitness = fitnessRepository.findFitnessById(fitnessId).orElseThrow(
-                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND)
-        );
         Page<MemberFitness> memberFitnessPages = memberFitnessRepository.findAllByFitnessIdAndStatusIsNot(fitnessId,
                 PageRequest.of(page, size), Status.NONE);
         return FitnessHistoryConverter.to(memberFitnessPages);
