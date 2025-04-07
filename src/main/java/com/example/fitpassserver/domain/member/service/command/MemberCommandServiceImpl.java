@@ -92,6 +92,17 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     }
 
     /**
+     * 위치 동의 여부 변경
+     **/
+    @Override
+    @Transactional
+    public void updateIsLocationAgree(String loginId, MemberRequestDTO.isLocationDTO dto) {
+        Member member = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        member.updateIsLocationAgree(dto.isLocationAgreed());
+    }
+
+    /**
      * 전화번호 변경
      **/
     @Override

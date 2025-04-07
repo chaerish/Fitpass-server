@@ -10,6 +10,8 @@ public interface MemberCommandService {
 
     void setLocation(String loginId, MemberRequestDTO.LocationDTO dto);
 
+    void updateIsLocationAgree(String loginId, MemberRequestDTO.isLocationDTO dto);
+
     void changePhoneNumber(Member member, MemberRequestDTO.ChangePhoneNumberDTO request);
 
     void changePassword(Member member, MemberRequestDTO.ChangePasswordDTO request);

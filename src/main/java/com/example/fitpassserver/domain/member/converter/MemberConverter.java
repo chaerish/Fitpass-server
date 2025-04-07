@@ -25,6 +25,8 @@ public class MemberConverter {
                 .password(request.getPassword())
                 .phoneNumber(request.getPhoneNumber())
                 .role(role)
+                .isWork(request.isWork())
+                .companyName(request.getCompany_name())
                 .isAgree(request.isAgree())
                 .isTermsAgreed(request.isTermsAgreed())
                 .isPersonalInformaionAgreed(request.isPersonalInformationAgreed())
