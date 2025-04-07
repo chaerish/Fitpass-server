@@ -53,7 +53,7 @@ public class CoinPaymentHistoryService {
                 .tid(dto.tid())
                 .coin(coin)
                 .member(member)
-                .coinCount((coinType.getCoinQuantity() * dto.quantity()))
+                .coinCount((coinType.getCoinQuantity()))
                 .paymentPrice(dto.amount().total())
                 .build());
     }
