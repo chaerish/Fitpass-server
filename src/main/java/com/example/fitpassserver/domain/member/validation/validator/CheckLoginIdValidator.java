@@ -8,12 +8,13 @@ import org.springframework.validation.Errors;
 
 @RequiredArgsConstructor
 @Component
-public class CheckLoginIdValidator extends AbstractValidator<MemberRequestDTO.JoinDTO> {
+public class CheckLoginIdValidator extends AbstractValidator<MemberRequestDTO.MemberJoinDTO> {
     private final MemberRepository memberRepository;
+
     @Override
-    protected void doValidate(MemberRequestDTO.JoinDTO dto, Errors errors){
-        if(memberRepository.existsByLoginId(dto.getLoginId())){
-            errors.rejectValue("loginId", "아이디 중복 오류","이미 사용중인 아이디 입니다.");
+    protected void doValidate(MemberRequestDTO.MemberJoinDTO dto, Errors errors) {
+        if (memberRepository.existsByLoginId(dto.getLoginId())) {
+            errors.rejectValue("loginId", "아이디 중복 오류", "이미 사용중인 아이디 입니다.");
         }
     }
 

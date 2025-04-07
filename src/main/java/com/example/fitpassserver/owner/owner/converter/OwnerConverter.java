@@ -1,35 +1,35 @@
-package com.example.fitpassserver.domain.member.converter;
+package com.example.fitpassserver.owner.owner.converter;
 
-import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
-import com.example.fitpassserver.domain.member.dto.MemberResponseDTO;
-import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.Role;
+import com.example.fitpassserver.owner.owner.dto.OwnerRequestDTO;
+import com.example.fitpassserver.owner.owner.dto.OwnerResponseDTO;
+import com.example.fitpassserver.owner.owner.entity.Owner;
 
 import java.time.LocalDateTime;
 
-public class MemberConverter {
+public class OwnerConverter {
 
-    public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member) {
-        return MemberResponseDTO.JoinResultDTO.builder()
-                .memberId(member.getId())
+    public static OwnerResponseDTO.JoinResultDTO toJoinResultDTO(Owner owner) {
+        return OwnerResponseDTO.JoinResultDTO.builder()
+                .ownerId(owner.getId())
                 .createdAt(LocalDateTime.now())
-                .isLocationAgreed(member.isLocationAgreed())
                 .build();
     }
 
-    public static Member toMember(MemberRequestDTO.MemberJoinDTO request) {
-        Role role = Role.GUEST;
-        return Member.builder()
+    public static Owner toOwner(OwnerRequestDTO.OwnerJoinDTO request) {
+        Role role = Role.OWNER;
+        return Owner.builder()
                 .loginId(request.getLoginId())
                 .name(request.getName())
                 .password(request.getPassword())
                 .phoneNumber(request.getPhoneNumber())
                 .role(role)
+                .businessRegistrationUrl(request.getBusinessRegistrationUrl())
+                .bankCopyUrl(request.getBankCopyUrl())
                 .isAgree(request.isAgree())
                 .isTermsAgreed(request.isTermsAgreed())
                 .isPersonalInformaionAgreed(request.isPersonalInformationAgreed())
                 .isThirdPartyAgreed(request.isThirdPartyAgreed())
-                .isLocationAgreed(request.isLocationAgreed())
                 .isMarketingAgreed(request.isMarketingAgreed())
                 .isAdditionalInfo(false)
                 .build();

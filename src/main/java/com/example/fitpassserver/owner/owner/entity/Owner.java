@@ -1,9 +1,7 @@
-package com.example.fitpassserver.domain.member.entity;
+package com.example.fitpassserver.owner.owner.entity;
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
-import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
-import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
+import com.example.fitpassserver.domain.member.entity.MemberStatus;
+import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.global.common.support.LoginUser;
@@ -14,18 +12,16 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-@SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE owner SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("status = 'ACTIVE'")
-@Table(name = "member")
-public class Member extends BaseEntity implements LoginUser {
+@Table(name = "owner")
+public class Owner extends BaseEntity implements LoginUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,26 +38,33 @@ public class Member extends BaseEntity implements LoginUser {
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-//    @Column(name = "email")
-//    private String email;
+    @Column(name = "corporation", nullable = false)
+    private String corporation;
 
-    @Column(name = "latitude")
-    @Builder.Default
-    private Double latitude = 37.5665;
+    @Column(name = "business_registration_number", nullable = false)
+    private String businessRegistrationNumber;
 
-    @Column(name = "longitude")
-    @Builder.Default
-    private Double longitude = 126.9780;
+    @Column(name = "bank_name", nullable = false)
+    private String bankName;
+
+    @Column(name = "deposit_account", nullable = false)
+    private String depositAccount;
+
+    @Column(name = "deposit_account_name", nullable = false)
+    private String depositAccountName;
+
+    @Column(name = "deposit_account_number", nullable = false)
+    private String depositAccountNumber;
+
+    @Column(name = "business_registration_url", nullable = false)
+    private String businessRegistrationUrl;
+
+    @Column(name = "bank_copy_url", nullable = false)
+    private String bankCopyUrl;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role = Role.MEMBER;
-
-    @Column(name = "provider", nullable = true)
-    private String provider;
-
-    @Column(name = "provider_id")
-    private String providerId;
+    private Role role = Role.OWNER;
 
     @Column(name = "is_agree", nullable = false)
     private boolean isAgree;
@@ -69,20 +72,17 @@ public class Member extends BaseEntity implements LoginUser {
     @Column(name = "is_terms_agreed", nullable = false)
     private boolean isTermsAgreed;
 
-    @Column(name = "is_location_agreed", nullable = false)
-    private boolean isLocationAgreed;
-
     @Column(name = "is_third_party_agreed", nullable = false)
     private boolean isThirdPartyAgreed;
 
     @Column(name = "is_marketing_agreed", nullable = false)
-    private Boolean isMarketingAgreed;
+    private boolean isMarketingAgreed;
 
     @Column(name = "is_personal_information_agreed", nullable = false)
-    private Boolean isPersonalInformaionAgreed;
+    private boolean isPersonalInformaionAgreed;
 
-    @Column(name = "profile_image")
-    private String profileImage;
+    @Column(name = "is_additional_info")
+    private boolean isAdditionalInfo;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(15)")
@@ -95,23 +95,8 @@ public class Member extends BaseEntity implements LoginUser {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    @Column(name = "is_additional_info")
-    private boolean isAdditionalInfo;
-
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
-
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<Coin> CoinList = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<CoinPaymentHistory> CoinPaymentHistoryList = new ArrayList<>();
-
-    @Builder.Default
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
-    private List<MemberFitness> MemberFitnessList = new ArrayList<>();
 
     public void encodePassword(String password) {
         this.password = password;
@@ -129,37 +114,18 @@ public class Member extends BaseEntity implements LoginUser {
         this.isAdditionalInfo = isAdditionalInfo;
     }
 
-    public void socialJoin(MemberRequestDTO.SocialJoinDTO request) {
-        this.name = request.getName();
-        this.phoneNumber = request.getPhoneNumber();
-        this.isAgree = request.isAgree();
-        this.isTermsAgreed = request.isTermsAgreed();
-        this.isLocationAgreed = request.isLocationAgreed();
-        this.isThirdPartyAgreed = request.isThirdPartyAgreed();
-        this.isMarketingAgreed = request.isMarketingAgreed();
-        this.isAdditionalInfo = false;
-    }
-
     public void updateRole(Role role) {
         this.role = role;
-    }
-
-    public void setLocation(Double latitude, Double longitude) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public void updatePhoneNumber(String newPhoneNumber) {
-        this.phoneNumber = newPhoneNumber;
     }
 
     public void updatePassword(String newPassword) {
         this.password = newPassword;
     }
 
-    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
-        this.lastLoginAt = lastLoginAt;
-    }
+//    public void updateLastLoginAt(LocalDateTime lastLoginAt) {
+//        this.lastLoginAt = lastLoginAt;
+//    }
+
 
     @Override
     public String getLoginId() {
@@ -180,4 +146,6 @@ public class Member extends BaseEntity implements LoginUser {
     public Role getRole() {
         return role;
     }
+
+
 }
