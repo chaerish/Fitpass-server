@@ -12,6 +12,7 @@ public record UsageHistoryResponseDTO(
     public record FitnessUsageDetailDTO(
             String loginId,
             String memberName,
+            Integer totalFee,
             LocalDateTime activeTime
 
     ) {

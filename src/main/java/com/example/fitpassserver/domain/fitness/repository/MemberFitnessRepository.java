@@ -15,13 +15,13 @@ public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Lo
     @Query("""
                 SELECT FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m'), MAX(mf.createdAt), COUNT(mf)
                 FROM MemberFitness mf
-                WHERE mf.fitness.id = :fitnessId
+                WHERE mf.fitness.id = :fitnessId AND mf.status != com.example.fitpassserver.domain.fitness.entity.Status.NONE
                 GROUP BY FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m')
                 ORDER BY FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m') DESC
             """)
     Page<Object[]> findMonthlyRevenueSummary(@Param("fitnessId") Long fitnessId, Pageable pageable);
 
-    Page<MemberFitness> findAllByFitnessId(Long fitnessId, Pageable pageable);
+    Page<MemberFitness> findAllByFitnessIdAndStatusIsNot(Long fitnessId, Pageable pageable, Status status);
 
     List<MemberFitness> findAllByMember(Member member);
 

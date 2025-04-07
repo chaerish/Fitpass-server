@@ -22,6 +22,7 @@ public class FitnessHistoryConverter {
         return new UsageHistoryResponseDTO.FitnessUsageDetailDTO(
                 memberFitness.getMember().getLoginId(),
                 memberFitness.getMember().getName(),
+                memberFitness.getFitness().getTotalFee(),
                 memberFitness.getActiveTime()
         );
 
