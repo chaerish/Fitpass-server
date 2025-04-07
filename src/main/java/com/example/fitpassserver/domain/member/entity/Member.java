@@ -63,6 +63,12 @@ public class Member extends BaseEntity implements LoginUser {
     @Column(name = "provider_id")
     private String providerId;
 
+    @Column(name = "is_work", nullable = false)
+    private boolean isWork;
+
+    @Column(name = "company_name")
+    private String companyName;
+
     @Column(name = "is_agree", nullable = false)
     private boolean isAgree;
 
@@ -132,6 +138,8 @@ public class Member extends BaseEntity implements LoginUser {
     public void socialJoin(MemberRequestDTO.SocialJoinDTO request) {
         this.name = request.getName();
         this.phoneNumber = request.getPhoneNumber();
+        this.isWork = request.isWork();
+        this.companyName = request.getCompany_name();
         this.isAgree = request.isAgree();
         this.isTermsAgreed = request.isTermsAgreed();
         this.isLocationAgreed = request.isLocationAgreed();
@@ -147,6 +155,10 @@ public class Member extends BaseEntity implements LoginUser {
     public void setLocation(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public void updateIsLocationAgree(boolean isLocationAgreed) {
+        this.isLocationAgreed = isLocationAgreed;
     }
 
     public void updatePhoneNumber(String newPhoneNumber) {

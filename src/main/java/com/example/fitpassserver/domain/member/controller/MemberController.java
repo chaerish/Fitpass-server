@@ -55,6 +55,13 @@ public class MemberController {
         return ApiResponse.onSuccess("사용자의 위치가 변경되었습니다.");
     }
 
+    @Operation(summary = "사용자 위치 이용 동의여부 업데이트 api", description = "사용자 위치 이용 동의 여부를 업데이트합니다.")
+    @PatchMapping("/location_agree")
+    public ApiResponse<String> updateIsLocationAgree(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.isLocationDTO dto) {
+        memberCommandService.updateIsLocationAgree(member.getLoginId(), dto);
+        return ApiResponse.onSuccess("사용자의 위치 동의 여부가 변경되었습니다.");
+    }
+
     @Operation(summary = "전화번호 변경 api", description = "인증된 전화번호를 변경하는 api입니다.")
     @PatchMapping("/change/phone-number")
     public ApiResponse<?> changePhoneNumber(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.ChangePhoneNumberDTO request) {
