@@ -1,5 +1,6 @@
 package com.example.fitpassserver.owner.owner.entity;
 
+import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.member.entity.MemberStatus;
 import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
@@ -12,6 +13,8 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -41,19 +44,16 @@ public class Owner extends BaseEntity implements LoginUser {
     @Column(name = "corporation", nullable = false)
     private String corporation;
 
-    @Column(name = "business_registration_number", nullable = false)
+    @Column(name = "business_registration_number", nullable = false) //사업자 등록번호
     private String businessRegistrationNumber;
 
-    @Column(name = "bank_name", nullable = false)
+    @Column(name = "bank_name", nullable = false) //은행명
     private String bankName;
 
-    @Column(name = "deposit_account", nullable = false)
-    private String depositAccount;
-
-    @Column(name = "deposit_account_name", nullable = false)
+    @Column(name = "deposit_account_name", nullable = false) //예금주명
     private String depositAccountName;
 
-    @Column(name = "deposit_account_number", nullable = false)
+    @Column(name = "deposit_account_number", nullable = false) //사업자 계좌번호
     private String depositAccountNumber;
 
     @Column(name = "business_registration_url", nullable = false)
@@ -97,6 +97,10 @@ public class Owner extends BaseEntity implements LoginUser {
 
     @Column(name = "last_login_at")
     private LocalDateTime lastLoginAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
+    private List<Fitness> fitnessList = new ArrayList<>();
 
     public void encodePassword(String password) {
         this.password = password;
