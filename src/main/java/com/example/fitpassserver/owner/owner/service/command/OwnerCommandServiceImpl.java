@@ -3,7 +3,6 @@ package com.example.fitpassserver.owner.owner.service.command;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
-import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import com.example.fitpassserver.owner.owner.converter.OwnerConverter;
 import com.example.fitpassserver.owner.owner.dto.OwnerRequestDTO;
 import com.example.fitpassserver.owner.owner.entity.Owner;
@@ -20,7 +19,6 @@ public class OwnerCommandServiceImpl implements OwnerCommandService {
     private final OwnerRepository ownerRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final S3Service s3Service;
 
     /**
      * 회원가입
