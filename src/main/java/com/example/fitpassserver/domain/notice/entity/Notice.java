@@ -40,6 +40,10 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private boolean isDraft;  // true: 임시저장, false: 정식 등록
 
+    @Setter
+    @Column(nullable = false)
+    private boolean isMemberSlide;
+
     // 🔹 조회수 증가 메서드 추가
     public void increaseViews() {
         this.views += 1;

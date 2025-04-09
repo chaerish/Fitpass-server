@@ -8,8 +8,21 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MemberFitnessRepository extends JpaRepository<MemberFitness, Long>, MemberFitnessCustomRepository {
+    @Query("""
+                SELECT FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m'), MAX(mf.createdAt), COUNT(mf)
+                FROM MemberFitness mf
+                WHERE mf.fitness.id = :fitnessId AND mf.status != com.example.fitpassserver.domain.fitness.entity.Status.NONE
+                GROUP BY FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m')
+                ORDER BY FUNCTION('DATE_FORMAT', mf.createdAt, '%Y-%m') DESC
+            """)
+    Page<Object[]> findMonthlyRevenueSummary(@Param("fitnessId") Long fitnessId, Pageable pageable);
+
+    Page<MemberFitness> findAllByFitnessIdAndStatusIsNot(Long fitnessId, Pageable pageable, Status status);
+
     List<MemberFitness> findAllByMember(Member member);
 
     Page<MemberFitness> findAllByMemberIn(Pageable pageable, List<Member> member);

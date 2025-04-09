@@ -9,26 +9,29 @@ import java.time.LocalDateTime;
 
 public class MemberConverter {
 
-    public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member){
+    public static MemberResponseDTO.JoinResultDTO toJoinResultDTO(Member member) {
         return MemberResponseDTO.JoinResultDTO.builder()
                 .memberId(member.getId())
                 .createdAt(LocalDateTime.now())
+                .isLocationAgreed(member.isLocationAgreed())
                 .build();
     }
 
-    public static Member toMember(MemberRequestDTO.JoinDTO request) {
-        Role role=Role.GUEST;
-
+    public static Member toMember(MemberRequestDTO.MemberJoinDTO request) {
+        Role role = Role.GUEST;
         return Member.builder()
                 .loginId(request.getLoginId())
                 .name(request.getName())
                 .password(request.getPassword())
                 .phoneNumber(request.getPhoneNumber())
                 .role(role)
+                .isWork(request.isWork())
+                .companyName(request.getCompany_name())
                 .isAgree(request.isAgree())
                 .isTermsAgreed(request.isTermsAgreed())
-                .isLocationAgreed(request.isLocationAgreed())
+                .isPersonalInformaionAgreed(request.isPersonalInformationAgreed())
                 .isThirdPartyAgreed(request.isThirdPartyAgreed())
+                .isLocationAgreed(request.isLocationAgreed())
                 .isMarketingAgreed(request.isMarketingAgreed())
                 .isAdditionalInfo(false)
                 .build();

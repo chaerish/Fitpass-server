@@ -6,6 +6,7 @@ import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
+import com.example.fitpassserver.global.common.support.LoginUser;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,7 +25,7 @@ import java.util.List;
 @SQLDelete(sql = "UPDATE member SET is_deleted = true, deleted_at = NOW() WHERE id = ?")
 @SQLRestriction("status = 'ACTIVE'")
 @Table(name = "member")
-public class Member extends BaseEntity {
+public class Member extends BaseEntity implements LoginUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,13 +55,19 @@ public class Member extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Role role;
+    private Role role = Role.MEMBER;
 
     @Column(name = "provider", nullable = true)
     private String provider;
 
     @Column(name = "provider_id")
     private String providerId;
+
+    @Column(name = "is_work", nullable = false)
+    private boolean isWork;
+
+    @Column(name = "company_name")
+    private String companyName;
 
     @Column(name = "is_agree", nullable = false)
     private boolean isAgree;
@@ -76,6 +83,9 @@ public class Member extends BaseEntity {
 
     @Column(name = "is_marketing_agreed", nullable = false)
     private Boolean isMarketingAgreed;
+
+    @Column(name = "is_personal_information_agreed", nullable = false)
+    private Boolean isPersonalInformaionAgreed;
 
     @Column(name = "profile_image")
     private String profileImage;
@@ -128,6 +138,8 @@ public class Member extends BaseEntity {
     public void socialJoin(MemberRequestDTO.SocialJoinDTO request) {
         this.name = request.getName();
         this.phoneNumber = request.getPhoneNumber();
+        this.isWork = request.isWork();
+        this.companyName = request.getCompany_name();
         this.isAgree = request.isAgree();
         this.isTermsAgreed = request.isTermsAgreed();
         this.isLocationAgreed = request.isLocationAgreed();
@@ -145,6 +157,10 @@ public class Member extends BaseEntity {
         this.longitude = longitude;
     }
 
+    public void updateIsLocationAgree(boolean isLocationAgreed) {
+        this.isLocationAgreed = isLocationAgreed;
+    }
+
     public void updatePhoneNumber(String newPhoneNumber) {
         this.phoneNumber = newPhoneNumber;
     }
@@ -155,5 +171,25 @@ public class Member extends BaseEntity {
 
     public void updateLastLoginAt(LocalDateTime lastLoginAt) {
         this.lastLoginAt = lastLoginAt;
+    }
+
+    @Override
+    public String getLoginId() {
+        return loginId;
+    }
+
+    @Override
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Role getRole() {
+        return role;
     }
 }

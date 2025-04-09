@@ -163,4 +163,20 @@ public class S3Service {
                 .build();
     }
 
+    @Transactional(readOnly = true)
+    public S3UrlResponseDTO getOwnerPresignedUrl(String type, String filename) {
+        String key = "owner/" + type + "/" + UUID.randomUUID() + "/" + filename;
+        Date expiration = getExpiration();
+
+        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+                getPostGeneratePresignedUrlRequest(key, expiration);
+
+        URL url = amazonS3Client.generatePresignedUrl(generatePresignedUrlRequest);
+
+        return S3UrlResponseDTO.builder()
+                .preSignedUrl(url.toExternalForm())
+                .key(key)
+                .build();
+    }
+
 }

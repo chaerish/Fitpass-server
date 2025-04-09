@@ -29,7 +29,7 @@ public class CoinPaymentEventListener {
     @EventListener
     @Transactional
     public void handle(CoinSuccessEvent event) {
-        Coin coin = coinService.createNewCoin(event.member(), event.dto());
+        Coin coin = coinService.createNewCoinByKakaoPay(event.member(), event.dto());
         CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPayment(event.member(), event.dto(), coin);
         coinService.setCoinAndCoinPayment(coin, history);
     }

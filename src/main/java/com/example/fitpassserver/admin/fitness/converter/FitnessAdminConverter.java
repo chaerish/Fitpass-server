@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class FitnessAdminConverter {
 
     // Map을 형식화된 String으로 변환하는 메소드
-    private static String convertMapToFormattedString(Map<String, String> timeMap) {
+    public static String convertMapToFormattedString(Map<String, String> timeMap) {
         if (timeMap == null) return null;
 
         StringBuilder sb = new StringBuilder();
@@ -38,7 +38,7 @@ public class FitnessAdminConverter {
         return sb.toString();
     }
 
-    public static Fitness toEntity(FitnessAdminRequestDTO.CreateFitnessDTO dto){
+    public static Fitness toEntity(FitnessAdminRequestDTO.FitnessReqDTO dto){
         if(dto.getTotalFee() > dto.getFee()){
             throw new FitnessException(FitnessErrorCode.INVALID_SALE_PRICE);
         }

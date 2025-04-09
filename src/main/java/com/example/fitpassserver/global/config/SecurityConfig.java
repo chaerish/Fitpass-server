@@ -41,7 +41,11 @@ public class SecurityConfig {
             "/swagger-ui/**",
             "/swagger-resources/**",
             "/v3/api-docs/**",
-            "/auth/register",
+            "/auth/member/register",
+            "/auth/member/oauth2/**",
+            "/auth/owner/register",
+            "/auth/owner/registration",
+            "/auth/owner/bank-copy",
             "/auth/verify-code",
             "/auth/verification",
             "/auth/login",
@@ -50,7 +54,6 @@ public class SecurityConfig {
             "/auth/find-id",
             "/auth/find-password",
             "/auth/reset-password",
-            "/auth/oauth2/**",
             "/fitness",
             "/fitness/recommend",
             "/fitness/{fitnessId}",
@@ -69,6 +72,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(allowUrl).permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/owner/**").hasAnyRole("OWNER", "ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class)
                 //기본 폼 로그인 비활성화

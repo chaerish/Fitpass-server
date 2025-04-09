@@ -4,67 +4,66 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.MemberStatus;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.member.repository.MemberRepository;
+import com.example.fitpassserver.global.common.support.LoginUser;
+import com.example.fitpassserver.global.common.support.LoginUserFinder;
 import com.example.fitpassserver.global.jwt.exception.AuthException;
 import com.example.fitpassserver.global.jwt.exception.JwtErrorCode;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Date;
-import java.util.Map;
-import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Component
 public class JwtProvider {
 
-    private final MemberRepository memberRepository;
-    private SecretKey secret;
-    private long accessExpiration;
-    private long refreshExpiration;
+    private final List<LoginUserFinder> loginUserFinders;
+    private final SecretKey secret;
+    private final long accessExpiration;
+    private final long refreshExpiration;
 
-    public JwtProvider(MemberRepository memberRepository, @Value("${Jwt.secret}") String secret,
+    public JwtProvider(List<LoginUserFinder> loginUserFinders,
+                       @Value("${Jwt.secret}") String secret,
                        @Value("${Jwt.token.access-expiration-time}") long accessExpiration,
                        @Value("${Jwt.token.refresh-expiration-time}") long refreshExpiration) {
         this.secret = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.accessExpiration = accessExpiration;
         this.refreshExpiration = refreshExpiration;
-        this.memberRepository = memberRepository;
+        this.loginUserFinders = loginUserFinders;
     }
 
-    public String createAccessToken(Member member) {
-        return createToken(member, this.accessExpiration);
+    public String createAccessToken(LoginUser user) {
+        return createToken(user, accessExpiration);
     }
 
-    public String createRefreshToken(Member member) {
-        return createToken(member, this.refreshExpiration);
+    public String createRefreshToken(LoginUser user) {
+        return createToken(user, refreshExpiration);
     }
 
-    //공통 토큰 생성
-    public String createToken(Member member, long expiration) {
+    private String createToken(LoginUser user, long expiration) {
         Instant issuedAt = Instant.now();
         Instant expiredAt = issuedAt.plusMillis(expiration);
-        System.out.println("issuedAt: " + issuedAt);
-        System.out.println("expiredAt: " + expiredAt);
+
         return Jwts.builder()
                 .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
-                .setSubject(member.getLoginId())
-                .claim("id", member.getId())
+                .setSubject(user.getLoginId())
+                .claim("id", user.getId())
+                .claim("role", user.getRole().name()) // optional: 권한 정보 추가
                 .issuedAt(Date.from(issuedAt))
                 .expiration(Date.from(expiredAt))
                 .signWith(secret, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    //토큰 유효성 확인
     public boolean isValid(String token) {
         try {
             Jws<Claims> claims = getClaims(token);
@@ -78,7 +77,6 @@ public class JwtProvider {
         }
     }
 
-    //토큰의 클레임 가져오는 메서드
     public Jws<Claims> getClaims(String token) {
         try {
             return Jwts.parser()
@@ -91,23 +89,26 @@ public class JwtProvider {
         }
     }
 
-    //loginId 추출
     public String getLoginId(String token) {
         return getClaims(token).getBody().getSubject();
     }
 
-    //토큰 만료 확인
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = getClaims(token);
             String loginId = claims.getPayload().getSubject();
 
-            // 사용자 상태 확인
-            Member member = memberRepository.findByLoginId(loginId)
+            LoginUser user = loginUserFinders.stream()
+                    .map(finder -> finder.findByLoginId(loginId))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
                     .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-            if (member.getStatus() == MemberStatus.INACTIVE) {
-                throw new MemberException(MemberErrorCode.INACTIVE_ACCOUNT);
+            if (user instanceof Member member) {
+                if (member.getStatus() == MemberStatus.INACTIVE) {
+                    throw new MemberException(MemberErrorCode.INACTIVE_ACCOUNT);
+                }
             }
 
             return !claims.getPayload().getExpiration().before(new Date());
@@ -116,5 +117,5 @@ public class JwtProvider {
             return false;
         }
     }
-
 }
+
