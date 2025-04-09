@@ -1,10 +1,10 @@
 package com.example.fitpassserver.global.common.service;
 
+import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.domain.member.sms.repositroy.SmsRepository;
 import com.example.fitpassserver.global.common.dto.CommonRequestDTO;
 import com.example.fitpassserver.global.common.dto.CommonResponseDTO;
@@ -12,7 +12,6 @@ import com.example.fitpassserver.global.common.support.LoginUser;
 import com.example.fitpassserver.global.common.support.LoginUserFinder;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import com.example.fitpassserver.owner.owner.entity.Owner;
-import com.example.fitpassserver.owner.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -21,13 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CommonServiceImpl implements CommonService {
     private final PasswordEncoder passwordEncoder;
-    private final MemberRepository memberRepository;
-    private final OwnerRepository ownerRepository;
     private final List<LoginUserFinder> loginUserFinders;
     private final JwtProvider jwtProvider;
     private final SmsRepository smsRepository;
@@ -64,10 +62,13 @@ public class CommonServiceImpl implements CommonService {
             if (!passwordEncoder.matches(dto.getPassword(), owner.getPassword())) {
                 throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
             }
+            List<Long> fitnessIds = owner.getFitnessList().stream()
+                    .map(Fitness::getId)
+                    .collect(Collectors.toList());
 
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(owner.getRole())
-                    .isLocationAgreed(false)
+                    .fitnessIds(fitnessIds)
                     .accessToken(jwtProvider.createAccessToken(owner))
                     .refreshToken(jwtProvider.createRefreshToken(owner))
                     .build();
