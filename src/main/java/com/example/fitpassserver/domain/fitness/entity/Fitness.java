@@ -5,22 +5,12 @@ import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDT
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.global.entity.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import com.example.fitpassserver.owner.owner.entity.Owner;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -82,6 +72,10 @@ public class Fitness extends BaseEntity {
     @Column(name = "total_fee")
     private Integer totalFee;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Owner owner;
+
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FitnessImage> additionalImages = new ArrayList<>();
 
@@ -102,7 +96,7 @@ public class Fitness extends BaseEntity {
     }
 
     public void update(FitnessAdminRequestDTO.FitnessReqDTO dto, List<Category> categoryList) {
-        if(dto.getTotalFee() > dto.getFee()){
+        if (dto.getTotalFee() > dto.getFee()) {
             throw new FitnessException(FitnessErrorCode.INVALID_SALE_PRICE);
         }
         this.name = dto.getFitnessName();
