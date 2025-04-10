@@ -44,9 +44,9 @@ public interface FitnessRepository extends JpaRepository<Fitness, Long> {
     Page<Fitness> findByPhoneNumberContaining(String phoneNumber, Pageable pageable);
 
 
-    @Query("SELECT f FROM Fitness f WHERE f.member.id = :memberId ORDER BY f.id DESC")
-    Slice<Fitness> findFirstPageByMemberId(@Param("memberId") Long memberId, Pageable pageable);
+    @Query("SELECT f FROM Fitness f WHERE f.owner.id = :ownerId ORDER BY f.id DESC")
+    Slice<Fitness> findFirstPageByOwnerId(@Param("ownerId") Long ownerId, Pageable pageable);
 
-    @Query("SELECT f FROM Fitness f WHERE f.member.id = :memberId AND f.id < :cursor ORDER BY f.id DESC")
-    Slice<Fitness> findByMemberAndCursor(@Param("memberId") Long memberId, @Param("cursor") Long cursor, Pageable pageable);
+    @Query("SELECT f FROM Fitness f WHERE f.owner.id = :ownerId AND f.id < :cursor ORDER BY f.id DESC")
+    Slice<Fitness> findByOwnerAndCursor(@Param("ownerId") Long ownerId, @Param("cursor") Long cursor, Pageable pageable);
 }

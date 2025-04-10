@@ -2,23 +2,26 @@ package com.example.fitpassserver.owner.fitness.service;
 
 import com.example.fitpassserver.admin.fitness.converter.FitnessAdminConverter;
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
+import com.example.fitpassserver.admin.fitness.dto.response.FitnessAdminResponseDTO;
 import com.example.fitpassserver.domain.fitness.converter.CategoryConverter;
 import com.example.fitpassserver.domain.fitness.converter.FitnessImageConverter;
 import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.entity.FitnessImage;
+import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
+import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
-import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.member.entity.MemberStatus;
-import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
-import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
 import com.example.fitpassserver.owner.fitness.converter.FitnessOwnerConverter;
-import com.example.fitpassserver.owner.fitness.dto.FitnessOwnerResDTO;
+import com.example.fitpassserver.owner.fitness.dto.request.FitnessOwnerRequestDTO;
+import com.example.fitpassserver.owner.fitness.dto.response.FitnessOwnerResponseDTO;
+import com.example.fitpassserver.owner.owner.entity.Owner;
+import com.example.fitpassserver.owner.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,12 +38,13 @@ import java.util.UUID;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class FitnessOwnerServiceImpl implements FitnessOwnerService {
 
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
-    private final MemberRepository memberRepository;
+    private final OwnerRepository ownerRepository;
 
     private String generateMainImageKey(Long fitnessId, String originalFilename){
         return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
@@ -50,9 +54,9 @@ public class FitnessOwnerServiceImpl implements FitnessOwnerService {
     }
 
     @Override
-    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.FitnessReqDTO dto, Long memberId) throws IOException {
+    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessOwnerRequestDTO.FitnessRequestDTO dto, String loginId) throws IOException {
         // 우선 Fitness 엔티티를 생성
-        Fitness fitness = FitnessAdminConverter.toEntity(dto);
+        Fitness fitness = FitnessOwnerConverter.toEntity(dto);
         fitnessRepository.save(fitness); // ID 생성됨
         Long fitnessId = fitness.getId(); // 생성된 ID 가져오기
 
@@ -81,18 +85,13 @@ public class FitnessOwnerServiceImpl implements FitnessOwnerService {
             fitnessImageRepository.saveAll(fitnessImages);
             fitness.setAdditionalImages(fitnessImages);
         }
-
         // 사업자 조회
-        Member member = memberRepository.findByIdAndStatusIs(memberId, MemberStatus.ACTIVE)
-                .orElseThrow(() -> new MemberException(MemberErrorCode.INACTIVE_ACCOUNT));
+        Owner owner = ownerRepository.findByLoginId(loginId).orElseThrow(
+                () ->new MemberException(MemberErrorCode.NOT_FOUND));
 
-        // 해당 전화번호의 사용자가 OWNER, ADMIN인지확인
-        if(!(member.getRole().equals(Role.ADMIN) || member.getRole().equals(Role.OWNER))){
-            throw new MemberException(MemberErrorCode.INVALID_ROLE);
-        }
 
         // fitness 맴버 매핑
-        fitness.setMember(member);
+        fitness.setOwner(owner);
 
         // 시설 저장
         fitnessRepository.save(fitness);
@@ -101,8 +100,8 @@ public class FitnessOwnerServiceImpl implements FitnessOwnerService {
     }
 
     @Override
-    public FitnessOwnerResDTO.FitnessListDTO getFitnessList(Long memberId, Long cursor, int size) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
+    public FitnessOwnerResponseDTO.FitnessListDTO getFitnessList(Long ownerId, Long cursor, int size) {
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow(
                 () -> new MemberException(MemberErrorCode.NOT_FOUND));
 
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
@@ -110,11 +109,41 @@ public class FitnessOwnerServiceImpl implements FitnessOwnerService {
 
         // 커서 체크 로직 수정
         if (cursor == null || cursor == 0L) {
-            fitnesses = fitnessRepository.findFirstPageByMemberId(memberId, pageable);
+            fitnesses = fitnessRepository.findFirstPageByOwnerId(ownerId, pageable);
         } else {
-            fitnesses = fitnessRepository.findByMemberAndCursor(memberId, cursor, pageable);
+            fitnesses = fitnessRepository.findByOwnerAndCursor(ownerId, cursor, pageable);
         }
 
         return FitnessOwnerConverter.toFitnessPageResDTO(fitnesses);
+    }
+
+    @Override
+    public FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long ownerId, Long fitnessId, FitnessOwnerRequestDTO.FitnessRequestDTO dto) {
+        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
+                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
+
+        if(!fitness.getOwner().getId().equals(ownerId)){
+            throw new MemberException(MemberErrorCode.INVALID_INFO);
+        }
+        List<Category> categoryList = CategoryConverter.toEntityList(dto.getCategoryList(), fitness);
+        fitness.setCategoryList(categoryList);
+
+        fitness.update(
+                dto.getFitnessName(),
+                dto.getAddress(),
+                dto.getDetailAddress(),
+                dto.getPhoneNumber(),
+                dto.getFee(),
+                dto.getTotalFee(),
+                categoryList,
+                dto.isPurchasable(),
+                dto.getNotice(),
+                dto.getTime(),
+                dto.getHowToUse(),
+                dto.getLatitude(),
+                dto.getLongitude()
+        );
+
+        return FitnessAdminConverter.from(fitness);
     }
 }

@@ -1,4 +1,4 @@
-package com.example.fitpassserver.owner.fitness.dto;
+package com.example.fitpassserver.owner.fitness.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-public class FitnessOwnerResDTO {
+public class FitnessOwnerResponseDTO {
 
     @Getter
     @NoArgsConstructor
