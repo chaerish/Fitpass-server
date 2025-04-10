@@ -9,6 +9,8 @@ import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
+import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
+import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CoinService {
     private final CoinRepository coinRepository;
+    private final CoinPaymentRepository coinPaymentRepository;
     private final PlanTypeRepository planTypeRepository;
     private final CoinTypeRepository coinTypeRepository;
     private final ApplicationEventPublisher eventPublisher;
@@ -33,21 +36,14 @@ public class CoinService {
 
     //결제 성공시 Coin 엔티티 증가
 
-    public Coin createNewCoin(Member member, KakaoPaymentApproveDTO dto) {
-        int price = dto.amount().total();
+    public Coin createNewCoinByKakaoPay(Member member, KakaoPaymentApproveDTO dto) {
+        return createNewCoin(member, dto.amount().total());
+    }
 
-        CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
-                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
-
-        if (coinType == null) {
-            throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
-        }
-        return coinRepository.save(Coin.builder()
-                .member(member)
-                .count(((long) coinType.getCoinQuantity()))
-                .expiredDate(LocalDate.now().plusDays(coinType.getExpirationPeriod()))
-                .planType(PlanType.NONE)
-                .build());
+    public Coin createNewCoinByPg(Member member, String paymentId, int price) {
+        Coin coin = createNewCoin(member, price);
+        createCoinHistory(member, paymentId, price, coin, "pg");
+        return coin;
     }
 
     @Transactional
@@ -70,6 +66,36 @@ public class CoinService {
                 .planType(planType)
                 .count((long) planTypeEntity.getCoinQuantity())
                 .expiredDate(LocalDate.now().plusDays(DEAD_LINE))
+                .build());
+    }
+
+    private Coin createNewCoin(Member member, int price) {
+        CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
+                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
+
+        if (coinType == null) {
+            throw new CoinException(CoinErrorCode.COIN_NOT_FOUND);
+        }
+        return coinRepository.save(Coin.builder()
+                .member(member)
+                .count(((long) coinType.getCoinQuantity()))
+                .expiredDate(LocalDate.now().plusDays(coinType.getExpirationPeriod()))
+                .planType(PlanType.NONE)
+                .build());
+    }
+
+    private CoinPaymentHistory createCoinHistory(Member member, String tid, int price, Coin coin, String method) {
+        CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
+                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(method)
+                .isAgree(true)
+                .paymentStatus(PaymentStatus.SUCCESS)
+                .tid(tid)
+                .coin(coin)
+                .member(member)
+                .coinCount((coinType.getCoinQuantity()))
+                .paymentPrice(price)
                 .build());
     }
 }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 public class CommonResponseDTO {
     /**
      * 토큰 정보 응답 DTO
@@ -16,9 +18,11 @@ public class CommonResponseDTO {
     @NoArgsConstructor
     public static class MemberTokenDTO {
         Role role;
-        boolean isLocationAgreed;
         String accessToken;
         String refreshToken;
+
+        boolean isLocationAgreed;
+        private List<Long> fitnessIds;
     }
 
 }

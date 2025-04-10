@@ -8,6 +8,10 @@ import com.example.fitpassserver.global.entity.BaseEntity;
 import com.example.fitpassserver.owner.owner.entity.Owner;
 import jakarta.persistence.*;
 
+import com.example.fitpassserver.owner.owner.entity.Owner;
+import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +82,10 @@ public class Fitness extends BaseEntity {
     @Column(name = "total_fee")
     private Integer totalFee;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Owner owner;
+
     @OneToMany(mappedBy = "fitness", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FitnessImage> additionalImages = new ArrayList<>();
 
@@ -85,9 +93,6 @@ public class Fitness extends BaseEntity {
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id")
-    private Owner owner;
 
     public void setCategoryList(List<Category> categoryList) {
         this.categoryList = categoryList;

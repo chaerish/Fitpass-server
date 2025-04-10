@@ -20,6 +20,12 @@ public class MemberRequestDTO {
     @NoArgsConstructor
     public static class MemberJoinDTO extends CommonRequestDTO.JoinDTO {
         @NotNull
+        @JsonProperty("isWork")
+        private boolean isWork;
+
+        private String company_name;
+
+        @NotNull
         @JsonProperty("locationAgreed")
         boolean isLocationAgreed;
     }
@@ -37,6 +43,12 @@ public class MemberRequestDTO {
 
         @NotBlank
         private String name;
+
+        @NotNull
+        @JsonProperty("isWork")
+        private boolean isWork;
+
+        private String company_name;
 
         @NotNull
         @JsonProperty("agree")
@@ -85,6 +97,15 @@ public class MemberRequestDTO {
         private Double latitude;
         @NotNull(message = "경도는 필수 입력 값입니다.")
         private Double longitude;
+    }
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class isLocationDTO {
+        @NotNull
+        private boolean isLocationAgreed;
     }
 
     /**
