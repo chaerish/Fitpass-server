@@ -1,4 +1,4 @@
-package com.example.fitpassserver.admin.fitness.dto.request;
+package com.example.fitpassserver.owner.fitness.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +9,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class FitnessAdminRequestDTO {
+public class FitnessOwnerRequestDTO {
     @Getter
     @Builder
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class FitnessReqDTO {
-        public String loginId;
+    public static class FitnessRequestDTO {
         public String fitnessName;
         public String address;
         public String detailAddress;

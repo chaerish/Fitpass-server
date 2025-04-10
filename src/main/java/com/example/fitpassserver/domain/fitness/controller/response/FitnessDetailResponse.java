@@ -11,12 +11,12 @@ public class FitnessDetailResponse {
     private Long fitnessId;
     private String fitnessName;
     private String address;
+    private String detailAddress;
     private String phoneNumber;
     private String categoryName;
     private String notice;
     private String time;
     private String howToUse;
-    private String etc;
     private Integer fee;
     private Double distance;
     private String imageUrl;

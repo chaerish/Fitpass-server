@@ -1,4 +1,4 @@
-package com.example.fitpassserver.admin.fitness.service;
+package com.example.fitpassserver.owner.fitness.service;
 
 import com.example.fitpassserver.admin.fitness.converter.FitnessAdminConverter;
 import com.example.fitpassserver.admin.fitness.dto.request.FitnessAdminRequestDTO;
@@ -15,13 +15,16 @@ import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
+import com.example.fitpassserver.owner.fitness.converter.FitnessOwnerConverter;
+import com.example.fitpassserver.owner.fitness.dto.request.FitnessOwnerRequestDTO;
+import com.example.fitpassserver.owner.fitness.dto.response.FitnessOwnerResponseDTO;
 import com.example.fitpassserver.owner.owner.entity.Owner;
 import com.example.fitpassserver.owner.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,10 +36,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
 @Transactional
+@RequiredArgsConstructor
 @Slf4j
-public class FitnessAdminServiceImpl implements FitnessAdminService{
+public class FitnessOwnerServiceImpl implements FitnessOwnerService {
+
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
@@ -50,9 +54,9 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     }
 
     @Override
-    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessAdminRequestDTO.FitnessReqDTO dto) throws IOException {
+    public Long createFitness(MultipartFile mainImage, List<MultipartFile> additionalImages, FitnessOwnerRequestDTO.FitnessRequestDTO dto, String loginId) throws IOException {
         // 우선 Fitness 엔티티를 생성
-        Fitness fitness = FitnessAdminConverter.toEntity(dto);
+        Fitness fitness = FitnessOwnerConverter.toEntity(dto);
         fitnessRepository.save(fitness); // ID 생성됨
         Long fitnessId = fitness.getId(); // 생성된 ID 가져오기
 
@@ -81,10 +85,9 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
             fitnessImageRepository.saveAll(fitnessImages);
             fitness.setAdditionalImages(fitnessImages);
         }
-
-        // 로그인 아이디 사업자 조회
-        Owner owner = ownerRepository.findByLoginId(dto.getLoginId())
-                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+        // 사업자 조회
+        Owner owner = ownerRepository.findByLoginId(loginId).orElseThrow(
+                () ->new MemberException(MemberErrorCode.NOT_FOUND));
 
 
         // fitness 맴버 매핑
@@ -97,38 +100,31 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     }
 
     @Override
-    public FitnessAdminResponseDTO.FitnessListDTO getFitnessList(int page, int size, String searchType, String keyword) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+    public FitnessOwnerResponseDTO.FitnessListDTO getFitnessList(Long ownerId, Long cursor, int size) {
+        Owner owner = ownerRepository.findById(ownerId).orElseThrow(
+                () -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-        Page<Fitness> fitnessPage;
-        if (StringUtils.isEmpty(searchType) || StringUtils.isEmpty(keyword)) {
-            // 검색 조건이 없으면 전체 조회
-            fitnessPage = fitnessRepository.findAll(pageRequest);
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "id"));
+        Slice<Fitness> fitnesses;
+
+        // 커서 체크 로직 수정
+        if (cursor == null || cursor == 0L) {
+            fitnesses = fitnessRepository.findFirstPageByOwnerId(ownerId, pageable);
         } else {
-            switch (searchType) {
-                case "name":
-                    fitnessPage = fitnessRepository.findByNameContaining(keyword, pageRequest);
-                    break;
-                case "category":
-                    fitnessPage = fitnessRepository.findByCategoryList_NameContaining(keyword, pageRequest);
-                    break;
-                case "phoneNumber":
-                    fitnessPage = fitnessRepository.findByPhoneNumberContaining(keyword, pageRequest);
-                    break;
-                default:
-                    fitnessPage = fitnessRepository.findAll(pageRequest);
-            }
+            fitnesses = fitnessRepository.findByOwnerAndCursor(ownerId, cursor, pageable);
         }
 
-        return FitnessAdminConverter.from(fitnessPage);
+        return FitnessOwnerConverter.toFitnessPageResDTO(fitnesses);
     }
 
-
     @Override
-    public FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long fitnessId, FitnessAdminRequestDTO.FitnessReqDTO dto) {
+    public FitnessAdminResponseDTO.FitnessInfoDTO updateFitness(Long ownerId, Long fitnessId, FitnessOwnerRequestDTO.FitnessRequestDTO dto) {
         Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
                 () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
 
+        if(!fitness.getOwner().getId().equals(ownerId)){
+            throw new MemberException(MemberErrorCode.INVALID_INFO);
+        }
         List<Category> categoryList = CategoryConverter.toEntityList(dto.getCategoryList(), fitness);
         fitness.setCategoryList(categoryList);
 
@@ -150,23 +146,4 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
 
         return FitnessAdminConverter.from(fitness);
     }
-
-    @Override
-    public void deleteFitness(Long fitnessId) {
-        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
-                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
-        fitnessRepository.deleteById(fitnessId);
-    }
-
-
-    @Override
-    public FitnessAdminResponseDTO.FitnessInfoDTO updatePurchaseStatus(Long fitnessId) {
-        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
-                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
-
-        fitness.updatePurchaseStatus();
-
-        return FitnessAdminConverter.from(fitness);
-    }
-
 }

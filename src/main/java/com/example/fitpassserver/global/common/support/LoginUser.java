@@ -7,6 +7,8 @@ public interface LoginUser {
 
     String getLoginId();
 
+    String getPassword();
+
     String getPhoneNumber();
 
     Role getRole();

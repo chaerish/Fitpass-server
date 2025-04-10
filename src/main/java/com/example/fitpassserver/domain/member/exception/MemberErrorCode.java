@@ -19,8 +19,11 @@ public enum MemberErrorCode implements BaseErrorCode {
     DUPLICATE_PHONE_NUMBER(HttpStatus.CONFLICT, "PHONE409", "이미 가입된 번호입니다."),
     DUPLICATE_LOGINID(HttpStatus.BAD_REQUEST, "MEMBER400", "이미 사용중인 아이디입니다."),
     INVALID_INFO(HttpStatus.BAD_REQUEST, "MEMBER404", "올바르지 않은 정보입니다."),
+    UNVERIFIED_PHONE_NUMBER(HttpStatus.UNAUTHORIZED, "PHONE401", "인증되지 않은 전화번호입니다."),
+    UNREGISTERED_PHONE_NUMBER(HttpStatus.BAD_REQUEST, "MEMBER400", "등록되지 않은 회원 전화번호입니다."),
+    INVALID_ROLE(HttpStatus.FORBIDDEN, "MEMBER403", "해당 사용자의 권한이 유효하지 않습니다."),
     UNSUPPORTED_USER_TYPE(HttpStatus.BAD_REQUEST, "MEMBER401", "지원하지 않는 사용자 타입입니다."),
-    UNVERIFIED_PHONE_NUMBER(HttpStatus.UNAUTHORIZED, "PHONE401", "인증되지 않은 전화번호입니다.");
+    ;
     private final HttpStatus status;
     private final String code;
     private final String message;
