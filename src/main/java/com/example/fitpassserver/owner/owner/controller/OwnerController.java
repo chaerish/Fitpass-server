@@ -4,6 +4,7 @@ import com.example.fitpassserver.domain.member.validation.validator.CheckLoginId
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
 import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
+import com.example.fitpassserver.owner.owner.annotation.CurrentOwner;
 import com.example.fitpassserver.owner.owner.converter.OwnerConverter;
 import com.example.fitpassserver.owner.owner.dto.OwnerRequestDTO;
 import com.example.fitpassserver.owner.owner.dto.OwnerResponseDTO;
@@ -55,6 +56,12 @@ public class OwnerController {
     public ApiResponse<OwnerResponseDTO.JoinResultDTO> join(@RequestBody @Valid OwnerRequestDTO.OwnerJoinDTO request) {
         Owner owner = ownerCommandService.joinOwner(request);
         return ApiResponse.onSuccess(OwnerConverter.toJoinResultDTO(owner));
+    }
+
+    @Operation(summary = "사업자 test api", description = "사업자 회원가입을 위한 api입니다.")
+    @GetMapping("/test")
+    public ApiResponse<?> join(@CurrentOwner Owner owner) {
+        return ApiResponse.onSuccess(owner.getLoginId());
     }
 
 }
