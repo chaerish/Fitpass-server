@@ -35,7 +35,7 @@ public class Owner extends BaseEntity implements LoginUser {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "phone_number", nullable = false, unique = true)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
     @Column(name = "corporation", nullable = false)
