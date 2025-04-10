@@ -15,6 +15,7 @@ public class FitnessAdminRequestDTO {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class FitnessReqDTO {
+        public String loginId;
         public String fitnessName;
         public String address;
         public String detailAddress;
