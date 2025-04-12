@@ -37,8 +37,7 @@ public class CoinPaymentEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(CoinPaymentAllSuccessEvent event) {
-//        smsCertificationUtil.sendCoinPaymentSMS(event.phoneNumber(), event.quantity(), event.totalAmount());
-        kakaoAlimtalkUtil.coinPaymentAlimtalk(event.phoneNumber(), event.totalAmount(), event.quantity() + "코인", event.paymentMethod());
+        kakaoAlimtalkUtil.sendCoinOrPlanPayment(event.phoneNumber(), event.quantity() + "코인", event.paymentMethod());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 

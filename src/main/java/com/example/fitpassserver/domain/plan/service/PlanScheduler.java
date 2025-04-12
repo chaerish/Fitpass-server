@@ -70,7 +70,7 @@ public class PlanScheduler {
         paymentService.cancelSubscription(plan);
         plan.changePlanType(PlanType.NONE);
 //        smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
-        kakaoAlimtalkUtil.cancelPlanAlimtalk(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
+//        kakaoAlimtalkUtil.paymentSecondFailAlimtalk(plan.getMember().getPhoneNumber());
         planRepository.save(plan);
     }
 
@@ -95,9 +95,8 @@ public class PlanScheduler {
 //                    smsCertificationUtil.sendPlanInsufficientFundsAlert(
 //                            plan.getMember().getPhoneNumber(),
 //                            plan.getPlanType().getName());
-                    kakaoAlimtalkUtil.paymentFailAlimtalk(
-                            plan.getMember().getPhoneNumber(),
-                            plan.getPlanType().getName());
+                    kakaoAlimtalkUtil.sendFirstPaymentFail(
+                            plan.getMember().getPhoneNumber());
                     log.error("plan ID: {} - 잔액 부족으로 결제 실패: {}", plan.getId(), e.getMessage(), e);
                 } else {
                     fail(plan);

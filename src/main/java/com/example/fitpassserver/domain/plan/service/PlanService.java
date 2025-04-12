@@ -103,12 +103,13 @@ public class PlanService {
 
     @Transactional
     public void changeSubscriptionInfo(Plan plan, PlanType planType) {
+        String oldPlanName = plan.getPlanType().getName();
         plan.changePlanType(planType);
         plan.updatePlanDate();
         plan.resetPaymentCount();
         planRepository.save(plan);
         eventPublisher.publishEvent(
-                new PlanChangeAllSuccessEvent(plan.getMember().getPhoneNumber(), plan.getPlanType().getName()));
+                new PlanChangeAllSuccessEvent(plan.getMember().getPhoneNumber(),oldPlanName, plan.getPlanType().getName()));
     }
 
 
