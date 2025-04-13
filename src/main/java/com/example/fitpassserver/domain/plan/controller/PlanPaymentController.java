@@ -1,11 +1,13 @@
 package com.example.fitpassserver.domain.plan.controller;
 
+import com.example.fitpassserver.domain.coin.service.CoinService;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PGRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PGResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.command.PGPaymentCommandService;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import com.example.fitpassserver.domain.plan.converter.PlanConverter;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.ChangePlanDTO;
@@ -34,10 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "플랜 결제 API", description = "플랜 결제 API입니다.")
 public class PlanPaymentController {
     private final KakaoPaymentService paymentService;
-    private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final PlanService planService;
-    private final SmsCertificationUtil smsCertificationUtil;
     private final PlanRedisService planRedisService;
+    private final PGPaymentCommandService paymentCommandService;
 
     @Operation(summary = "코인 정기 결제 1회차 요청", description = "가장 처음 플랜을 등록시, 코인 정기 결제(플랜 구매)를 요청합니다.")
     @PostMapping("/first-request")
@@ -105,4 +106,11 @@ public class PlanPaymentController {
         return ApiResponse.onSuccess(response);
     }
 
+    @Operation(summary = "등록된 카드로 정기 결제하기", description = "등록된 카드로 정기결제하기")
+    @PostMapping("/pg/billing-keys")
+    public ApiResponse<PGResponseDTO.PGSubscriptionPayResponseDTO> planPayWithBillingKey(@CurrentMember Member member,
+                                                                                         @RequestBody PGRequestDTO.PGSubscriptionPaymentWithBillingKeyRequestDTO dto) {
+        PGResponseDTO.PGSubscriptionPayResponseDTO response = paymentCommandService.createPGSubscriptionPay(member, dto);
+        return ApiResponse.onSuccess(response);
+    }
 }

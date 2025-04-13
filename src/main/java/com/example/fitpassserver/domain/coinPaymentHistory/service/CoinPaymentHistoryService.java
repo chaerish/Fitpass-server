@@ -121,7 +121,7 @@ public class CoinPaymentHistoryService {
         coinPaymentRepository.save(history);
     }
 
-    private CoinPaymentHistory createSinglePayCoin(Member member, String tid, int price, Coin coin) {
+    public CoinPaymentHistory createSinglePayCoin(Member member, String tid, int price, Coin coin) {
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
         return coinPaymentRepository.save(CoinPaymentHistory.builder()

@@ -41,7 +41,7 @@ public class PlanSubscriptionEventListener {
     public void handle(PlanSuccessEvent event) {
         Member member = event.member();
         PlanSubscriptionResponseDTO dto = event.dto();
-        Plan plan = planService.createNewPlan(member, dto.itemName(), dto.sid());
+        Plan plan = planService.createNewKakaoPlan(member, dto.itemName(), dto.sid());
         Coin coin = coinService.createSubscriptionNewCoin(member, plan);
         CoinPaymentHistory history = coinPaymentHistoryService.createNewCoinPaymentByPlan(event.member(), dto,
                 coin);

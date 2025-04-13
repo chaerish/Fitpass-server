@@ -13,4 +13,11 @@ public class PGRequestDTO {
             int amount
     ) {
     }
+
+    public record PGSubscriptionPaymentWithBillingKeyRequestDTO(
+            String billingKey,
+            String orderName,
+            int amount
+    ) {
+    }
 }
