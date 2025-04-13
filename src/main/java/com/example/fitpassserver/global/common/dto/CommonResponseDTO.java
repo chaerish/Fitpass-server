@@ -17,7 +17,8 @@ public class CommonResponseDTO {
     @NoArgsConstructor
     public static class MemberTokenDTO {
         Role role;
-        Long userId;
+        Long memberId;
+        String memberName;
         String accessToken;
         String refreshToken;
 
