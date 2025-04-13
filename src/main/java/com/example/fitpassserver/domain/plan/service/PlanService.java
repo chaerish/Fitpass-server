@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.plan.service;
 
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PGRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
@@ -9,6 +10,7 @@ import com.example.fitpassserver.domain.plan.dto.event.PlanChangeSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.ChangePlanDTO;
+import com.example.fitpassserver.domain.plan.entity.PaymentType;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
@@ -43,21 +45,12 @@ public class PlanService {
         }
     }
 
-    public Plan createNewPlan(Member member, String planName, String sid) {
-        Plan plan = planRepository.findByMember(member).orElse(null);
-        if (plan == null) {
-            return planRepository.save(Plan.builder()
-                    .planType(PlanType.getPlanType(planName))
-                    .planDate(LocalDate.now())
-                    .sid(sid)
-                    .paymentStatus(PaymentStatus.SUCCESS)
-                    .paymentCount(1)
-                    .member(member)
-                    .build());
-        }
-        plan.changePlanType(PlanType.getPlanType(planName));
-        planRepository.save(plan);
-        return plan;
+    public Plan createNewKakaoPlan(Member member, String planName, String sid) {
+        return this.createNewPlan(member, planName, sid, PaymentType.KAKAO);
+    }
+
+    public Plan createNewPGPlan(Member member, PGRequestDTO.PGSubscriptionPaymentWithBillingKeyRequestDTO dto) {
+        return this.createNewPlan(member, dto.orderName(), dto.billingKey(), PaymentType.PG);
     }
 
     @Transactional
@@ -119,5 +112,23 @@ public class PlanService {
         eventPublisher.publishEvent(
                 new PlanPaymentAllSuccessEvent(plan.getMember().getPhoneNumber(), plan.getPlanType().getName(),
                         history.getPaymentPrice(), history.getPaymentMethod()));
+    }
+
+    private Plan createNewPlan(Member member, String planName, String sid, PaymentType paymentType) {
+        Plan plan = planRepository.findByMember(member).orElse(null);
+        if (plan == null) {
+            return planRepository.save(Plan.builder()
+                    .planType(PlanType.getPlanType(planName))
+                    .planDate(LocalDate.now())
+                    .sid(sid)
+                    .paymentStatus(PaymentStatus.SUCCESS)
+                    .paymentType(paymentType)
+                    .paymentCount(1)
+                    .member(member)
+                    .build());
+        }
+        plan.changePlanType(PlanType.getPlanType(planName));
+        planRepository.save(plan);
+        return plan;
     }
 }

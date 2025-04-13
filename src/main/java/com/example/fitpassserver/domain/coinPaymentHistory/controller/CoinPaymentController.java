@@ -11,6 +11,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentS
 import com.example.fitpassserver.domain.coinPaymentHistory.service.command.PGPaymentCommandService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.query.PGPaymentQueryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOneApiUtil;
+import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOnePaymentIdUtil;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
@@ -38,8 +39,8 @@ public class CoinPaymentController {
     private final CoinPaymentHistoryService coinPaymentHistoryService;
     private final CoinService coinService;
     private final CoinPaymentHistoryRedisService coinPaymentHistoryRedisService;
-    private final PGPaymentCommandService memberCardCommandService;
-    private final PGPaymentQueryService memberCardQueryService;
+    private final PGPaymentCommandService pgPaymentCommandService;
+    private final PGPaymentQueryService pgPaymentQueryService;
     private final PortOneApiUtil portOne;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
@@ -92,15 +93,14 @@ public class CoinPaymentController {
     @PostMapping("/pg/success")
     public ApiResponse<PGResponseDTO.PGSinglePayResponseDTO> pgSinglePay(@CurrentMember Member member,
                                                                          @RequestBody PGRequestDTO.PGSinglePayRequestDTO dto) {
-        PortOneResponseDTO.SearchSinglePaymentDTO searchSinglePaymentDTO = portOne.searchSinglePayment(dto.paymentId());
-        Coin coin = coinService.createNewCoinByPg(member, dto.paymentId(), searchSinglePaymentDTO.amount().paid());
-        return ApiResponse.onSuccess(PGResponseDTO.PGSinglePayResponseDTO.from(coin));
+        PGResponseDTO.PGSinglePayResponseDTO response = pgPaymentCommandService.pgSinglePay(member, dto);
+        return ApiResponse.onSuccess(response);
     }
 
     @Operation(summary = "등록된 카드 목록 가져오기", description = "등록된 카드 정보 가져오기")
     @PostMapping("/pg/cards")
     public ApiResponse<PGResponseDTO.PGSearchCardListResponseDTO> findCards(@CurrentMember Member member) {
-        PGResponseDTO.PGSearchCardListResponseDTO response = memberCardQueryService.findCards(member);
+        PGResponseDTO.PGSearchCardListResponseDTO response = pgPaymentQueryService.findCards(member);
         return ApiResponse.onSuccess(response);
     }
 
@@ -108,10 +108,8 @@ public class CoinPaymentController {
     @PostMapping("/pg/billing-keys")
     public ApiResponse<PGResponseDTO.PGSinglePayResponseDTO> payWithBillingKey(@CurrentMember Member member,
                                                                                @RequestBody PGRequestDTO.PGPaymentWithBillingKeyRequestDTO dto) {
-        String paymentId = UUID.randomUUID().toString().replace("-", "");
-        // TODO: Transaction 처리 필요
-        Coin coin = coinService.createNewCoinByPg(member, paymentId, dto.amount());
-        memberCardCommandService.payWithBillingKey(member, paymentId, dto);
-        return ApiResponse.onSuccess(PGResponseDTO.PGSinglePayResponseDTO.from(coin));
+
+        PGResponseDTO.PGSinglePayResponseDTO response = pgPaymentCommandService.payWithBillingKey(member, dto);
+        return ApiResponse.onSuccess(response);
     }
 }

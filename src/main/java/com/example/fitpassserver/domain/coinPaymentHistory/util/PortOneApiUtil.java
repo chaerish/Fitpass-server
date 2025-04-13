@@ -4,10 +4,6 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PortOneRe
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PortOneResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneException;
-import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
-import com.example.fitpassserver.domain.plan.exception.PlanException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +35,7 @@ public class PortOneApiUtil {
     public PortOneResponseDTO.SearchSinglePaymentDTO searchSinglePayment(String paymentId) {
         WebClient webClient = getPortOneWebClient();
         Mono<PortOneResponseDTO.SearchSinglePaymentDTO> response = webClient.get()
-                .uri("/payment/" + paymentId)
+                .uri("/payments/" + paymentId)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, this::handleError)
                 .bodyToMono(PortOneResponseDTO.SearchSinglePaymentDTO.class)
