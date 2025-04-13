@@ -98,7 +98,7 @@ public class CoinPaymentController {
     }
 
     @Operation(summary = "등록된 카드 목록 가져오기", description = "등록된 카드 정보 가져오기")
-    @PostMapping("/pg/cards")
+    @GetMapping("/pg/cards")
     public ApiResponse<PGResponseDTO.PGSearchCardListResponseDTO> findCards(@CurrentMember Member member) {
         PGResponseDTO.PGSearchCardListResponseDTO response = pgPaymentQueryService.findCards(member);
         return ApiResponse.onSuccess(response);
