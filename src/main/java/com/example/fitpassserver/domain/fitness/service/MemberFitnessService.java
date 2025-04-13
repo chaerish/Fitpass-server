@@ -13,8 +13,12 @@ import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
+import com.example.fitpassserver.domain.review.service.ReviewReminderService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,9 +32,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class MemberFitnessService {
     private final MemberFitnessRepository memberFitnessRepository;
-    // MemberRepository 의존성 추가
      private final MemberRepository memberRepository;
      private final FitnessImageService fitnessImageService;
+     private final ReviewReminderService reviewReminderService;
 
      private void checkMember(Member member, MemberFitness memberFitness){
          if(!memberFitness.getMember().getId().equals(member.getId())){
@@ -75,6 +79,8 @@ public class MemberFitnessService {
 
         memberFitness.use();
         memberFitnessRepository.createEventSchedulerUpdateStatusIsProgress(memberFitness.getId());
+
+        reviewReminderService.reserve(memberFitness);
     }
 
     public MemberFitnessResDTO.MemberFitnessPreviewDTO getPass(Member member, Long passId) {

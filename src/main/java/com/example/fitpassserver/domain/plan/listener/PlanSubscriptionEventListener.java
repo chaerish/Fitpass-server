@@ -52,7 +52,7 @@ public class PlanSubscriptionEventListener {
     @Async
     public void handle(PlanPaymentAllSuccessEvent event) {
 //        smsCertificationUtil.sendPlanPaymentSMS(event.phoneNumber(), event.planName(), event.totalAmount());
-        kakaoAlimtalkUtil.coinPaymentAlimtalk(event.phoneNumber(), event.totalAmount(), event.planName(), event.paymentMethod());
+        kakaoAlimtalkUtil.sendCoinOrPlanPayment(event.phoneNumber(), event.planName(), event.paymentMethod());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
@@ -79,7 +79,7 @@ public class PlanSubscriptionEventListener {
     @Async
     public void handle(PlanChangeAllSuccessEvent event) {
 //        smsCertificationUtil.sendPlanChangeAlert(event.phoneNumber(), event.planName());
-        kakaoAlimtalkUtil.planChangeAlimtalk(event.phoneNumber(), event.planName());
+        kakaoAlimtalkUtil.sendPlanChange(event.phoneNumber(),event.oldPlanName(), event.planName());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
@@ -94,7 +94,7 @@ public class PlanSubscriptionEventListener {
     @Async
     public void handle(PlanCancelSuccessEvent event) {
 //        smsCertificationUtil.sendPlanInActiveAlert(event.phoneNumber(), event.planName());
-        kakaoAlimtalkUtil.deactivatePlanAlimtalk(event.phoneNumber(), event.planName());
+        kakaoAlimtalkUtil.sendSecondPaymentFail(event.phoneNumber());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 

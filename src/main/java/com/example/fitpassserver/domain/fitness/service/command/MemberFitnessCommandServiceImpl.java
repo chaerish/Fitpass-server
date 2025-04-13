@@ -82,7 +82,7 @@ public class MemberFitnessCommandServiceImpl implements MemberFitnessCommandServ
 
         // 결제 문자 발송
 //        smsCertificationUtil.sendPassPaymentSMS(member.getPhoneNumber(), price, memberFitness);
-        kakaoAlimtalkUtil.passPaymentAlimtalk(member.getPhoneNumber(), Math.toIntExact(price), memberFitness.getFitness().getName());
+        kakaoAlimtalkUtil.sendPassPayment(member.getPhoneNumber(), Math.toIntExact(price), memberFitness.getFitness().getName());
 
         return memberFitness;
     }
