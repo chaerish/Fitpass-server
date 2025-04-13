@@ -42,7 +42,6 @@ public class PlanScheduler {
             else if (plan.getPaymentType().equals(PaymentType.PG)) {
                 pgSubscriptionPay(plan, this::handleException);
             }
-
         }
     }
 
@@ -59,7 +58,7 @@ public class PlanScheduler {
         paymentService.cancelSubscription(plan);
         plan.changePlanType(PlanType.NONE);
 //        smsCertificationUtil.sendPlanCancelAlert(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
-        kakaoAlimtalkUtil.cancelPlanAlimtalk(plan.getMember().getPhoneNumber(), plan.getPlanType().getName());
+//        kakaoAlimtalkUtil.paymentSecondFailAlimtalk(plan.getMember().getPhoneNumber());
         planRepository.save(plan);
     }
 
@@ -80,7 +79,7 @@ public class PlanScheduler {
                 kakaoSubscriptionPay(plan, this::retryHandleException);
             }
             else if (plan.getPaymentType().equals(PaymentType.PG)) {
-
+                pgSubscriptionPay(plan, this::retryHandleException);
             }
         }
     }
@@ -122,13 +121,14 @@ public class PlanScheduler {
     private void retryHandleException(Plan plan, PlanException e) {
         if (e.getBaseErrorCode() == PlanErrorCode.PLAN_INSUFFICIENT_FUNDS) {
             insufficient(plan);
-            kakaoAlimtalkUtil.paymentFailAlimtalk(
-                    plan.getMember().getPhoneNumber(),
-                    plan.getPlanType().getName());
+            kakaoAlimtalkUtil.sendFirstPaymentFail(
+                    plan.getMember().getPhoneNumber()
+            );
             log.error("plan ID: {} - 잔액 부족으로 결제 실패: {}", plan.getId(), e.getMessage(), e);
         } else {
             fail(plan);
             log.error("plan ID: {} - 결제 사 결제 오류", plan.getId(), e);
         }
     }
+
 }

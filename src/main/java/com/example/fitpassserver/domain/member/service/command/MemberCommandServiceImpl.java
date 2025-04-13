@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.member.service.command;
 
+import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.dto.MemberRequestDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
@@ -25,6 +26,7 @@ public class MemberCommandServiceImpl implements MemberCommandService {
     private final JwtProvider jwtProvider;
     private final ProfileRepository profileRepository;
     private final SmsRepository smsRepository;
+    private final KakaoAlimtalkUtil kakaoAlimtalkUtil;
 
     /**
      * 회원가입
@@ -65,6 +67,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
 
         profileRepository.save(profile);
 
+        // 회원가입 완료 알림톡
+        kakaoAlimtalkUtil.sendRegisterSuccess(newMember.getPhoneNumber());
+
         return savedMember;
     }
 
@@ -79,6 +84,9 @@ public class MemberCommandServiceImpl implements MemberCommandService {
         member.socialJoin(request);
         member.updateRole(Role.MEMBER);
         member.updateIsAdditionInfo(true);
+
+        // 회원가입 완료 알림톡
+        kakaoAlimtalkUtil.sendRegisterSuccess(member.getPhoneNumber());
 
         return memberRepository.save(member);
     }
