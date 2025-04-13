@@ -104,10 +104,11 @@ public class MemberCommandServiceImpl implements MemberCommandService {
      **/
     @Override
     @Transactional
-    public void updateIsLocationAgree(String loginId, MemberRequestDTO.isLocationDTO dto) {
+    public void updateIsLocationAgree(String loginId) {
         Member member = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
-        member.updateIsLocationAgree(dto.isLocationAgreed());
+        member.updateIsLocationAgree(true);
+
     }
 
     /**

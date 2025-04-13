@@ -57,8 +57,8 @@ public class MemberController {
 
     @Operation(summary = "사용자 위치 이용 동의여부 업데이트 api", description = "사용자 위치 이용 동의 여부를 업데이트합니다.")
     @PatchMapping("/location_agree")
-    public ApiResponse<String> updateIsLocationAgree(@CurrentMember Member member, @RequestBody @Valid MemberRequestDTO.isLocationDTO dto) {
-        memberCommandService.updateIsLocationAgree(member.getLoginId(), dto);
+    public ApiResponse<String> updateIsLocationAgree(@CurrentMember Member member) {
+        memberCommandService.updateIsLocationAgree(member.getLoginId());
         return ApiResponse.onSuccess("사용자의 위치 동의 여부가 변경되었습니다.");
     }
 
