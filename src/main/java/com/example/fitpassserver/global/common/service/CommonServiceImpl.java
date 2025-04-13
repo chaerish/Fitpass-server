@@ -51,7 +51,8 @@ public class CommonServiceImpl implements CommonService {
 
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(member.getRole())
-                    .userId(member.getId())
+                    .memberId(member.getId())
+                    .memberName(member.getName())
                     .isLocationAgreed(member.isLocationAgreed())
                     .accessToken(jwtProvider.createAccessToken(member))
                     .refreshToken(jwtProvider.createRefreshToken(member))
