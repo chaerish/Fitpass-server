@@ -12,15 +12,14 @@ import com.example.fitpassserver.global.common.support.LoginUser;
 import com.example.fitpassserver.global.common.support.LoginUserFinder;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import com.example.fitpassserver.owner.owner.entity.Owner;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +42,6 @@ public class CommonServiceImpl implements CommonService {
                 .findFirst()
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-
         if (loginUser instanceof Member member) {
             if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
                 throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
@@ -53,6 +51,7 @@ public class CommonServiceImpl implements CommonService {
 
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(member.getRole())
+                    .userId(member.getId())
                     .isLocationAgreed(member.isLocationAgreed())
                     .accessToken(jwtProvider.createAccessToken(member))
                     .refreshToken(jwtProvider.createRefreshToken(member))
