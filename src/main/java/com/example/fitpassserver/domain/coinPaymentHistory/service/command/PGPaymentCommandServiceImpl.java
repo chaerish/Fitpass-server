@@ -12,7 +12,6 @@ import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOneApiUtil;
 import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOnePaymentIdUtil;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
-import com.example.fitpassserver.domain.plan.entity.PlanType;
 import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
@@ -33,12 +32,13 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
     private final PlanService planService;
     private final PlanTypeRepository planTypeRepository;
 
+
     @Override
     public PGResponseDTO.PGSinglePayResponseDTO payWithBillingKey(Member member, PGRequestDTO.PGPaymentWithBillingKeyRequestDTO dto) {
         String paymentId = PortOnePaymentIdUtil.getRandomPaymentId();
         Coin coin = coinService.createNewCoinByPg(member, paymentId, dto.amount());
 
-        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createSinglePayCoin(member, paymentId, dto.amount(), coin);
+        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createPGSinglePayCoin(member, paymentId, dto.amount(), coin);
         coinService.setCoinAndCoinPayment(coin, coinPaymentHistory);
 
         payWithBillingKey(member, paymentId, dto);
@@ -50,7 +50,7 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
         PortOneResponseDTO.SearchSinglePaymentDTO searchSinglePaymentDTO = portOneApiUtil.searchSinglePayment(dto.paymentId());
         Coin coin = coinService.createNewCoinByPg(member, dto.paymentId(), searchSinglePaymentDTO.amount().paid());
 
-        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createSinglePayCoin(member, dto.paymentId(), searchSinglePaymentDTO.amount().paid(), coin);
+        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createPGSinglePayCoin(member, dto.paymentId(), searchSinglePaymentDTO.amount().paid(), coin);
         coinService.setCoinAndCoinPayment(coin, coinPaymentHistory);
 
         return PGResponseDTO.PGSinglePayResponseDTO.from(coin);
@@ -63,7 +63,7 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
 
         Plan plan = planService.createNewPGPlan(member, dto);
         Coin coin = coinService.createSubscriptionNewCoin(member, plan);
-        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createSinglePayCoin(member, paymentId, dto.amount(), coin);
+        CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createPGPlanPayCoin(member, dto.orderName(), paymentId, dto.amount(), coin);
         PortOneRequestDTO.BillingKeyPaymentRequestDTO request = PortOneRequestDTO.BillingKeyPaymentRequestDTO.from(member.getId(), dto.billingKey(), dto.orderName(), dto.amount());
         portOneApiUtil.payWithBillingKey(paymentId, request);
         coinService.setCoinAndCoinPayment(coin, coinPaymentHistory);
