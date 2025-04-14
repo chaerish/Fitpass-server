@@ -12,14 +12,15 @@ import com.example.fitpassserver.global.common.support.LoginUser;
 import com.example.fitpassserver.global.common.support.LoginUserFinder;
 import com.example.fitpassserver.global.jwt.util.JwtProvider;
 import com.example.fitpassserver.owner.owner.entity.Owner;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,6 +70,8 @@ public class CommonServiceImpl implements CommonService {
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(owner.getRole())
                     .fitnessIds(fitnessIds)
+                    .memberId(owner.getId())
+                    .memberName(owner.getName())
                     .accessToken(jwtProvider.createAccessToken(owner))
                     .refreshToken(jwtProvider.createRefreshToken(owner))
                     .build();
