@@ -120,6 +120,10 @@ public class Owner extends BaseEntity implements LoginUser {
         this.status = MemberStatus.INACTIVE;
     }
 
+    public void updateOwnerStatus(OwnerStatus ownerStatus) {
+        this.ownerStatus = ownerStatus;
+    }
+
     public void updateIsAdditionInfo(boolean isAdditionalInfo) {
         this.isAdditionalInfo = isAdditionalInfo;
     }
