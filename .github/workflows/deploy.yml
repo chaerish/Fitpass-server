@@ -75,8 +75,9 @@ jobs:
             HEALTH_URL="http://127.0.0.1:$GREEN_PORT/actuator/health"
             
             docker stop $GREEN_CONTAINER || true
+            sleep 5
             docker rm $GREEN_CONTAINER || true
-            sleep 3
+            sleep 5
             
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
             sudo docker run -d \
