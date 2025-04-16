@@ -95,6 +95,7 @@ jobs:
             for i in {1..10}; do
               status_code=$(curl -s -o /dev/null -w '%{http_code}' $HEALTH_URL || echo "000")
               echo "응답 코드: $status_code"
+              echo "헬스 체크 경로: $"
               if [ "$status_code" = "200" ]; then
                 echo "헬스체크 통과"
                 break
@@ -110,7 +111,7 @@ jobs:
             
             echo "Nginx 트래픽 전환"
             sed -i "s/service_url\s\+127.0.0.1:$BLUE_PORT;/service_url 127.0.0.1:$GREEN_PORT;/g" $NGINX_CONFIG
-            nginx -s reload
+            docker exec nginx nginx -s reload
 
             echo "기존 Blue 컨테이너 정리"
             docker rm -f $BLUE_CONTAINER || true
