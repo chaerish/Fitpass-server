@@ -27,4 +27,25 @@ public class OwnerAdminConverter {
                 .build();
     }
 
+    public static OwnerAdminResponseDTO.OwnerApprovalPagesDTO toApprovalPageDTO(Page<Owner> ownerPage) {
+        List<OwnerAdminResponseDTO.OwnerApprovalsDTO> ownersApproval = ownerPage
+                .map(owner -> OwnerAdminResponseDTO.OwnerApprovalsDTO.builder()
+                        .id(owner.getId())
+                        .name(owner.getName())
+                        .corporation(owner.getCorporation())
+                        .loginId(owner.getLoginId())
+                        .phoneNumber(owner.getPhoneNumber())
+                        .businessRegistrationUrl(owner.getBusinessRegistrationUrl())
+                        .bankCopyUrl(owner.getBankCopyUrl())
+                        .createdAt(owner.getCreatedAt().toLocalDate())
+                        .build())
+                .getContent();
+
+        return OwnerAdminResponseDTO.OwnerApprovalPagesDTO.builder()
+                .ownersApprovals(ownersApproval)
+                .totalPages(ownerPage.getTotalPages())
+                .totalElements(ownerPage.getTotalElements())
+                .build();
+    }
+
 }

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin")
-@Tag(name = "어드민 시설회원 정보 API", description = "어드민 시설회원 정보 API입니다.")
+@Tag(name = "어드민 시설회원 API", description = "어드민 시설회원 API입니다.")
 public class OwnerAdminController {
 
     private final OwnerAdminQueryService ownerAdminQueryService;
@@ -30,9 +30,21 @@ public class OwnerAdminController {
             @Parameter(description = "현재 인증된 사용자 정보", hidden = true) @CurrentMember Member member,
             @Parameter(description = "페이지 시작 오프셋 (기본값: 0)", example = "0") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 당 엘리먼트 개수 (기본값: 10)", example = "10") @RequestParam(defaultValue = "10") int size,
-            @Parameter(description = "검색 유형 (예: name, loginId, phoneNumber)", example = "name") @RequestParam(required = false) String searchType,
-            @Parameter(description = "검색 키워드", example = "핏패스") @RequestParam(required = false) String keyword) {
+            @Parameter(description = "검색 유형 (예: corporation,phoneNumber,status)", example = "status") @RequestParam(required = false) String searchType,
+            @Parameter(description = "검색 키워드", example = "승인대기") @RequestParam(required = false) String keyword) {
         OwnerAdminResponseDTO.OwnerPagesDTO ownersInfo = ownerAdminQueryService.getOwnersInfo(page, size, searchType, keyword);
+        return ApiResponse.onSuccess(ownersInfo);
+    }
+
+    @Operation(summary = "어드민 시설회원 승인 조회", description = "어드민이 시설회원 승인을 조회하는 API 입니다.")
+    @GetMapping("/approval")
+    public ApiResponse<?> getApprovalOwnersPage(
+            @Parameter(description = "현재 인증된 사용자 정보", hidden = true) @CurrentMember Member member,
+            @Parameter(description = "페이지 시작 오프셋 (기본값: 0)", example = "0") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "페이지 당 엘리먼트 개수 (기본값: 10)", example = "10") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "검색 유형 (예: corporation,phoneNumber)", example = "corporation") @RequestParam(required = false) String searchType,
+            @Parameter(description = "검색 키워드", example = "핏패스") @RequestParam(required = false) String keyword) {
+        OwnerAdminResponseDTO.OwnerApprovalPagesDTO ownersInfo = ownerAdminQueryService.getOwnersApproval(page, size, searchType, keyword);
         return ApiResponse.onSuccess(ownersInfo);
     }
 
