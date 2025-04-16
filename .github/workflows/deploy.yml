@@ -108,7 +108,7 @@ jobs:
             
             echo "Nginx 트래픽 전환"
             sed -i "s/service_url\s\+127.0.0.1:$BLUE_PORT;/service_url 127.0.0.1:$GREEN_PORT;/g" $NGINX_CONFIG
-            docker exec nginx nginx -s reload
+            sudo nginx -s reload
 
             echo "기존 Blue 컨테이너 정리"
             docker rm -f $BLUE_CONTAINER || true
