@@ -70,12 +70,12 @@ public class Owner extends BaseEntity implements LoginUser {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(15)")
     @Builder.Default
-    public OwnerStatus status = OwnerStatus.PENDING;
+    public OwnerStatus ownerStatus = OwnerStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(15)")
     @Builder.Default
-    public MemberStatus accountStatus = MemberStatus.ACTIVE;
+    public MemberStatus status = MemberStatus.ACTIVE;
 
     @Column(name = "is_agree", nullable = false)
     private boolean isAgree;
@@ -114,10 +114,10 @@ public class Owner extends BaseEntity implements LoginUser {
 
     //accountStatus 변경(계정 탈퇴)
     public void deactivateAccount() {
-        if (this.accountStatus == MemberStatus.INACTIVE) {
+        if (this.status == MemberStatus.INACTIVE) {
             throw new MemberException(MemberErrorCode.ALREADY_DELETED);
         }
-        this.accountStatus = MemberStatus.INACTIVE;
+        this.status = MemberStatus.INACTIVE;
     }
 
     public void updateIsAdditionInfo(boolean isAdditionalInfo) {
