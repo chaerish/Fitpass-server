@@ -108,7 +108,7 @@ jobs:
             fi
             
             echo "Nginx 트래픽 전환"
-            sed -i "s/service_url\s\+127.0.0.1:$BLUE_PORT;/service_url 127.0.0.1:$GREEN_PORT;/g" $NGINX_CONFIG
+            sudo sed -i "s/service_url\s\+127.0.0.1:$BLUE_PORT;/service_url 127.0.0.1:$GREEN_PORT;/g" $NGINX_CONFIG
             sudo nginx -s reload
 
             echo "기존 Blue 컨테이너 정리"
