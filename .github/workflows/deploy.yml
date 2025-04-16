@@ -2,7 +2,7 @@ name: CI/CD
 
 on:
   push:
-    branches: [ "refactor/blue-green" ]
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -72,8 +72,6 @@ jobs:
               GREEN_PORT=$BASE_PORT_A
             fi
 
-            echo "기존 Blue 포트: $BLUE_PORT"
-            echo "신규 Green 포트: $GREEN_PORT"
             HEALTH_URL="http://127.0.0.1:$GREEN_PORT/actuator/health"
             
             docker stop $GREEN_CONTAINER || true
@@ -95,7 +93,6 @@ jobs:
             for i in {1..10}; do
               status_code=$(curl -s -o /dev/null -w '%{http_code}' $HEALTH_URL || echo "000")
               echo "응답 코드: $status_code"
-              echo "헬스 체크 경로: $"
               if [ "$status_code" = "200" ]; then
                 echo "헬스체크 통과"
                 break
