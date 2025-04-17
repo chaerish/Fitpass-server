@@ -7,7 +7,8 @@ public enum AlimtalkTemplate {
     PAYMENT_FAIL_2("TZ_2556", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"},{\"name\":\"구독 관리 바로가기\",\"linkType\":\"WL\",\"linkPc\":\"https://fitpass.co.kr/subscribe\",\"linkMo\":\"https://fitpass.co.kr/subscribe\"}]}"),
     PLAN_CHANGE("TZ_0745", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"},{\"name\":\"핏패스 바로가기\",\"linkType\":\"WL\",\"linkPc\":\"https://fitpass.co.kr/\",\"linkMo\":\"https://fitpass.co.kr/\"}]}"),
     REGISTER_SUCCESS("TZ_2552", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"},{\"name\":\"시설 둘러보기\",\"linkType\":\"WL\",\"linkPc\":\"https://fitpass.co.kr/\",\"linkMo\":\"https://fitpass.co.kr/\"}]}"),
-    REVIEW_NOTICE("TZ_2547", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"},{\"name\":\"후기 남기기\",\"linkType\":\"WL\",\"linkPc\":\"https://fitpass.co.kr/use-pass\",\"linkMo\":\"https://fitpass.co.kr/use-pass\"}]}");
+    REVIEW_NOTICE("TZ_2547", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"},{\"name\":\"후기 남기기\",\"linkType\":\"WL\",\"linkPc\":\"https://fitpass.co.kr/use-pass\",\"linkMo\":\"https://fitpass.co.kr/use-pass\"}]}"),
+    SEND_CODE("TZ_2551", "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\"}]}");
 
     private final String templateCode;
     private final String buttonJson;
