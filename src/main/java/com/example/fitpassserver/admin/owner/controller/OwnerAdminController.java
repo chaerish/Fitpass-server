@@ -56,5 +56,15 @@ public class OwnerAdminController {
         return ApiResponse.onSuccess("완료되었습니다.");
     }
 
+    @GetMapping("/file")
+    @Operation(summary = "파일 조회 API", description = "사용자의 ID로 파일을 조회하는 api")
+    public ApiResponse<OwnerAdminResponseDTO.OwnerGetPresignedUrlDTO> getProfile(
+            @Parameter(description = "조회할 시설회원의 loginId") @RequestParam String loginId,
+            @Parameter(description = "조회할 파일 이름(businessRegistrationUrl, bankCopyUrl)", example = "businessRegistrationUrl") @RequestParam String name) {
+        OwnerAdminResponseDTO.OwnerGetPresignedUrlDTO file = ownerAdminQueryService.getFile(loginId, name);
+        return ApiResponse.onSuccess(file);
+
+    }
+
 
 }

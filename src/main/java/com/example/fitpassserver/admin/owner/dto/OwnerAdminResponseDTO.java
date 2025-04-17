@@ -53,4 +53,12 @@ public class OwnerAdminResponseDTO {
         private int totalPages;
         private long totalElements;
     }
+
+    @Getter
+    @Builder
+    public static class OwnerGetPresignedUrlDTO {
+        private String loginId;
+        private String name;
+        private String url;
+    }
 }
