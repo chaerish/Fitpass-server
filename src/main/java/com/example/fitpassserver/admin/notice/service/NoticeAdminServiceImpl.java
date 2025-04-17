@@ -140,6 +140,8 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
                 .isDraft(isDraft)
                 .isHomeSlide(false) // 자동으로 false 설정
                 .views(0L)
+                .isMemberSlide(request.isMemberSlide())
+                .isOwnerSlide(request.isOwnerSlide())
                 .build();
     }
 
@@ -153,6 +155,8 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
                 .isDraft(isDraft)
                 .isHomeSlide(false) // 자동으로 false 설정
                 .views(notice.getViews()) // 기존 조회수 유지
+                .isMemberSlide(request.isMemberSlide())
+                .isOwnerSlide(request.isOwnerSlide())
                 .build();
     }
 
