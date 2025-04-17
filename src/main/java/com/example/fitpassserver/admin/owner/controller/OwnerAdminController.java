@@ -6,7 +6,6 @@ import com.example.fitpassserver.admin.owner.service.query.OwnerAdminQueryServic
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
-import com.example.fitpassserver.owner.owner.entity.OwnerStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,22 +47,13 @@ public class OwnerAdminController {
         return ApiResponse.onSuccess(ownersInfo);
     }
 
-    @Operation(summary = "시설회원 반려", description = "어드민이 시설회원을 반려하는 API입니다.")
-    @PatchMapping("/refusal")
-    public ApiResponse<?> patchRefusalOwner(
-            @Parameter(description = "반려할 시설회원의 loginId") @RequestParam String loginId) {
-        OwnerStatus status = OwnerStatus.STOPPED;
-        ownerAdminCommandService.patchOwnerStatus(loginId, status);
-        return ApiResponse.onSuccess("반려되었습니다.");
-    }
-
-    @Operation(summary = "시설회원 승인", description = "어드민이 시설회원을 승인하는 API입니다.")
+    @Operation(summary = "시설회원 승인/반려", description = "어드민이 시설회원을 승인/반려하는 API입니다.")
     @PatchMapping("/approval")
     public ApiResponse<?> patchApprovalOwner(
-            @Parameter(description = "승인할 시설회원의 loginId") @RequestParam String loginId) {
-        OwnerStatus status = OwnerStatus.UNREGISTERED;
-        ownerAdminCommandService.patchOwnerStatus(loginId, status);
-        return ApiResponse.onSuccess("승인되었습니다.");
+            @Parameter(description = "승인할 시설회원의 loginId") @RequestParam String loginId,
+            @Parameter(description = "승인 여부(승인, 반려)", example = "true") @RequestParam boolean isApproval) {
+        ownerAdminCommandService.patchOwnerStatus(loginId, isApproval);
+        return ApiResponse.onSuccess("완료되었습니다.");
     }
 
 
