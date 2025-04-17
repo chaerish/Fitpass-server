@@ -43,7 +43,7 @@ public class NoticeOwnerServiceImpl implements NoticeOwnerService {
 
         isMemberOwner(owner);
 
-        Page<Notice> noticePage = noticeRepository.findPublishedNoticesSorted(pageable);
+        Page<Notice> noticePage = noticeRepository.findPublishedNoticesByIsOwnerSlideTrue(pageable);
 
         List<NoticeListResponse> content = noticePage.getContent().stream()
                 .map(notice -> new NoticeListResponse(

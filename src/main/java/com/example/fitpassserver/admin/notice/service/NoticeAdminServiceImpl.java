@@ -81,6 +81,19 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
         notice.setMemberSlide(isMemberSlide);
     }
 
+    // 🔹 사업자 페이지 슬라이드 업데이트
+    @Transactional
+    public void updateOwnerSlideStatus(Long noticeId, boolean isOwnerSlide) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
+
+        if (notice.isDraft()) {
+            throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_DRAFT_NOT_ALLOWED);
+        }
+
+        notice.setOwnerSlide(isOwnerSlide);
+    }
+
 
     @Transactional
     public NoticeAdminResDTO saveNotice(NoticeAdminReqDTO request, MultipartFile image, boolean isDraft) throws IOException {
@@ -140,6 +153,8 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
                 .isDraft(isDraft)
                 .isHomeSlide(false) // 자동으로 false 설정
                 .views(0L)
+                .isMemberSlide(request.isMemberSlide())
+                .isOwnerSlide(request.isOwnerSlide())
                 .build();
     }
 
@@ -153,6 +168,8 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
                 .isDraft(isDraft)
                 .isHomeSlide(false) // 자동으로 false 설정
                 .views(notice.getViews()) // 기존 조회수 유지
+                .isMemberSlide(request.isMemberSlide())
+                .isOwnerSlide(request.isOwnerSlide())
                 .build();
     }
 

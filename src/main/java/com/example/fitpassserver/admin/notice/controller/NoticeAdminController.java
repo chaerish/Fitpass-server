@@ -33,10 +33,10 @@ public class NoticeAdminController {
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAllNotices(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
         Map<String, Object> noticeList = noticeAdminServiceImpl.getNoticeAdminList(keyword, pageable);
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeList));
     }
@@ -58,6 +58,16 @@ public class NoticeAdminController {
             @RequestParam boolean isMemberSlide
     ) {
         noticeAdminServiceImpl.updateMemberSlideStatus(noticeId, isMemberSlide);
+        return ResponseEntity.ok(ApiResponse.onSuccess(null));
+    }
+
+    @Operation(summary = "회원 페이지 슬라이드 게시 체크박스", description = "회원 페이지 슬라이드에 게시 할건지에 대한 값을 저장 true = 게시")
+    @PatchMapping("/{noticeId}/owner-slide-check")
+    public ResponseEntity<ApiResponse<Void>> updateOwnerSlide(
+            @PathVariable Long noticeId,
+            @RequestParam boolean isOwnerSlide
+    ) {
+        noticeAdminServiceImpl.updateOwnerSlideStatus(noticeId, isOwnerSlide);
         return ResponseEntity.ok(ApiResponse.onSuccess(null));
     }
 

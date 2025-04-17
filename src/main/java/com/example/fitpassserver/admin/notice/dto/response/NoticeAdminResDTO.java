@@ -8,6 +8,7 @@ public record NoticeAdminResDTO (
         java.time.LocalDateTime createdAt,
         String status,
         boolean isHomeSlide,
-        boolean isMemberSlide
+        boolean isMemberSlide,
+        boolean isOwnerSlide
 ){
 }

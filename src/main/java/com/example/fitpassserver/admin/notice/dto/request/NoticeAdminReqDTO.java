@@ -23,4 +23,10 @@ public class NoticeAdminReqDTO {
     @Schema(description = "공지사항 유형 (정식 등록 시 필수)", example = "ANNOUNCEMENT / EVENT")
     private NoticeType type;
 
+    @Schema(description = "회원 슬라이드 게시 여부", example = "true")
+    private boolean isMemberSlide;
+
+    @Schema(description = "사업자 슬라이드 게시 여부", example = "false")
+    private boolean isOwnerSlide;
+
 }

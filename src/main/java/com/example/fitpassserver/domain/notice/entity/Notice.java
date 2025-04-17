@@ -44,6 +44,10 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private boolean isMemberSlide;
 
+    @Setter
+    @Column(nullable = false)
+    private boolean isOwnerSlide;
+
     // 🔹 조회수 증가 메서드 추가
     public void increaseViews() {
         this.views += 1;

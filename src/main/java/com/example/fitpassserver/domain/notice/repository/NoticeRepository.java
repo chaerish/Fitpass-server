@@ -19,17 +19,13 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     long countByIsHomeSlideTrue();
     List<Notice> findByIsDraftTrueOrderByCreatedAtDesc();
 
-    @Query("""
-        SELECT n FROM Notice n
-        WHERE n.isDraft = false
-        ORDER BY n.createdAt DESC
-    """)
-    Page<Notice> findPublishedNoticesSorted(Pageable pageable);
-
 
     @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isMemberSlide = true ORDER BY n.createdAt DESC")
     Page<Notice> findPublishedNoticesByIsMemberSlideTrue(Pageable pageable);
 
     @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isMemberSlide = true AND n.isHomeSlide = true")
     List<Notice> findNoticeHomeSlideIsMemberSlideTrue();
+
+    @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isOwnerSlide = true ORDER BY n.createdAt DESC")
+    Page<Notice> findPublishedNoticesByIsOwnerSlideTrue(Pageable pageable);
 }
