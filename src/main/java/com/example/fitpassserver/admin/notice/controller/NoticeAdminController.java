@@ -33,10 +33,10 @@ public class NoticeAdminController {
     @GetMapping
     public ResponseEntity<ApiResponse<Map<String, Object>>> getAllNotices(
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page, size);
         Map<String, Object> noticeList = noticeAdminServiceImpl.getNoticeAdminList(keyword, pageable);
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeList));
     }
