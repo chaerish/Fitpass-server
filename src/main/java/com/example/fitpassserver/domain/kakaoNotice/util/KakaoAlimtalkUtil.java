@@ -104,8 +104,8 @@ public class KakaoAlimtalkUtil {
 
     // 회원 가입 인증번호 알림톡
     public void sendCode(String receiver, String code) {
-        String message = String.format("3분안에 입력해주세요.\n\n%s\n\n", code);
-        sendTemplate(receiver, AlimtalkTemplate.SEND_CODE, message, "회원 가입 인증코드 발송 완료", "핏패스 회원 가입을 위한 인증번호입니다.");
+        String message = String.format("인증번호는 [%s]입니다. (유효시간 3분)", code);
+        sendTemplate(receiver, AlimtalkTemplate.SEND_CODE, message, "회원가입 인증번호 발송", null);
     }
 
     // 회원 가입 완료 알림톡
