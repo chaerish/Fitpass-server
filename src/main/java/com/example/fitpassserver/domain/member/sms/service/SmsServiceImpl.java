@@ -1,9 +1,9 @@
 package com.example.fitpassserver.domain.member.sms.service;
 
+import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.repository.MemberRepository;
 import com.example.fitpassserver.domain.member.sms.dto.SmsRequestDTO;
 import com.example.fitpassserver.domain.member.sms.repositroy.SmsRepository;
-import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class SmsServiceImpl implements SmsService {
 
-    private final SmsCertificationUtil smsCertificationUtil; // SMS 인증 유틸리티 객체
+    private final KakaoAlimtalkUtil kakaoAlimtalkUtil;
     private final SmsRepository smsRepository; // SMS 레포지토리 객체 (Redis)
     private final MemberRepository memberRepository;
 
@@ -21,8 +21,8 @@ public class SmsServiceImpl implements SmsService {
         String phoneNum = smsRequestDto.getPhoneNumber(); // SmsRequestDTO에서 전화번호를 가져옴
 
 
-        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000); // 6자리 인증 코드를 랜덤으로 생성
-        smsCertificationUtil.sendSMS(phoneNum, certificationCode); // SMS 인증 유틸리티를 사용하여 SMS 발송
+        String certificationCode = Integer.toString((int) (Math.random() * (999999 - 100000 + 1)) + 100000);
+        kakaoAlimtalkUtil.sendCode(phoneNum, certificationCode); //알림톡으로 변경
         smsRepository.createSmsCertification(phoneNum, certificationCode); // 인증 코드를 Redis에 저장
     }
 
