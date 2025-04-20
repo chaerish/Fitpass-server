@@ -14,7 +14,7 @@ public interface PlanAttemptLogRepository extends JpaRepository<PlanAttemptLog, 
     PlanAttemptLog findByPlanAndCreatedAtBetween(Plan plan, LocalDateTime start, LocalDateTime end);
 
     @EntityGraph(attributePaths = {"plan", "plan.member"})
-    @Query("SELECT l FROM PlanAttemptLog l WHERE l.firstAttemptedAt BETWEEN :start AND :end AND l.attemptOrder = 1 AND l.isCompleted = true")
+    @Query("SELECT l FROM PlanAttemptLog l WHERE l.firstAttemptedAt BETWEEN :start AND :end AND l.attemptOrder = 1 AND l.isCompleted = false")
     List<PlanAttemptLog> findFailureNotificationTarget(LocalDateTime start, LocalDateTime end);
 
     boolean existsByPlanAndCreatedAtBetween(Plan plan, LocalDateTime start, LocalDateTime end);
