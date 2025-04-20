@@ -7,8 +7,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHi
 import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.sms.util.SmsCertificationUtil;
-import com.example.fitpassserver.domain.plan.dto.event.PlanCancelSuccessEvent;
-import com.example.fitpassserver.domain.plan.dto.event.PlanCancelUpdateEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanChangeAllSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanChangeSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
@@ -51,7 +50,6 @@ public class PlanSubscriptionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(PlanPaymentAllSuccessEvent event) {
-//        smsCertificationUtil.sendPlanPaymentSMS(event.phoneNumber(), event.planName(), event.totalAmount());
         kakaoAlimtalkUtil.sendCoinOrPlanPayment(event.phoneNumber(), event.planName(), event.paymentMethod());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
@@ -78,22 +76,22 @@ public class PlanSubscriptionEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
     public void handle(PlanChangeAllSuccessEvent event) {
-//        smsCertificationUtil.sendPlanChangeAlert(event.phoneNumber(), event.planName());
-        kakaoAlimtalkUtil.sendPlanChange(event.phoneNumber(),event.oldPlanName(), event.planName());
+        kakaoAlimtalkUtil.sendPlanChange(event.phoneNumber(), event.oldPlanName(), event.planName());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
 
+    /*
+    사용자에 의해 취소
+     */
     @EventListener
     @Transactional
-    public void handle(PlanCancelUpdateEvent event) {
-        planService.cancelNewPlan(event.plan());
+    public void handle(PlanCancelEvent.PlanCancelUpdateEvent event) {
+        planService.cancelPlanByMember(event.plan());
     }
-
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Async
-    public void handle(PlanCancelSuccessEvent event) {
-//        smsCertificationUtil.sendPlanInActiveAlert(event.phoneNumber(), event.planName());
+    public void handle(PlanCancelEvent.PlanCancelSuccessEvent event) {
         kakaoAlimtalkUtil.sendSecondPaymentFail(event.phoneNumber());
         log.info("{} 에게 문자 발송 완료", event.phoneNumber());
     }
