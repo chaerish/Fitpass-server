@@ -1,6 +1,7 @@
 package com.example.fitpassserver.admin.notice.controller;
 
 import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
+import com.example.fitpassserver.admin.notice.dto.request.NoticeUpdateReqDTO;
 import com.example.fitpassserver.admin.notice.dto.response.AdminNoticeDetailDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeDraftResDTO;
@@ -41,15 +42,6 @@ public class NoticeAdminController {
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeList));
     }
 
-    @Operation(summary = "홈 슬라이드 게시 체크박스", description = "홈 슬라이드에 게시 할건지에 대한 값을 저장 true = 게시")
-    @PatchMapping("/{noticeId}/home-slide-check")
-    public ResponseEntity<ApiResponse<Void>> updateHomeSlide(
-            @PathVariable Long noticeId,
-            @RequestParam boolean isHomeSlide
-    ) {
-        noticeAdminServiceImpl.updateHomeSlideStatus(noticeId, isHomeSlide);
-        return ResponseEntity.ok(ApiResponse.onSuccess(null));
-    }
 
     @Operation(summary = "회원 페이지 슬라이드 게시 체크박스", description = "회원 페이지 슬라이드에 게시 할건지에 대한 값을 저장 true = 게시")
     @PatchMapping("/{noticeId}/member-slide-check")
@@ -89,6 +81,16 @@ public class NoticeAdminController {
             @RequestPart(value = "image",required = false) MultipartFile image
     ) throws IOException {
         NoticeAdminResDTO response = noticeAdminServiceImpl.saveNotice(request, image, false);
+        return ApiResponse.onSuccess(response);
+    }
+
+    @Operation(summary = "공지사항 수정")
+    @PutMapping(consumes = {"multipart/form-data"})
+    public ApiResponse<NoticeAdminResDTO> updateNotice(
+            @RequestPart("request") NoticeUpdateReqDTO request,
+            @RequestPart(value = "image",required = false) MultipartFile image
+    ) throws IOException {
+        NoticeAdminResDTO response = noticeAdminServiceImpl.updateNotice(request, image);
         return ApiResponse.onSuccess(response);
     }
 
