@@ -55,6 +55,11 @@ public class Plan extends BaseEntity {
         this.paymentStatus = paymentStatus;
     }
 
+    public void cancelPlan() {
+        changePlanType(PlanType.NONE);
+        setPaymentStatus(PaymentStatus.CANCEL);
+    }
+
     public void changePlanType(PlanType planType) {
         this.planType = planType;
     }

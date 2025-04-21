@@ -8,7 +8,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.SinglePay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.plan.dto.event.PlanCancelUpdateEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprovedEvent;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
@@ -31,6 +31,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
@@ -221,32 +222,19 @@ public class KakaoPaymentService {
         return dto;
     }
 
-//    //정기 구독 취소
-//    public KakaoCancelResponseDTO cancelSubscription(Plan plan, PlanType planType) {
-//        WebClient kakao = getKakaoClient();
-//        SubscriptionCancelRequestDTO request = new SubscriptionCancelRequestDTO(
-//                monthlyCid,
-//                plan.getSid()
-//        );
-//        Mono<KakaoCancelResponseDTO> response = kakao.post()
-//                .uri(BASE_URL + "/manage/subscription/inactive")
-//                .bodyValue(request)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, this::handleError)
-//                .bodyToMono(KakaoCancelResponseDTO.class)
-//                .doOnError((e) -> {
-//                    if (e.getMessage().equals(PlanErrorCode.SID_INACTIVE.getMessage())) {
-//                        throw new PlanException(PlanErrorCode.SID_INACTIVE);
-//                    }
-//                    log.error("API Error {}", e.getMessage());
-//                });
-//        KakaoCancelResponseDTO dto = response.block();
-//        eventPublisher.publishEvent(new PlanChangeSuccessEvent(plan, planType, dto));
-//        return dto;
-//    }
+    public void cancelSubscriptionByAuto(Plan plan) {
+        KakaoCancelResponseDTO dto = getKakaoCancelResponseDTO(plan);
+    }
 
-    //정기 구독 취소
+    //정기 구독 취소(유저)
     public KakaoCancelResponseDTO cancelSubscription(Plan plan) {
+        KakaoCancelResponseDTO dto = getKakaoCancelResponseDTO(plan);
+        eventPublisher.publishEvent(new PlanCancelEvent.PlanCancelUpdateEvent(plan));
+        return dto;
+    }
+
+    @Nullable
+    private KakaoCancelResponseDTO getKakaoCancelResponseDTO(Plan plan) {
         WebClient kakao = getKakaoClient();
         SubscriptionCancelRequestDTO request = new SubscriptionCancelRequestDTO(
                 monthlyCid,
@@ -264,9 +252,7 @@ public class KakaoPaymentService {
                     }
                     log.error("API Error {}", e.getMessage());
                 });
-        KakaoCancelResponseDTO dto = response.block();
-        eventPublisher.publishEvent(new PlanCancelUpdateEvent(plan));
-        return dto;
+        return response.block();
     }
 
     //sid 가 유효한지 체크

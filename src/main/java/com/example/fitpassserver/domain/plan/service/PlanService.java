@@ -4,7 +4,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PGRequest
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
-import com.example.fitpassserver.domain.plan.dto.event.PlanCancelSuccessEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanCancelEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanChangeAllSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanChangeSuccessEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
@@ -32,6 +32,7 @@ public class PlanService {
         return planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
     }
 
+
     @Transactional
     public void syncPlanStatus(Plan plan) {
         plan.changePlanType(PlanType.NONE);
@@ -51,20 +52,6 @@ public class PlanService {
 
     public Plan createNewPGPlan(Member member, PGRequestDTO.PGSubscriptionPaymentWithBillingKeyRequestDTO dto) {
         return this.createNewPlan(member, dto.orderName(), dto.billingKey(), PaymentType.PG);
-    }
-
-    @Transactional
-    public void cancelNewPlan(Plan plan) {
-        String origin = plan.getPlanType().getName();
-        plan.changePlanType(PlanType.NONE);
-        planRepository.save(plan);
-        eventPublisher.publishEvent(new PlanCancelSuccessEvent(plan.getMember().getPhoneNumber(), origin));
-    }
-
-    public Plan getPlan(Member member) {
-        return planRepository.findByMember(member).orElseThrow(
-                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
-        );
     }
 
     public Plan checkSubscriptionAndGetPlan(Member member) {
@@ -102,7 +89,8 @@ public class PlanService {
         plan.resetPaymentCount();
         planRepository.save(plan);
         eventPublisher.publishEvent(
-                new PlanChangeAllSuccessEvent(plan.getMember().getPhoneNumber(),oldPlanName, plan.getPlanType().getName()));
+                new PlanChangeAllSuccessEvent(plan.getMember().getPhoneNumber(), oldPlanName,
+                        plan.getPlanType().getName()));
     }
 
 
@@ -130,5 +118,20 @@ public class PlanService {
         plan.changePlanType(PlanType.getPlanType(planName));
         planRepository.save(plan);
         return plan;
+    }
+
+    @Transactional
+    public void cancelPlanByMember(Plan plan) {
+        String origin = plan.getPlanType().getName();
+        plan.changePlanType(PlanType.NONE);
+        planRepository.save(plan);
+        eventPublisher.publishEvent(
+                new PlanCancelEvent.PlanCancelSuccessEvent(plan.getMember().getPhoneNumber(), origin));
+    }
+
+    public Plan getPlan(Member member) {
+        return planRepository.findByMember(member).orElseThrow(
+                () -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND)
+        );
     }
 }
