@@ -16,8 +16,10 @@ public class NoticeAdminConverter {
                 notice.getTitle(),
                 notice.getType().getValue(),
                 notice.getCreatedAt(),
+                notice.getUpdatedAt(),
                 notice.isDraft() ? "임시저장" : "게시중",
-                notice.isHomeSlide(),
+                notice.isMemberHomeSlide(),
+                notice.isOwnerHomeSlide(),
                 notice.isMemberSlide(),
                 notice.isOwnerSlide()
         );
