@@ -10,7 +10,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPay
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.dto.event.PlanCancelEvent;
 import com.example.fitpassserver.domain.plan.dto.event.PlanSuccessEvent;
-import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionApprovedEvent;
+import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionEvent;
 import com.example.fitpassserver.domain.plan.dto.request.SIDCheckDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionCancelRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.request.SubscriptionRequestDTO;
@@ -168,7 +168,7 @@ public class KakaoPaymentService {
                     log.error("API Error {}", e.getMessage());
                 });
         SubscriptionResponseDTO dto = response.block();
-        eventPublisher.publishEvent(new RegularSubscriptionApprovedEvent(plan, dto));
+        eventPublisher.publishEvent(new RegularSubscriptionEvent.RegularSubscriptionApprovedEvent(plan, dto));
     }
 
     /*

@@ -102,6 +102,11 @@ public class PlanService {
                         history.getPaymentPrice(), history.getPaymentMethod()));
     }
 
+    public void updatePlanInfoByScheduler(Plan plan, CoinPaymentHistory history) {
+        plan.updatePlanSubscriptionInfo();
+        planRepository.save(plan);
+    }
+
     private Plan createNewPlan(Member member, String planName, String sid, PaymentType paymentType) {
         Plan plan = planRepository.findByMember(member).orElse(null);
         if (plan == null) {
