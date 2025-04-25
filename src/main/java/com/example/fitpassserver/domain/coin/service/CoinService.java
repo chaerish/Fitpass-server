@@ -9,7 +9,6 @@ import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
@@ -49,8 +48,15 @@ public class CoinService {
         coin.setHistory(history);
         coinRepository.save(coin);
         eventPublisher.publishEvent(
-                new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(), history.getCoinCount(),
+                new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(),
+                        history.getCoinCount(),
                         history.getPaymentPrice(), history.getPaymentMethod()));
+    }
+
+    @Transactional
+    public void setCoinAndCoinPaymentByScheduler(Coin coin, CoinPaymentHistory history) {
+        coin.setHistory(history);
+        coinRepository.save(coin);
     }
 
 

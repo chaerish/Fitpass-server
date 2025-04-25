@@ -3,6 +3,7 @@ package com.example.fitpassserver.domain.plan.service.scheduler;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.command.PGPaymentCommandService;
 import com.example.fitpassserver.domain.kakaoNotice.util.KakaoAlimtalkUtil;
+import com.example.fitpassserver.domain.plan.dto.request.NotificationInfo;
 import com.example.fitpassserver.domain.plan.entity.PaymentType;
 import com.example.fitpassserver.domain.plan.entity.Plan;
 import com.example.fitpassserver.domain.plan.entity.planLog.CancelType;
@@ -12,6 +13,7 @@ import com.example.fitpassserver.domain.plan.entity.planLog.PlanAttemptLog;
 import com.example.fitpassserver.domain.plan.entity.planLog.PlanCancelLog;
 import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
 import com.example.fitpassserver.domain.plan.exception.PlanException;
+import com.example.fitpassserver.domain.plan.service.PlanRedisService;
 import com.example.fitpassserver.domain.plan.service.planLog.NotificationLogService;
 import com.example.fitpassserver.domain.plan.service.planLog.PlanAttemptLogService;
 import com.example.fitpassserver.domain.plan.service.planLog.PlanCancelLogService;
@@ -35,6 +37,7 @@ public class PlanScheduler {
     private final PlanAttemptLogService planAttemptLogService;
     private final PlanCancelLogService planCancelLogService;
     private final NotificationLogService notificationLogService;
+    private final PlanRedisService planRedisService;
 
     @Scheduled(cron = "0 0 0 * * ?")
     @Async
@@ -83,6 +86,22 @@ public class PlanScheduler {
                 notificationLog = notificationLogService.createFailNotification(LogType.CANCEL);
             }
             planCancelLogService.addNotificationLog(target, notificationLog);
+        }
+    }
+
+    @Scheduled(cron = "0 0 9 * * ?")
+    @Async
+    public void sentSuccessNotification() {
+        //취소 알림톡
+        List<NotificationInfo> notifies = planRedisService.getAllSuccessNotifications();
+        for (NotificationInfo info : notifies) {
+            try {
+                kakaoAlimtalkUtil.sendCoinOrPlanPayment(info.phoneNumber(), info.planName(), info.paymentMethod());
+                planRedisService.deleteSuccessNotification(info.planId());
+            } catch (Exception e) {
+                log.error("결제 취소 알림톡 전송 실패", e);
+                notificationLogService.createFailNotification(LogType.SUCCESS);
+            }
         }
     }
 
