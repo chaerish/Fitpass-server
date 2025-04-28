@@ -42,22 +42,23 @@ public class CoinPaymentHistoryService {
     private final CoinRepository coinRepository;
     private final PlanRepository planRepository;
     private final String KAKAOPAY = "kakaopay";
+    private final String PGPAY = "PG";
 
     public CoinPaymentHistory createNewCoinPayment(Member member, KakaoPaymentApproveDTO dto, Coin coin) {
-        return createSinglePayCoin(member, dto.tid(), dto.amount().total(), coin);
+        return createSinglePayCoin(member, dto.tid(), dto.amount().total(), coin, KAKAOPAY);
     }
 
     public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto, Coin coin) {
-        return createPlanCoin(member, dto.item_name(), dto.tid(), dto.amount().total(), coin);
+        return createPlanCoin(member, dto.item_name(), dto.tid(), dto.amount().total(), coin, KAKAOPAY);
     }
 
     public CoinPaymentHistory createNewCoinPaymentByPlan(Member member, PlanSubscriptionResponseDTO dto,
                                                          Coin coin) {
-        return createPlanCoin(member, dto.itemName(), dto.tid(), dto.amount().total(), coin);
+        return createPlanCoin(member, dto.itemName(), dto.tid(), dto.amount().total(), coin, KAKAOPAY);
     }
 
     public CoinPaymentHistory createNewCoinPaymentByPGSinglePay(Member member, PortOneResponseDTO.SearchSinglePaymentDTO dto, Coin coin) {
-        return createSinglePayCoin(member, dto.id(), dto.amount().paid(), coin);
+        return createSinglePayCoin(member, dto.id(), dto.amount().paid(), coin, PGPAY);
     }
 
     public CoinPaymentHistoryResponseListDTO getCoinHistory(Member member, String query, Long cursor, int size) {
@@ -121,11 +122,19 @@ public class CoinPaymentHistoryService {
         coinPaymentRepository.save(history);
     }
 
-    private CoinPaymentHistory createSinglePayCoin(Member member, String tid, int price, Coin coin) {
+    public CoinPaymentHistory createPGSinglePayCoin(Member member, String paymentId, int price, Coin coin) {
+        return this.createSinglePayCoin(member, paymentId, price, coin, PGPAY);
+    }
+
+    public CoinPaymentHistory createPGPlanPayCoin(Member member, String itemName, String paymentId, int price, Coin coin) {
+        return this.createPlanCoin(member, itemName, paymentId, price, coin, PGPAY);
+    }
+
+    public CoinPaymentHistory createSinglePayCoin(Member member, String tid, int price, Coin coin, String paymentMethod) {
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
                 .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod(KAKAOPAY)
+                .paymentMethod(paymentMethod)
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.SUCCESS)
                 .tid(tid)
@@ -136,7 +145,7 @@ public class CoinPaymentHistoryService {
                 .build());
     }
 
-    private CoinPaymentHistory createPlanCoin(Member member, String itemName, String tid, int price, Coin coin) {
+    private CoinPaymentHistory createPlanCoin(Member member, String itemName, String tid, int price, Coin coin, String paymentMethod) {
         PlanType type = PlanType.getPlanType(itemName);
         if (type == null) {
             throw new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND);
@@ -145,7 +154,7 @@ public class CoinPaymentHistoryService {
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NAME_NOT_FOUND));
 
         return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod(KAKAOPAY)
+                .paymentMethod(paymentMethod)
                 .isAgree(true)
                 .paymentStatus(PaymentStatus.SUCCESS)
                 .coin(coin)

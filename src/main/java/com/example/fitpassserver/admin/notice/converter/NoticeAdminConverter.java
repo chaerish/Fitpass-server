@@ -16,9 +16,12 @@ public class NoticeAdminConverter {
                 notice.getTitle(),
                 notice.getType().getValue(),
                 notice.getCreatedAt(),
+                notice.getUpdatedAt(),
                 notice.isDraft() ? "임시저장" : "게시중",
-                notice.isHomeSlide(),
-                notice.isMemberSlide()
+                notice.isMemberHomeSlide(),
+                notice.isOwnerHomeSlide(),
+                notice.isMemberSlide(),
+                notice.isOwnerSlide()
         );
     }
     public static List<NoticeAdminResDTO> toNoticeAdminResDTOList(List<Notice> notices, NoticeService noticeService) {

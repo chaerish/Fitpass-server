@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin")
-@Tag(name = "어드민 회원 정보 API", description = "어드민 회원 정보 API입니다.")
+@Tag(name = "어드민 일반 회원 정보 API", description = "어드민 회원 정보 API입니다.")
 public class MemberAdminController {
 
     private final MemberAdminService memberAdminService;

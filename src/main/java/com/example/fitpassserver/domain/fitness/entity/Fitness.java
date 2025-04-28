@@ -7,10 +7,20 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import com.example.fitpassserver.owner.owner.entity.Owner;
 import jakarta.persistence.*;
+
+import com.example.fitpassserver.owner.owner.entity.Owner;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
@@ -30,6 +40,9 @@ public class Fitness extends BaseEntity {
     @Column(name = "address", nullable = false)
     private String address;
 
+    @Column(name = "detail_address")
+    private String detailAddress;
+
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
@@ -47,9 +60,6 @@ public class Fitness extends BaseEntity {
 
     @Column(name = "how_to_use")
     private String howToUse;
-
-    @Column(name = "etc")
-    private String etc;
 
     @Column(name = "discount")
     private Integer discount;
@@ -83,6 +93,7 @@ public class Fitness extends BaseEntity {
     @Builder.Default
     private List<Category> categoryList = new ArrayList<>();
 
+
     public void setCategoryList(List<Category> categoryList) {
         this.categoryList = categoryList;
     }
@@ -95,26 +106,45 @@ public class Fitness extends BaseEntity {
         this.additionalImages = fitnessImageList;
     }
 
-    public void update(FitnessAdminRequestDTO.FitnessReqDTO dto, List<Category> categoryList) {
-        if (dto.getTotalFee() > dto.getFee()) {
+    public void update(
+            String fitnessName,
+            String address,
+            String detailAddress,
+            String phoneNumber,
+            int fee,
+            int totalFee,
+            List<Category> categoryList,
+            boolean isPurchasable,
+            String notice,
+            Map<String, String> time,
+            String howToUse,
+            double latitude,
+            double longitude
+    ) {
+        if (totalFee > fee) {
             throw new FitnessException(FitnessErrorCode.INVALID_SALE_PRICE);
         }
-        this.name = dto.getFitnessName();
-        this.address = dto.getAddress();
-        this.phoneNumber = dto.getPhoneNumber();
-        this.fee = dto.getFee();
-        this.totalFee = dto.getTotalFee();
+        this.name = fitnessName;
+        this.address = address;
+        this.detailAddress = detailAddress;
+        this.phoneNumber = phoneNumber;
+        this.fee = fee;
+        this.totalFee = totalFee;
         this.categoryList = categoryList;
-        this.isPurchasable = dto.isPurchasable();
-        this.notice = dto.getNotice();
-        this.time = FitnessAdminConverter.convertMapToFormattedString(dto.getTime());
-        this.howToUse = dto.getHowToUse();
-        this.etc = dto.getEtc();
-        this.latitude = dto.getLatitude();
-        this.longitude = dto.getLongitude();
+        this.isPurchasable = isPurchasable;
+        this.notice = notice;
+        this.time = FitnessAdminConverter.convertMapToFormattedString(time);
+        this.howToUse = howToUse;
+        this.latitude = latitude;
+        this.longitude = longitude;
     }
+
 
     public void updatePurchaseStatus() {
         this.isPurchasable = !isPurchasable;
+    }
+
+    public void setOwner(Owner owner) {
+        this.owner = owner;
     }
 }

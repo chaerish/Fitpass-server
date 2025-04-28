@@ -38,7 +38,7 @@ public class NoticeController {
         NoticeDetailResponse noticeDetail = noticeService.getNoticeDetail(noticeId);
         return ResponseEntity.ok(ApiResponse.onSuccess(noticeDetail));
     }
-    @Operation(summary = "홈슬라이드 공지 이미지 조회", description = "홈 슬라이드에 표시될 공지사항 이미지를 조회합니다(최대 3개).")
+    @Operation(summary = "일반 사용자 홈슬라이드 공지 이미지 조회", description = "일반 사용자 홈 슬라이드에 표시될 공지사항 이미지를 조회합니다(최대 3개).")
     @GetMapping("/homeSlide")
     public ResponseEntity<ApiResponse<List<NoticeHomeSlideResponse>>> getNoticeHomeSlides() {
         List<NoticeHomeSlideResponse> homeSlides = noticeService.getNoticeHomeSlides();

@@ -43,7 +43,6 @@ public class CommonServiceImpl implements CommonService {
                 .findFirst()
                 .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
 
-
         if (loginUser instanceof Member member) {
             if (!passwordEncoder.matches(dto.getPassword(), member.getPassword())) {
                 throw new MemberException(MemberErrorCode.INCORRECT_PASSWORD);
@@ -53,6 +52,8 @@ public class CommonServiceImpl implements CommonService {
 
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(member.getRole())
+                    .memberId(member.getId())
+                    .memberName(member.getName())
                     .isLocationAgreed(member.isLocationAgreed())
                     .accessToken(jwtProvider.createAccessToken(member))
                     .refreshToken(jwtProvider.createRefreshToken(member))
@@ -69,6 +70,8 @@ public class CommonServiceImpl implements CommonService {
             return CommonResponseDTO.MemberTokenDTO.builder()
                     .role(owner.getRole())
                     .fitnessIds(fitnessIds)
+                    .memberId(owner.getId())
+                    .memberName(owner.getName())
                     .accessToken(jwtProvider.createAccessToken(owner))
                     .refreshToken(jwtProvider.createRefreshToken(owner))
                     .build();

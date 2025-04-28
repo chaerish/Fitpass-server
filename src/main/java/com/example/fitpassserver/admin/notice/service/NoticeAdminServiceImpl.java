@@ -2,6 +2,7 @@ package com.example.fitpassserver.admin.notice.service;
 
 import com.example.fitpassserver.admin.notice.converter.NoticeAdminConverter;
 import com.example.fitpassserver.admin.notice.dto.request.NoticeAdminReqDTO;
+import com.example.fitpassserver.admin.notice.dto.request.NoticeUpdateReqDTO;
 import com.example.fitpassserver.admin.notice.dto.response.AdminNoticeDetailDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeAdminResDTO;
 import com.example.fitpassserver.admin.notice.dto.response.NoticeDraftResDTO;
@@ -61,10 +62,10 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
         if (notice.isDraft()) {
             throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_DRAFT_NOT_ALLOWED);
         }
-        if (isHomeSlide && noticeRepository.countByIsHomeSlideTrue() >= 3) {
+        if (isHomeSlide && noticeRepository.countByIsMemberHomeSlideTrue() >= 3) {
             throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_LIMIT_EXCEEDED);
         }
-        notice.setHomeSlide(isHomeSlide);
+        notice.updateMemberHomeSlide(isHomeSlide);
         noticeRepository.save(notice);
     }
 
@@ -78,7 +79,20 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
             throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_DRAFT_NOT_ALLOWED);
         }
 
-        notice.setMemberSlide(isMemberSlide);
+        notice.updateMemberHomeSlide(isMemberSlide);
+    }
+
+    // 🔹 사업자 페이지 슬라이드 업데이트
+    @Transactional
+    public void updateOwnerSlideStatus(Long noticeId, boolean isOwnerSlide) {
+        Notice notice = noticeRepository.findById(noticeId)
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
+
+        if (notice.isDraft()) {
+            throw new NoticeAdminException(NoticeAdminErrorCode.HOME_SLIDE_DRAFT_NOT_ALLOWED);
+        }
+
+        notice.updateOwnerHomeSlide(isOwnerSlide);
     }
 
 
@@ -89,17 +103,22 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
         String imageUrl = (image != null) ? uploadNoticeImage(image) : null;
         Notice notice;
 
-        if (request.getId() != null) {
-            // 기존 공지 수정
-            notice = noticeRepository.findById(request.getId())
-                    .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
-            notice = updateNotice(notice, request, imageUrl, isDraft);
-        } else {
-            // 새 공지 저장
-            notice = createNewNotice(request, imageUrl, isDraft);
-        }
+        notice = createNewNotice(request, imageUrl, isDraft);
 
         notice = noticeRepository.save(notice); // 🔹 저장된 엔티티를 반환받아야 함
+        return NoticeAdminConverter.toNoticeAdminResDTO(notice, noticeService); // 🔹 변환 후 반환
+    }
+
+    @Transactional
+    public NoticeAdminResDTO updateNotice(NoticeUpdateReqDTO request, MultipartFile image) throws IOException {
+
+        String imageUrl = (image != null) ? uploadNoticeImage(image) : null;
+        Notice notice;
+
+        notice = noticeRepository.findById(request.getId())
+                .orElseThrow(() -> new NoticeException(NoticeErrorCode.NOTICE_NOT_FOUND));
+        notice.update(request, imageUrl);
+
         return NoticeAdminConverter.toNoticeAdminResDTO(notice, noticeService); // 🔹 변환 후 반환
     }
 
@@ -115,19 +134,6 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
             if (request.getType() == null) {
                 throw new NoticeAdminException(NoticeAdminErrorCode.TYPE_REQUIRED);
             }
-            // 🔹 기존 DB에 저장된 이미지 확인
-            boolean hasExistingImage = false;
-            if (request.getId() != null) {
-                Notice existingNotice = noticeRepository.findById(request.getId()).orElse(null);
-                if (existingNotice != null && existingNotice.getNoticeImage() != null) {
-                    hasExistingImage = true; // DB에 기존 이미지 있음
-                }
-            }
-
-            // 🔹 새로운 이미지가 없고, 기존 DB에도 이미지가 없을 경우 에러 발생
-            if ((image == null || image.isEmpty()) && !hasExistingImage) {
-                throw new NoticeAdminException(NoticeAdminErrorCode.IMAGE_REQUIRED);
-            }
         }
     }
 
@@ -138,23 +144,13 @@ public class NoticeAdminServiceImpl implements NoticeAdminService {
                 .type(request.getType())
                 .noticeImage(imageUrl)
                 .isDraft(isDraft)
-                .isHomeSlide(false) // 자동으로 false 설정
+                .isMemberHomeSlide(false) // 자동으로 false 설정
                 .views(0L)
+                .isMemberSlide(request.isMemberSlide())
+                .isOwnerSlide(request.isOwnerSlide())
                 .build();
     }
 
-    private Notice updateNotice(Notice notice, NoticeAdminReqDTO request, String imageUrl, boolean isDraft) {
-        return Notice.builder()
-                .id(notice.getId())
-                .title(request.getTitle())
-                .content(request.getContent())
-                .type(request.getType())
-                .noticeImage(imageUrl != null ? imageUrl : notice.getNoticeImage()) // 기존 이미지 유지
-                .isDraft(isDraft)
-                .isHomeSlide(false) // 자동으로 false 설정
-                .views(notice.getViews()) // 기존 조회수 유지
-                .build();
-    }
 
     // 🔹 공지사항 이미지 업로드
     private String uploadNoticeImage(MultipartFile file) throws IOException {

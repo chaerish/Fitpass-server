@@ -49,17 +49,73 @@ jobs:
           key: ${{ secrets.AWS_KEY }}
           envs: GITHUB_SHA
           script: |
-            sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
-            sudo docker stop fitpass-app || true
-            sudo docker rm fitpass-app || true
-            sudo docker rmi -f ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest || true
+            set -e
+            
+            BASE_PORT_A=${{ secrets.BASE_PORT_A }}
+            BASE_PORT_B=${{ secrets.BASE_PORT_B }}
+            APP_PORT=${{ secrets.APP_PORT }}
+            NETWORK=${{ secrets.DOCKER_NETWORK }}
+            GREEN_CONTAINER=${{ secrets.GREEN_CONTAINER }}
+            BLUE_CONTAINER=${{ secrets.BLUE_CONTAINER }}
+            NGINX_CONFIG=${{ secrets.NGINX_CONFIG }}
+            
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_ACCESS_TOKEN }}
+            
+            current_port=$(grep 'service_url\s\+127.0.0.1:' $NGINX_CONFIG | head -1 | sed 's/.*127.0.0.1://;s/;//')
+            echo "현재 Nginx upstream 포트: $current_port"
+
+            if [ "$current_port" = "$BASE_PORT_A" ]; then
+              BLUE_PORT=$BASE_PORT_A
+              GREEN_PORT=$BASE_PORT_B
+            else
+              BLUE_PORT=$BASE_PORT_B
+              GREEN_PORT=$BASE_PORT_A
+            fi
+
+            HEALTH_URL="http://127.0.0.1:$GREEN_PORT/actuator/health"
+            
+            docker stop $GREEN_CONTAINER || true
+            sleep 5
+            docker rm $GREEN_CONTAINER || true
+            sleep 5
+            
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
             sudo docker run -d \
-              --name fitpass-app \
-              -p 8080:8080 \
-              --network fitpass \
-              --restart always \
-              -e TZ=Asia/Seoul \
-              -e SPRING_PROFILES_ACTIVE=prod \
-              -e JAVA_OPTS="-Duser.timezone=Asia/Seoul" \
-              ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+            --name $GREEN_CONTAINER \
+            --network $NETWORK \
+            --restart always \
+            -e SPRING_PROFILES_ACTIVE=prod \
+            -e TZ=Asia/Seoul \
+            -e JAVA_OPTS='-Duser.timezone=Asia/Seoul' \
+            -p $GREEN_PORT:$APP_PORT \
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}
+            
+            echo "Green 컨테이너 헬스체크 시작"
+            for i in {1..10}; do
+              status_code=$(curl -s -o /dev/null -w '%{http_code}' $HEALTH_URL || echo "000")
+              echo "응답 코드: $status_code"
+              if [ "$status_code" = "200" ]; then
+                echo "헬스체크 통과"
+                break
+              fi
+              echo "재시도 $i/10"
+              sleep 10
+            done
+            
+            if [ "$status_code" != "200" ]; then
+              echo "Green 환경 헬스체크 실패"
+              exit 1
+            fi
+            
+            echo "Nginx 트래픽 전환"
+            sudo sed -i "s/service_url\s\+127.0.0.1:$BLUE_PORT;/service_url 127.0.0.1:$GREEN_PORT;/g" $NGINX_CONFIG
+            sudo nginx -s reload
+
+            echo "기존 Blue 컨테이너 정리"
+            docker rm -f $BLUE_CONTAINER || true
+            docker rename $GREEN_CONTAINER $BLUE_CONTAINER
+
+            echo "미사용 이미지 정리 (dangling)"
+            docker rmi -f $(docker images -f "dangling=true" -q) || true
+
+            echo "배포 완료"

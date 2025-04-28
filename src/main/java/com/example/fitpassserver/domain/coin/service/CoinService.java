@@ -9,7 +9,6 @@ import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinPaymentAllSuccessEvent;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
-import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.coinPaymentHistory.repository.CoinPaymentRepository;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
@@ -41,9 +40,7 @@ public class CoinService {
     }
 
     public Coin createNewCoinByPg(Member member, String paymentId, int price) {
-        Coin coin = createNewCoin(member, price);
-        createCoinHistory(member, paymentId, price, coin, "pg");
-        return coin;
+        return createNewCoin(member, price);
     }
 
     @Transactional
@@ -51,8 +48,15 @@ public class CoinService {
         coin.setHistory(history);
         coinRepository.save(coin);
         eventPublisher.publishEvent(
-                new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(), history.getCoinCount(),
+                new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(),
+                        history.getCoinCount(),
                         history.getPaymentPrice(), history.getPaymentMethod()));
+    }
+
+    @Transactional
+    public void setCoinAndCoinPaymentByScheduler(Coin coin, CoinPaymentHistory history) {
+        coin.setHistory(history);
+        coinRepository.save(coin);
     }
 
 
@@ -81,21 +85,6 @@ public class CoinService {
                 .count(((long) coinType.getCoinQuantity()))
                 .expiredDate(LocalDate.now().plusDays(coinType.getExpirationPeriod()))
                 .planType(PlanType.NONE)
-                .build());
-    }
-
-    private CoinPaymentHistory createCoinHistory(Member member, String tid, int price, Coin coin, String method) {
-        CoinTypeEntity coinType = coinTypeRepository.findByPrice(price)
-                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
-        return coinPaymentRepository.save(CoinPaymentHistory.builder()
-                .paymentMethod(method)
-                .isAgree(true)
-                .paymentStatus(PaymentStatus.SUCCESS)
-                .tid(tid)
-                .coin(coin)
-                .member(member)
-                .coinCount((coinType.getCoinQuantity()))
-                .paymentPrice(price)
                 .build());
     }
 }

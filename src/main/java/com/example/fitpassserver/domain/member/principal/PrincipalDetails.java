@@ -11,22 +11,23 @@ import java.util.Collection;
 import java.util.List;
 @RequiredArgsConstructor
 public class PrincipalDetails implements UserDetails {
-    private final Member member;
+    private final String loginId;
+    private final String password;
+    private final String role;
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = new ArrayList<>();
-        Role role=member.getRole();
-        roles.add(role.name());
-        return roles.stream().map(SimpleGrantedAuthority::new).toList();
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(role));
+        return authorities;
     }
 
     @Override
     public String getUsername() {
-        return member.getLoginId();
+        return loginId;
     }
     @Override
     public String getPassword() {
-        return member.getPassword();
+        return password;
     }
     @Override
     public boolean isEnabled() {

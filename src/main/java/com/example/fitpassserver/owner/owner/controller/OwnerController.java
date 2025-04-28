@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/auth/owner")
-@Tag(name = "사업자 회원 API", description = "사업자 회원 관련 API입니다.")
+@Tag(name = "회원가입 사장님 API", description = "사장님 회원가입 관련 API입니다.")
 public class OwnerController {
     private final OwnerCommandService ownerCommandService;
     private final CheckLoginIdValidator checkLoginIdValidator;
@@ -50,11 +50,10 @@ public class OwnerController {
         return ApiResponse.onSuccess(presignedUrl);
     }
 
-    @Operation(summary = "사업자 회원가입 api", description = "사업자 회원가입을 위한 api입니다.")
+    @Operation(summary = "사장님 회원가입 api", description = "사장님 회원가입을 위한 api입니다.")
     @PostMapping("/register")
     public ApiResponse<OwnerResponseDTO.JoinResultDTO> join(@RequestBody @Valid OwnerRequestDTO.OwnerJoinDTO request) {
         Owner owner = ownerCommandService.joinOwner(request);
         return ApiResponse.onSuccess(OwnerConverter.toJoinResultDTO(owner));
     }
-
 }

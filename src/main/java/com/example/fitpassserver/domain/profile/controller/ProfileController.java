@@ -19,7 +19,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth/profile")
+@RequestMapping("/auth/member/profile")
 @Tag(name = "프로필 API", description = "프로필 조회 및 변경 API입니다.")
 public class ProfileController {
 
@@ -58,7 +58,7 @@ public class ProfileController {
         return ApiResponse.onSuccess(profileService.getProfileUploadUrl(member));
     }
 
-    /* 프로필 변경 */
+
     @PatchMapping("/update")
     @Operation(summary = "프로필 변경 API", description = "S3에 업로드 후 받은 key를 백엔드로 전달하는 API(업로드 -> 변경 순으로 사용하면 됩니다.)")
     public ApiResponse<Long> updateProfile(

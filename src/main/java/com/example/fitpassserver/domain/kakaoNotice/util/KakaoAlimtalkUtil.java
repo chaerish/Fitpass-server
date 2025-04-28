@@ -1,183 +1,122 @@
 package com.example.fitpassserver.domain.kakaoNotice.util;
 
-
+import com.example.fitpassserver.domain.kakaoNotice.template.AlimtalkTemplate;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class KakaoAlimtalkUtil {
-
-    @Value("${aligo.apiKey}")
-    private  String API_KEY;
-    @Value("${aligo.userId}")
-    private  String USER_ID;
-    @Value("${aligo.senderKey}")
-    private  String SENDER_KEY;
-    @Value("${aligo.sender}")
-    private  String SENDER;
 
     private final RestTemplate restTemplate;
 
-    public KakaoAlimtalkUtil() {
-        this.restTemplate = new RestTemplate();
-    }
+    @Value("${aligo.apiKey}")
+    private String apiKey;
 
-        // 알림톡 기본 설정
-    private MultiValueMap<String, String> init(){
+    @Value("${aligo.userId}")
+    private String userId;
+
+    @Value("${aligo.senderKey}")
+    private String senderKey;
+
+    @Value("${aligo.sender}")
+    private String sender;
+
+    private MultiValueMap<String, String> initParams() {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-
-        params.add("apikey", API_KEY);
-        params.add("userid", USER_ID);
-        params.add("senderkey", SENDER_KEY);
-        params.add("sender", SENDER);
-
+        params.add("apikey", apiKey);
+        params.add("userid", userId);
+        params.add("senderkey", senderKey);
+        params.add("sender", sender);
         return params;
     }
 
-    private void send(MultiValueMap<String, String> params){
-        String url = "https://kakaoapi.aligo.in/akv10/alimtalk/send/";
+    private void addDefaultButtons(MultiValueMap<String, String> params, AlimtalkTemplate template) {
+        params.add("button_1", template.getButtonJson());
+    }
+
+    private void sendTemplate(String receiver, AlimtalkTemplate template, String message, String subject, String emTitle) {
+        MultiValueMap<String, String> params = initParams();
+        params.add("tpl_code", template.getTemplateCode());
+        params.add("receiver_1", receiver);
+        params.add("subject_1", subject);
+        if (emTitle != null) {
+            params.add("emtitle_1", emTitle);
+        }
+        params.add("message_1", message);
+        addDefaultButtons(params, template);
+
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
         ResponseEntity<String> response = restTemplate.exchange(
-                url, HttpMethod.POST, entity, String.class
-        );
-        System.out.println("Alimtalk response: " + response.getBody());
+                "https://kakaoapi.aligo.in/akv10/alimtalk/send/", HttpMethod.POST, entity, String.class);
+        log.info("Alimtalk Response: {}", response.getBody());
     }
-
-    private void addChannelButton(MultiValueMap<String, String> params){
-        String buttonJson = "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\",\"linkTypeName\":\"채널 추가\"}]}";
-        params.add("button_1", buttonJson);
-    }
-
 
     //요금제, 코인 구매 완료 알림톡
-    public void coinPaymentAlimtalk(String receiver, int amount, String name, String type){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5388");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "요금제, 코인 구매 완료");
-
-        // 강조 메시지
-        String title = String.format("%,d원",amount);
-        params.add("emtitle_1", title);
-
-        // 내용
+    public void sendCoinOrPlanPayment(String receiver, String name, String type) {
         String message = String.format(
-                "[핏패스]\n결제가 완료되었어요.\n\n- 구매처 : %s\n- 상품명 : %s\n- 결제일시 : %s\n- 결제수단 : %s\n",
-                "핏패스", name, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), type);
-        params.add("message_1", message);
-        // 채널 추가 버튼 추가
-        addChannelButton(params);
-        send(params);
+                "%s 구매가 완료 되었어요. 지금 바로 원하는 운동 시설을 찾아보세요\n\n- 구매처 : %s\n- 상품명 : %s\n- 결제일시 : %s\n- 결제수단 : %s\n",
+                name, "핏패스", name, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), type);
+        sendTemplate(receiver, AlimtalkTemplate.COIN_PAYMENT, message, "요금제/코인 구매 완료", "결제가 완료 되었어요");
     }
 
     // 패스 구매 완료 알림톡
-    public void passPaymentAlimtalk(String receiver, int amount, String name){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5389");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "패스 구매 완료");
-
-        // 강조 메시지
-        String title = String.format("%d코인",amount);
-        params.add("emtitle_1", title);
-
-        // 내용
+    public void sendPassPayment(String receiver, int amount, String name) {
         String message = String.format(
-                "[핏패스]\n결제가 완료되었어요.\n\n- 구매처 : %s\n- 상품명 : %s\n- 결제일시 : %s\n- 결제 코인 : %d\n",
+                "패스 구매가 완료 되었어요. 패스는 24시간 안에 사용해야 하며, 사용 클릭  후 1시간 이내로 시설에 입장하여 패스 사용을 보여주세요.\n\n- 구매처 : %s\n- 상품명 : %s\n- 결제일시 : %s\n- 결제코인 : %d\n",
                 "핏패스", name, LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), amount);
-        params.add("message_1", message);
-        // 채널 추가 버튼 추가
-        addChannelButton(params);
-
-        send(params);
+        sendTemplate(receiver, AlimtalkTemplate.PASS_PAYMENT, message, "구매 완료", "패스 구매");
     }
 
-    // 결제 실패 알림톡
-    public void paymentFailAlimtalk(String receiver, String name){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5390");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "결제 실패");
-
-        // 내용
-        String message = String.format(
-                "[핏패스]\n%s 구독 상품 결제에 실패했습니다.\n\n결제일 포함 3일차까지 자동 결제가 시도되며 결제일 포함 4일차 결제 실패 시 자동 구독 취소됩니다.\n잔고를 충전해 결제를 시도해주세요.\n",
-                name);
-        params.add("message_1", message);
-        // 채널 추가 버튼 추가
-        addChannelButton(params);
-
-        send(params);
+    // 1차 결제 실패 알림톡
+    public void sendFirstPaymentFail(String receiver) {
+        String message = "구독 상품은 결제일 00시 명일 00시에 자동 결제가 시도 되며, 2회 결제 실패시 자동 구독 해지됩니다.\n";
+        sendTemplate(receiver, AlimtalkTemplate.PAYMENT_FAIL_1, message, "결제 실패", "결제에 실패했습니다");
     }
 
-    // 플랜 구독 자동 해지
-    public void cancelPlanAlimtalk(String receiver, String name){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5392");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "플랜 구독 자동 해지");
-
-        // 내용
-        String message = String.format(
-                "[핏패스]\n%s 구독이 자동 해지되었습니다.\n\n재구독을 원하시면 홈페이지 '구독하기'에서 결제하실 수 있습니다. 감사합니다.",
-                name
-        );
-        params.add("message_1", message);
-        // 채널 추가 버튼, 웹링크 버튼 추가
-        String buttonJson = "{\"button\":[{\"name\":\"채널 추가\",\"linkType\":\"AC\",\"linkTypeName\":\"채널 추가\"},{\"name\":\"구독하러 가기\",\"linkType\":\"WL\",\"linkTypeName\":\"웹링크\",\"linkPc\":\"https://fitpass.co.kr/\",\"linkMo\":\"https://fitpass.co.kr/\"}]}";
-        params.add("button_1", buttonJson);
-
-        send(params);
+    // 2차 결제 실패 알림톡
+    public void sendSecondPaymentFail(String receiver) {
+        String message = "자동 결제가 이루어 지지 않으며, 관련 서비스 이용이 제한될 수 있습니다.\n서비스 재이용을 원하시는 경우 아래를 참고해주세요\n";
+        sendTemplate(receiver, AlimtalkTemplate.PAYMENT_FAIL_2, message, "구독 해지", "구독이 종료되었습니다");
     }
 
-    // 플랜 변경 완료
-    public void planChangeAlimtalk(String receiver, String name){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5394");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "플랜 변경 완료");
-
-        // 내용
+    // 플랜 변경 완료 알림톡
+    public void sendPlanChange(String receiver, String oldPlanName, String newPlanName) {
         String message = String.format(
-                "[핏패스]\n%s 플랜으로 변경되었습니다.\n다음 결제일부터 적용됩니다.",
-                name
-
-        );
-        params.add("message_1", message);
-        // 채널 추가 버튼 추가
-        addChannelButton(params);
-
-        send(params);
+                "요금제 변경이 완료되었어요!\n\n%s → %s\n다음 결제일부터 적용됩니다.\n",
+                oldPlanName, newPlanName);
+        sendTemplate(receiver, AlimtalkTemplate.PLAN_CHANGE, message, "플랜 변경 완료", null);
     }
 
-    // 플랜 구독 비활성화 완료
-    public void deactivatePlanAlimtalk(String receiver, String name){
-        MultiValueMap<String, String> params = init();
-        params.add("tpl_code", "TY_5395");
-        params.add("receiver_1", receiver);
-        params.add("subject_1", "플랜 구독 비활성화");
+    // 회원 가입 인증번호 알림톡
+    public void sendCode(String receiver, String code) {
+        String message = String.format("인증번호는 [%s]입니다. (유효시간 3분)", code);
+        sendTemplate(receiver, AlimtalkTemplate.SEND_CODE, message, "회원가입 인증번호 발송", null);
+    }
 
-        // 내용
-        String message = String.format(
-                "[핏패스]\n%s 플랜 구독이 비활성화되었습니다.\n다음 결제일부터 자동 결제가 중단됩니다.",
-                name
-        );
+    // 회원 가입 완료 알림톡
+    public void sendRegisterSuccess(String receiver) {
+        String message = "핏패스 회원 가입이 완료 되었습니다. 지금 바로 다양한 운동 시설을 자유롭게 둘러보세요\n";
+        sendTemplate(receiver, AlimtalkTemplate.REGISTER_SUCCESS, message, "회원 가입 완료", "가입을 환영합니다");
+    }
 
-        params.add("message_1", message);
-        // 채널 추가 버튼 추가
-        addChannelButton(params);
-
-        send(params);
+    // 후기 알림톡
+    public void sendReviewNotice(String receiver) {
+        String message = "오늘 이용한 시설은 어떠셨나요? 리뷰를 남겨 경험을 공유해주세요\n";
+        sendTemplate(receiver, AlimtalkTemplate.REVIEW_NOTICE, message, "후기 알림", null);
     }
 }

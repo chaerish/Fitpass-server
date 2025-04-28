@@ -60,6 +60,7 @@ public class SecurityConfig {
             "/fitness/search",
             "/notice/**",
             "/healthcheck",
+            "/actuator/health",
             "/pageView",
             "/management/plan",
             "/management/coin"

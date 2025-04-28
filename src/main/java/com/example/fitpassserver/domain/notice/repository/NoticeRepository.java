@@ -12,24 +12,18 @@ import java.util.Optional;
 
 @Repository
 public interface NoticeRepository extends JpaRepository<Notice, Long> {
-    Optional<Notice> findNoticeById(Long noticeId);
-    List<Notice> findByIsHomeSlideTrueAndIsDraftFalse();
     Page<Notice> findAllByOrderByCreatedAtDesc(Pageable pageable);
     Page<Notice> findByTitleContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
-    long countByIsHomeSlideTrue();
+    long countByIsMemberHomeSlideTrue();
     List<Notice> findByIsDraftTrueOrderByCreatedAtDesc();
-
-    @Query("""
-        SELECT n FROM Notice n
-        WHERE n.isDraft = false
-        ORDER BY n.createdAt DESC
-    """)
-    Page<Notice> findPublishedNoticesSorted(Pageable pageable);
 
 
     @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isMemberSlide = true ORDER BY n.createdAt DESC")
     Page<Notice> findPublishedNoticesByIsMemberSlideTrue(Pageable pageable);
 
-    @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isMemberSlide = true AND n.isHomeSlide = true")
+    @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isMemberHomeSlide = true")
     List<Notice> findNoticeHomeSlideIsMemberSlideTrue();
+
+    @Query("SELECT n FROM Notice n WHERE n.isDraft = false AND n.isOwnerSlide = true ORDER BY n.createdAt DESC")
+    Page<Notice> findPublishedNoticesByIsOwnerSlideTrue(Pageable pageable);
 }

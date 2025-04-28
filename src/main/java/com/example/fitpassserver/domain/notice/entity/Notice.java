@@ -1,5 +1,6 @@
 package com.example.fitpassserver.domain.notice.entity;
 
+import com.example.fitpassserver.admin.notice.dto.request.NoticeUpdateReqDTO;
 import com.example.fitpassserver.global.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -34,7 +35,10 @@ public class Notice extends BaseEntity {
     private NoticeType type;
 
     @Column(nullable = false)
-    private boolean isHomeSlide; // true: 홈 슬라이드 게시, false: 미게시
+    private boolean isMemberHomeSlide; // true: 홈 슬라이드 게시, false: 미게시
+
+    @Column(nullable = false)
+    private boolean isOwnerHomeSlide; // true: 홈 슬라이드 게시, false: 미게시
 
     @Setter
     @Column(nullable = false)
@@ -44,11 +48,28 @@ public class Notice extends BaseEntity {
     @Column(nullable = false)
     private boolean isMemberSlide;
 
+    @Setter
+    @Column(nullable = false)
+    private boolean isOwnerSlide;
+
     // 🔹 조회수 증가 메서드 추가
     public void increaseViews() {
         this.views += 1;
     }
-    public void setHomeSlide(boolean isHomeSlide) {
-        this.isHomeSlide = isHomeSlide;
+    public void updateMemberHomeSlide(boolean isHomeSlide) {
+        this.isMemberHomeSlide = isHomeSlide;
     }
+    public void updateOwnerHomeSlide(boolean isHomeSlide) {
+        this.isOwnerHomeSlide = isHomeSlide;
+    }
+
+    public void update(NoticeUpdateReqDTO request, String imageUrl) {
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.type = request.getType();
+        this.noticeImage = (imageUrl != null) ? imageUrl : this.noticeImage; // 기존 이미지 유지
+        this.isMemberSlide = request.isMemberSlide();
+        this.isOwnerSlide = request.isOwnerSlide();
+    }
+
 }

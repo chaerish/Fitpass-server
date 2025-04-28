@@ -99,15 +99,6 @@ public class MemberRequestDTO {
         private Double longitude;
     }
 
-    @Getter
-    @Builder
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class isLocationDTO {
-        @NotNull
-        private boolean isLocationAgreed;
-    }
-
     /**
      * 아이디 찾기 dto
      **/

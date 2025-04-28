@@ -12,8 +12,11 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
+import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
+import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.fitpassserver.owner.owner.entity.Owner;
+import com.example.fitpassserver.owner.owner.repository.OwnerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +40,7 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     private final FitnessRepository fitnessRepository;
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
+    private final OwnerRepository ownerRepository;
 
     private String generateMainImageKey(Long fitnessId, String originalFilename){
         return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
@@ -77,6 +81,14 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
             fitnessImageRepository.saveAll(fitnessImages);
             fitness.setAdditionalImages(fitnessImages);
         }
+
+        // 로그인 아이디 사업자 조회
+        Owner owner = ownerRepository.findByLoginId(dto.getLoginId())
+                .orElseThrow(() -> new MemberException(MemberErrorCode.NOT_FOUND));
+
+
+        // fitness 맴버 매핑
+        fitness.setOwner(owner);
 
         // 시설 저장
         fitnessRepository.save(fitness);
@@ -120,7 +132,21 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         List<Category> categoryList = CategoryConverter.toEntityList(dto.getCategoryList(), fitness);
         fitness.setCategoryList(categoryList);
 
-        fitness.update(dto, categoryList);
+        fitness.update(
+                dto.getFitnessName(),
+                dto.getAddress(),
+                dto.getDetailAddress(),
+                dto.getPhoneNumber(),
+                dto.getFee(),
+                dto.getTotalFee(),
+                categoryList,
+                dto.isPurchasable(),
+                dto.getNotice(),
+                dto.getTime(),
+                dto.getHowToUse(),
+                dto.getLatitude(),
+                dto.getLongitude()
+        );
 
         return FitnessAdminConverter.from(fitness);
     }

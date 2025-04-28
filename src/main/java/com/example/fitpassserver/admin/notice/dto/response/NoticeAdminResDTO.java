@@ -1,13 +1,18 @@
 package com.example.fitpassserver.admin.notice.dto.response;
 
+import java.time.LocalDateTime;
+
 public record NoticeAdminResDTO (
         Long id,
         String imageUrl,
         String title,
         String category,
-        java.time.LocalDateTime createdAt,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
         String status,
-        boolean isHomeSlide,
-        boolean isMemberSlide
+        boolean isMemberHomeSlide,
+        boolean isOwnerHomeSlide,
+        boolean isMemberSlide,
+        boolean isOwnerSlide
 ){
 }

@@ -19,6 +19,17 @@ public class PGResponseDTO {
     }
 
     @Builder
+    public record PGSubscriptionPayResponseDTO(
+            Long coinId
+    ) {
+        public static PGSubscriptionPayResponseDTO from(Coin coin) {
+            return PGSubscriptionPayResponseDTO.builder()
+                    .coinId(coin.getId())
+                    .build();
+        }
+    }
+
+    @Builder
     public record PGSearchCardResponseDTO(
             String billingKey,
             String bank,
