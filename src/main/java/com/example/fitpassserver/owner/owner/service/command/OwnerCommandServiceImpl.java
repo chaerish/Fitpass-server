@@ -7,6 +7,7 @@ import com.example.fitpassserver.owner.owner.converter.OwnerConverter;
 import com.example.fitpassserver.owner.owner.dto.OwnerRequestDTO;
 import com.example.fitpassserver.owner.owner.entity.Owner;
 import com.example.fitpassserver.owner.owner.repository.OwnerRepository;
+import com.example.fitpassserver.owner.owner.service.file.OwnerFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,8 @@ public class OwnerCommandServiceImpl implements OwnerCommandService {
     private final OwnerRepository ownerRepository;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final OwnerFileService ownerFileService;
 
     /**
      * 회원가입
@@ -48,12 +51,12 @@ public class OwnerCommandServiceImpl implements OwnerCommandService {
         }
 
         Owner newOwner = OwnerConverter.toOwner(request);
-
         newOwner.encodePassword(passwordEncoder.encode(request.getPassword()));
 
         Owner savedOwner = ownerRepository.save(newOwner);
 
+        ownerFileService.uploadOwnerFile(request);
+
         return savedOwner;
     }
-
 }

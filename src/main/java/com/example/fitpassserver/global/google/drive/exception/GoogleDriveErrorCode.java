@@ -1,4 +1,4 @@
-package com.example.fitpassserver.global.aws.s3.exception;
+package com.example.fitpassserver.global.google.drive.exception;
 
 
 import com.example.fitpassserver.global.apiPayload.code.BaseErrorCode;
@@ -9,10 +9,9 @@ import org.springframework.http.HttpStatus;
 
 @Getter
 @AllArgsConstructor
-public enum S3ErrorCode implements BaseErrorCode {
+public enum GoogleDriveErrorCode implements BaseErrorCode {
 
-    UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UPLOAD0500", "업로드 처리 중 오류가 발생했습니다."),
-    DOWNLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "DOWNLOAD500", "다운로드 처리 중 오류가 발생했습니다.");
+    UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "UPLOAD500", "구글 드라이브에 업로드 처리 중 오류가 발생했습니다.");
 
     private final HttpStatus status;
     private final String code;
