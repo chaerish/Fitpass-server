@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.review.service;
 
 
+import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.fitness.entity.MemberFitness;
 import com.example.fitpassserver.domain.fitness.entity.Status;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
@@ -28,6 +29,8 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberFitnessRepository memberFitnessRepository;
 
+    private final CoinService coinService;
+
     public Long createReview(Member member, Long passId, ReviewReqDTO.CreateReviewReqDTO dto) {
 
         if (!dto.isAgree()) {
@@ -50,6 +53,8 @@ public class ReviewService {
         reviewRepository.save(review);
 
         pass.setStatus(Status.REVIEWED);
+
+        coinService.createNewCoinByReview(member);
 
         return review.getId();
     }
