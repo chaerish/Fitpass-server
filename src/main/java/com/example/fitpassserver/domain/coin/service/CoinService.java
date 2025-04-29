@@ -1,6 +1,7 @@
 package com.example.fitpassserver.domain.coin.service;
 
 import com.example.fitpassserver.domain.coin.entity.Coin;
+import com.example.fitpassserver.domain.coin.entity.CoinType;
 import com.example.fitpassserver.domain.coin.entity.CoinTypeEntity;
 import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
@@ -41,6 +42,13 @@ public class CoinService {
 
     public Coin createNewCoinByPg(Member member, String paymentId, int price) {
         return createNewCoin(member, price);
+    }
+
+    public Coin createNewCoinByReview(Member member) {
+        CoinTypeEntity coinType = coinTypeRepository.findByCoinType(CoinType.COIN_1)
+                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
+
+        return createNewCoin(member, coinType.getPrice());
     }
 
     @Transactional
