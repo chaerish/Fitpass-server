@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class FitnessAdminResponseDTO {
 
@@ -34,4 +35,29 @@ public class FitnessAdminResponseDTO {
         private int totalPages;
     }
 
+
+    @Getter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class FitnessAdminPreviewDTO {
+        public Long id;
+        public String loginId;
+        public String fitnessName;
+        public String address;
+        public String detailAddress;
+        public String phoneNumber;
+        public Integer fee;
+        public Integer totalFee;
+        public List<String> categoryList;
+        public boolean isPurchasable;
+        private String notice;
+        private Map<String, String > time;
+        private String howToUse;
+        private Double latitude;
+        private Double longitude;
+        private String fitnessImage;
+        private List<String> additionalImages;
+    }
 }
+

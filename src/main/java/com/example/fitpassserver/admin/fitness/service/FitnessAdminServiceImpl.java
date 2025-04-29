@@ -12,6 +12,7 @@ import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
 import com.example.fitpassserver.domain.fitness.repository.FitnessImageRepository;
 import com.example.fitpassserver.domain.fitness.repository.FitnessRepository;
+import com.example.fitpassserver.domain.fitness.service.FitnessImageService;
 import com.example.fitpassserver.domain.member.exception.MemberErrorCode;
 import com.example.fitpassserver.domain.member.exception.MemberException;
 import com.example.fitpassserver.global.aws.s3.service.S3Service;
@@ -41,6 +42,7 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
     private final FitnessImageRepository fitnessImageRepository;
     private final S3Service s3Service;
     private final OwnerRepository ownerRepository;
+    private final FitnessImageService fitnessImageService;
 
     private String generateMainImageKey(Long fitnessId, String originalFilename){
         return String.format("fitness/%d/main/%s/%s", fitnessId, UUID.randomUUID(), originalFilename);
@@ -121,6 +123,17 @@ public class FitnessAdminServiceImpl implements FitnessAdminService{
         }
 
         return FitnessAdminConverter.from(fitnessPage);
+    }
+
+    @Override
+    public FitnessAdminResponseDTO.FitnessAdminPreviewDTO getFitness(Long fitnessId) {
+        Fitness fitness = fitnessRepository.findById(fitnessId).orElseThrow(
+                () -> new FitnessException(FitnessErrorCode.FITNESS_NOT_FOUND));
+
+        String mainImage = fitnessImageService.getFitnessImage(fitness.getId());
+        List<String> additionalImages = fitnessImageService.getAdditionalImages(fitness.getId());
+
+        return FitnessAdminConverter.toFitnessAdminPreviewDTO(fitness, mainImage, additionalImages);
     }
 
 

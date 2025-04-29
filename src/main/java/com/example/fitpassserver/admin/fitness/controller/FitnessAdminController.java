@@ -44,6 +44,17 @@ public class FitnessAdminController {
         return ApiResponse.onSuccess(fitnessId);
     }
 
+
+    @Operation(
+            summary = "Fitness 조회",
+            description = "fitnessId에 해당하는 시설 정보를 조회합니다."
+    )
+    @GetMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessAdminPreviewDTO> getFitness(@PathVariable Long fitnessId) {
+        return ApiResponse.onSuccess(fitnessAdminService.getFitness(fitnessId));
+    }
+
+
     @Operation(
             summary = "Fitness 목록 조회",
             description = "페이지네이션, 정렬, 검색 기능을 포함한 Fitness 목록을 조회합니다."

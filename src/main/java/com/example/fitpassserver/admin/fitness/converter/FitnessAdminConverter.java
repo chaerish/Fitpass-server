@@ -6,11 +6,11 @@ import com.example.fitpassserver.domain.fitness.entity.Category;
 import com.example.fitpassserver.domain.fitness.entity.Fitness;
 import com.example.fitpassserver.domain.fitness.exception.FitnessErrorCode;
 import com.example.fitpassserver.domain.fitness.exception.FitnessException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.Page;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class FitnessAdminConverter {
@@ -36,6 +36,29 @@ public class FitnessAdminConverter {
         }
 
         return sb.toString();
+    }
+
+    public static Map<String, String> convertFormattedStringToMap(String formattedString) {
+        if (formattedString == null || formattedString.trim().isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, String> timeMap = new HashMap<>();
+        String[] lines = formattedString.split("\n");
+
+        for (String line : lines) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                // 첫 번째 글자는 요일로, 나머지는 시간으로 파싱
+                if (line.length() >= 2) {
+                    String day = line.substring(0, 1);  // 첫 글자를 요일로
+                    String time = line.substring(1).trim();  // 나머지를 시간으로 (앞쪽 공백 제거)
+                    timeMap.put(day, time);
+                }
+            }
+        }
+
+        return timeMap;
     }
 
     public static Fitness toEntity(FitnessAdminRequestDTO.FitnessReqDTO dto){
@@ -85,6 +108,35 @@ public class FitnessAdminConverter {
                         .collect(Collectors.toList()))
                 .totalElements(page.getTotalElements())
                 .totalPages(page.getTotalPages())
+                .build();
+    }
+
+    public static FitnessAdminResponseDTO.FitnessAdminPreviewDTO toFitnessAdminPreviewDTO(Fitness fitness, String mainImage, List<String> additionalImages) {
+
+        // 카테고리
+        List<String> categoryNames = fitness.getCategoryList().stream()
+                .map(Category::getCategoryName) // Category 엔티티의 getName() 메서드 호출
+                .collect(Collectors.toList());
+
+
+        return FitnessAdminResponseDTO.FitnessAdminPreviewDTO.builder()
+                .id(fitness.getId())
+                .loginId(fitness.getOwner().getLoginId())
+                .fitnessName(fitness.getName())
+                .address(fitness.getAddress())
+                .detailAddress(fitness.getDetailAddress())
+                .phoneNumber(fitness.getPhoneNumber())
+                .fee(fitness.getFee())
+                .totalFee(fitness.getTotalFee())
+                .categoryList(categoryNames)
+                .isPurchasable(fitness.getIsPurchasable())
+                .notice(fitness.getNotice())
+                .time(FitnessAdminConverter.convertFormattedStringToMap(fitness.getTime()))
+                .howToUse(fitness.getHowToUse())
+                .longitude(fitness.getLongitude())
+                .latitude(fitness.getLatitude())
+                .fitnessImage(mainImage)
+                .additionalImages(additionalImages)
                 .build();
     }
 }
