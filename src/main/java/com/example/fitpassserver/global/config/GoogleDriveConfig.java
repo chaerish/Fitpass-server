@@ -12,6 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -21,10 +22,13 @@ public class GoogleDriveConfig {
 
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
 
+    @Value("${google.drive.credentials.path}")
+    private String serviceAccountPath;
+
     @Bean
     public Drive googleDrive() throws IOException, GeneralSecurityException {
         ServiceAccountCredentials credentials = (ServiceAccountCredentials) ServiceAccountCredentials
-                .fromStream(new FileInputStream("src/main/resources/google-service.json"))
+                .fromStream(new FileInputStream(serviceAccountPath))
                 .createScoped(List.of("https://www.googleapis.com/auth/drive"));
 
         return new Drive.Builder(

@@ -27,14 +27,6 @@ jobs:
           touch ./application-prod.yml
           echo "${{ secrets.APPLICATION_PROD }}" > ./application-prod.yml
 
-      ## 구글 드라이브 연동
-      - name: make service-account.json
-        run: |
-          mkdir -p ./src/main/resources
-          cd ./src/main/resources
-          touch ./google-service.json
-          echo "${{ secrets.GOOGLE_SERVICE_JSON }}" > ./google-service.json
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
 
