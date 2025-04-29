@@ -5,9 +5,8 @@ import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHis
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.PaymentStatus;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.dto.event.PlanCancelEvent;
-import com.example.fitpassserver.domain.plan.dto.event.PlanChangeAllSuccessEvent;
-import com.example.fitpassserver.domain.plan.dto.event.PlanChangeSuccessEvent;
-import com.example.fitpassserver.domain.plan.dto.event.PlanPaymentAllSuccessEvent;
+import com.example.fitpassserver.domain.plan.dto.event.PlanChangeEvent;
+import com.example.fitpassserver.domain.plan.dto.event.RegularSubscriptionEvent;
 import com.example.fitpassserver.domain.plan.dto.request.PlanChangeRequestDTO;
 import com.example.fitpassserver.domain.plan.dto.response.ChangePlanDTO;
 import com.example.fitpassserver.domain.plan.entity.PaymentType;
@@ -77,7 +76,7 @@ public class PlanService {
         if (plan.getPlanType().getName().equals(dto.planName())) {
             throw new PlanException(PlanErrorCode.PLAN_CHANGE_DUPLICATE_ERROR);
         }
-        eventPublisher.publishEvent(new PlanChangeSuccessEvent(plan, planType));
+        eventPublisher.publishEvent(new PlanChangeEvent.ChangeUpdateEvent(plan, planType));
         return new ChangePlanDTO(plan, planType);
     }
 
@@ -89,23 +88,20 @@ public class PlanService {
         plan.resetPaymentCount();
         planRepository.save(plan);
         eventPublisher.publishEvent(
-                new PlanChangeAllSuccessEvent(plan.getMember().getPhoneNumber(), oldPlanName,
+                new PlanChangeEvent.ChangeSuccessEvent(plan.getMember().getPhoneNumber(), oldPlanName,
                         plan.getPlanType().getName()));
     }
-
 
     public void updatePlanInfo(Plan plan, CoinPaymentHistory history) {
         plan.updatePlanSubscriptionInfo();
         planRepository.save(plan);
+        System.out.println(plan.getPlanDate());
         eventPublisher.publishEvent(
-                new PlanPaymentAllSuccessEvent(plan.getMember().getPhoneNumber(), plan.getPlanType().getName(),
+                new RegularSubscriptionEvent.InfoUpdateSuccessEvent(
+                        plan.getPlanType().getName(), plan.getMember().getPhoneNumber(),
                         history.getPaymentPrice(), history.getPaymentMethod()));
     }
 
-    public void updatePlanInfoByScheduler(Plan plan, CoinPaymentHistory history) {
-        plan.updatePlanSubscriptionInfo();
-        planRepository.save(plan);
-    }
 
     private Plan createNewPlan(Member member, String planName, String sid, PaymentType paymentType) {
         Plan plan = planRepository.findByMember(member).orElse(null);
