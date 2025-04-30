@@ -35,14 +35,14 @@ public class PlanAttemptLogService {
         return attemptLog;
     }
 
-    public void createFirstAttemptLog(Plan plan) {
+    public PlanAttemptLog createFirstAttemptLog(Plan plan) {
         PlanAttemptLog planAttemptLog = PlanAttemptLog.builder()
                 .plan(plan)
                 .firstAttemptedAt(LocalDateTime.now())
                 .attemptOrder(1)
                 .isCompleted(false)
                 .build();
-        planAttemptLogRepository.save(planAttemptLog);
+        return planAttemptLogRepository.save(planAttemptLog);
     }
 
     public List<PlanAttemptLog> findFailureNotificationTarget() {
