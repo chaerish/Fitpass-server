@@ -25,8 +25,7 @@ public class PlanScheduler {
     private final PGPaymentCommandService paymentCommandService;
     private final PlanAttemptLogService planAttemptLogService;
 
-    //    @Scheduled(cron = "0 0 9 * * ?")
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 9 * * ?")
     @Async
     public void regularPay() {
         List<Plan> planToProcess = schedulerHelper.findPaymentTarget();
