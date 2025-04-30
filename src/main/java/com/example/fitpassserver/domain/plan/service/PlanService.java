@@ -91,11 +91,10 @@ public class PlanService {
                 new PlanChangeEvent.ChangeSuccessEvent(plan.getMember().getPhoneNumber(), oldPlanName,
                         plan.getPlanType().getName()));
     }
-
+    
     public void updatePlanInfo(Plan plan, CoinPaymentHistory history) {
         plan.updatePlanSubscriptionInfo();
         planRepository.save(plan);
-        System.out.println(plan.getPlanDate());
         eventPublisher.publishEvent(
                 new RegularSubscriptionEvent.InfoUpdateSuccessEvent(
                         plan.getPlanType().getName(), plan.getMember().getPhoneNumber(),
