@@ -82,7 +82,7 @@ public class FitnessAdminController {
     @PutMapping(value = "/{fitnessId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updateFitness(
             @Parameter(description = "수정할 Fitness 정보", required = true)
-            @RequestBody FitnessAdminRequestDTO.FitnessReqDTO request,
+            @RequestPart FitnessAdminRequestDTO.FitnessReqDTO request,
             @Parameter(description = "수정할 Fitness ID", required = true, example = "1")
             @PathVariable Long fitnessId){
         FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updateFitness(fitnessId, request);
