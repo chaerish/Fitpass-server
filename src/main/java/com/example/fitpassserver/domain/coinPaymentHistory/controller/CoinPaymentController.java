@@ -1,37 +1,50 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.controller;
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CompletePaymentRequest;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PGRequestDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.*;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PaymentDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.StartPaymentRequest;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PGResponseDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneErrorCode;
+import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneException;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.NewCoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.command.PGPaymentCommandService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.query.PGPaymentQueryService;
-import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOneApiUtil;
-import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOnePaymentIdUtil;
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
+import io.portone.sdk.server.webhook.Webhook;
+import io.portone.sdk.server.webhook.WebhookTransaction;
+import io.portone.sdk.server.webhook.WebhookVerifier;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.Map;
+import java.util.UUID;
+import kotlin.Unit;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
+import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/coin/pay")
+//@RequestMapping("/coin/pay")
 @RequiredArgsConstructor
 @Tag(name = "코인 결제 API", description = "코인 결제 API입니다.")
 public class CoinPaymentController {
@@ -41,7 +54,9 @@ public class CoinPaymentController {
     private final CoinPaymentHistoryRedisService coinPaymentHistoryRedisService;
     private final PGPaymentCommandService pgPaymentCommandService;
     private final PGPaymentQueryService pgPaymentQueryService;
-    private final PortOneApiUtil portOne;
+
+    private final WebhookVerifier portoneWebhook;
+    private final NewCoinPaymentHistoryRedisService newCoinPaymentHistoryRedisService;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
     @PostMapping("/request")
@@ -111,5 +126,51 @@ public class CoinPaymentController {
 
         PGResponseDTO.PGSinglePayResponseDTO response = pgPaymentCommandService.payWithBillingKey(member, dto);
         return ApiResponse.onSuccess(response);
+    }
+
+    @PostMapping("/coin/pay/start")
+    public ResponseEntity<Map<String, String>> startPayment(@CurrentMember Member member,
+                                                            @RequestBody StartPaymentRequest request) {
+        // 1. paymentId 생성
+        String paymentId = UUID.randomUUID().toString();
+
+        // 2. Redis 또는 임시 저장소에 memberId, itemId, price 매핑 저장
+        newCoinPaymentHistoryRedisService.savePaymentInfo(
+                paymentId,
+                member.getId(),
+                request.itemId(),
+                request.price()
+        );
+
+        // 3. 프론트(혹은 Postman)에 paymentId 반환
+        return ResponseEntity.ok(Map.of("paymentId", paymentId));
+    }
+
+    @Operation(summary = "결제 정보를 실시간으로 전달받기 위한 웹훅입니다.")
+    @PostMapping("/api/payment/webhook")
+    public Mono<Unit> handleWebhook(
+            @RequestBody String body,
+            @RequestHeader("webhook-id") String webhookId,
+            @RequestHeader("webhook-timestamp") String webhookTimestamp,
+            @RequestHeader("webhook-signature") String webhookSignature
+    ) throws PortOneException {
+        Webhook webhook;
+        try {
+            webhook = portoneWebhook.verify(body, webhookId, webhookSignature, webhookTimestamp);
+        } catch (Exception e) {
+            throw new PortOneException(PortOneErrorCode.PORT_ONE_ERROR_CODE);
+        }
+        if (webhook instanceof WebhookTransaction transaction) {
+            return pgPaymentCommandService.syncPayment(transaction.getData().getPaymentId(), null).map(payment -> Unit.INSTANCE);
+        }
+        return Mono.empty();
+    }
+
+    @PostMapping("/api/payment/complete")
+    public Mono<PaymentDTO> completePayment(
+            @CurrentMember Member member,
+            @RequestBody CompletePaymentRequest completePaymentRequest
+    ) {
+        return pgPaymentCommandService.syncPayment(completePaymentRequest.paymentId(), member);
     }
 }

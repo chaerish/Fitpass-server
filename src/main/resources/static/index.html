@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포트원 결제 테스트</title>
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+</head>
+<body>
+<h1>포트원 결제 테스트</h1>
+<button id="payButton">결제하기</button>
+
+<script>
+    document.getElementById("payButton").onclick = async function() {
+        // 1. 서버에서 paymentId 발급 받기
+        const startResponse = await fetch("http://localhost:8080/coin/pay/start", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiR1VFU1QiLCJpYXQiOjE3NDcxMjA3NDcsImV4cCI6MTc0NzEyNDM0N30.1AJQpxBcKgqNLDVCeuejJYN43cmzeOND7mkDr5FOwbI"
+            },
+            body: JSON.stringify({
+                itemId: "coin-500",  // 테스트용 상품 ID
+                price: 550          // 테스트용 결제 금액
+            })
+        });
+
+        const startData = await startResponse.json();
+        const paymentId = startData.paymentId;
+        console.log("서버로부터 받은 paymentId: " + paymentId);
+
+        const storeId = "store-4a14d1f5-1b04-45e3-b718-a0d5f8e7a757";
+        const channelKey = "channel-key-92b94069-2c2e-46e5-a866-76d418684ee1";
+
+        // 2. 포트원 결제창 호출
+        const payment = await PortOne.requestPayment({
+            storeId,
+            channelKey,
+            paymentId,
+            orderName: "테스트 코인 결제",
+            totalAmount: 550,
+            currency: "KRW",
+            payMethod: "EASY_PAY"
+        });
+
+        console.log("결제 결과", payment);
+
+        if (payment.code == null) {
+            // 3. 결제 성공시 서버에 결제 완료 알림
+            const completeResponse = await fetch("http://localhost:8080/api/payment/complete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiR1VFU1QiLCJpYXQiOjE3NDcxMjA3NDcsImV4cCI6MTc0NzEyNDM0N30.1AJQpxBcKgqNLDVCeuejJYN43cmzeOND7mkDr5FOwbI"
+                },
+                body: JSON.stringify({ paymentId: payment.paymentId })
+            });
+
+            const completeResult = await completeResponse.json();
+            console.log("서버 완료 처리 응답", completeResult);
+
+            if (completeResponse.ok) {
+                alert("결제 성공 및 서버 완료 처리 성공");
+            } else {
+                alert("서버 완료 처리 실패: " + JSON.stringify(completeResult));
+            }
+        } else {
+            alert("결제 실패: " + payment.message);
+        }
+    };
+</script>
+</body>
+</html>

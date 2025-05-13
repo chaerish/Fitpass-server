@@ -63,7 +63,8 @@ public class SecurityConfig {
             "/actuator/health",
             "/pageView",
             "/management/plan",
-            "/management/coin"
+            "/management/coin",
+            "/index.html"
     };
 
     @Bean
