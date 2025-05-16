@@ -10,6 +10,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaym
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PGResponseDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PaymentIdResponse;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneException;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryRedisService;
@@ -29,16 +30,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Map;
-import java.util.UUID;
 import kotlin.Unit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
@@ -129,21 +126,12 @@ public class CoinPaymentController {
     }
 
     @PostMapping("/coin/pay/start")
-    public ResponseEntity<Map<String, String>> startPayment(@CurrentMember Member member,
-                                                            @RequestBody StartPaymentRequest request) {
-        // 1. paymentId 생성
-        String paymentId = UUID.randomUUID().toString();
-
-        // 2. Redis 또는 임시 저장소에 memberId, itemId, price 매핑 저장
-        newCoinPaymentHistoryRedisService.savePaymentInfo(
-                paymentId,
-                member.getId(),
-                request.itemId(),
-                request.price()
-        );
-
-        // 3. 프론트(혹은 Postman)에 paymentId 반환
-        return ResponseEntity.ok(Map.of("paymentId", paymentId));
+    public ApiResponse<?> startPayment(
+            @CurrentMember Member member,
+            @RequestBody StartPaymentRequest request
+    ) {
+        PaymentIdResponse response = pgPaymentCommandService.createPaymentId(member, request);
+        return ApiResponse.onSuccess(response);
     }
 
     @Operation(summary = "결제 정보를 실시간으로 전달받기 위한 웹훅입니다.")

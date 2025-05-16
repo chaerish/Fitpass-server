@@ -16,7 +16,7 @@
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiR1VFU1QiLCJpYXQiOjE3NDcxMjA3NDcsImV4cCI6MTc0NzEyNDM0N30.1AJQpxBcKgqNLDVCeuejJYN43cmzeOND7mkDr5FOwbI"
+                "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzQ3MzY4ODM3LCJleHAiOjE3NDczNzI0Mzd9.uWmJY8HJ--N_qE7jqowfeNAbRvwvu3kMtZ6y50MTzTU"
             },
             body: JSON.stringify({
                 itemId: "coin-500",  // 테스트용 상품 ID
@@ -25,11 +25,11 @@
         });
 
         const startData = await startResponse.json();
-        const paymentId = startData.paymentId;
+        const paymentId = startData.result.paymentId;
         console.log("서버로부터 받은 paymentId: " + paymentId);
 
         const storeId = "store-4a14d1f5-1b04-45e3-b718-a0d5f8e7a757";
-        const channelKey = "channel-key-92b94069-2c2e-46e5-a866-76d418684ee1";
+        const channelKey = "channel-key-f58815d7-21a7-4020-a747-a39a359e20ff";
 
         // 2. 포트원 결제창 호출
         const payment = await PortOne.requestPayment({
@@ -39,7 +39,7 @@
             orderName: "테스트 코인 결제",
             totalAmount: 550,
             currency: "KRW",
-            payMethod: "EASY_PAY"
+            payMethod: "CARD"
         });
 
         console.log("결제 결과", payment);
@@ -50,7 +50,7 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiR1VFU1QiLCJpYXQiOjE3NDcxMjA3NDcsImV4cCI6MTc0NzEyNDM0N30.1AJQpxBcKgqNLDVCeuejJYN43cmzeOND7mkDr5FOwbI"
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3MDVsbyIsImlkIjoyLCJyb2xlIjoiTUVNQkVSIiwiaWF0IjoxNzQ3MzY4ODM3LCJleHAiOjE3NDczNzI0Mzd9.uWmJY8HJ--N_qE7jqowfeNAbRvwvu3kMtZ6y50MTzTU"
                 },
                 body: JSON.stringify({ paymentId: payment.paymentId })
             });

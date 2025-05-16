@@ -8,19 +8,16 @@ import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
 import com.example.fitpassserver.domain.coin.service.CoinService;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PGRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PaymentDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PortOneRequestDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.StartPaymentRequest;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PGResponseDTO;
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PortOneResponseDTO;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PaymentIdResponse;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneErrorCode;
 import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneException;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
-import com.example.fitpassserver.domain.coinPaymentHistory.util.PortOnePaymentIdUtil;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.NewCoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.plan.entity.Plan;
-import com.example.fitpassserver.domain.plan.entity.PlanTypeEntity;
-import com.example.fitpassserver.domain.plan.exception.PlanErrorCode;
-import com.example.fitpassserver.domain.plan.exception.PlanException;
 import com.example.fitpassserver.domain.plan.repository.PlanTypeRepository;
 import com.example.fitpassserver.domain.plan.service.PlanService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +26,7 @@ import io.portone.sdk.server.payment.PaymentClient;
 import io.portone.sdk.server.payment.VirtualAccountIssuedPayment;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,6 +48,7 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final Map<String, PaymentDTO> paymentStore = new HashMap<>();
     private final PaymentClient portone;
+    private final NewCoinPaymentHistoryRedisService newCoinPaymentHistoryRedisService;
 
     @Override
     public PGResponseDTO.PGSinglePayResponseDTO payWithBillingKey(Member member, PGRequestDTO.PGPaymentWithBillingKeyRequestDTO dto) {
@@ -110,8 +109,23 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
 //    }
 
     @Override
+    public PaymentIdResponse createPaymentId(Member member, StartPaymentRequest request) {
+        String paymentId = UUID.randomUUID().toString().replace("-", "");
+
+        newCoinPaymentHistoryRedisService.savePaymentInfo(
+                paymentId,
+                member.getId(),
+                request.itemId(),
+                request.price()
+        );
+
+        return PaymentIdResponse.builder()
+                .paymentId(paymentId)
+                .build();
+    }
+
+    @Override
     public Mono<PaymentDTO> syncPayment(String paymentId, Member member) {
-        log.info("SYNC PAYMENT");
         PaymentDTO payment = paymentStore.get(paymentId);
         if (payment == null) {
             payment = new PaymentDTO("PENDING");
@@ -119,7 +133,6 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
         }
         PaymentDTO finalPayment = payment;
 
-        log.info("return 시작");
         return Mono.fromFuture(portone.getPayment(paymentId))
                 .onErrorMap(error -> {
                     log.error("PortOne 결제 조회 실패: {}", error.getMessage(), error);
@@ -128,33 +141,28 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
                 .flatMap(actualPayment -> {
                     if (actualPayment instanceof PaidPayment paidPayment) {
                         if (!verifyPayment(paidPayment, member)) {
-                            log.info("1");
                             return Mono.error(new PortOneException(PortOneErrorCode.PORT_ONE_ERROR_CODE));
                         }
                         log.info("결제 성공 {}", actualPayment);
+                        newCoinPaymentHistoryRedisService.deletePaymentInfo(paymentId);
                         if ("PAID".equals(finalPayment.status())) {
-                            log.info("2");
                             return Mono.just(finalPayment);
                         } else {
-                            log.info("3");
                             PaymentDTO newPayment = new PaymentDTO("PAID");
                             paymentStore.put(paymentId, newPayment);
                             return Mono.just(newPayment);
                         }
                     } else if (actualPayment instanceof VirtualAccountIssuedPayment) {
-                        log.info("4");
                         PaymentDTO newPayment = new PaymentDTO("VIRTUAL_ACCOUNT_ISSUED");
                         paymentStore.put(paymentId, newPayment);
                         return Mono.just(newPayment);
                     } else {
-                        log.info("5");
                         return Mono.just(finalPayment);
                     }
                 });
     }
 
     private boolean verifyPayment(PaidPayment payment, Member member) {
-        log.info("VERIFY PAYMENT");
         int paidAmount = (int) payment.getAmount().getTotal();
 
         CoinTypeEntity coinType = coinTypeRepository.findByPrice(paidAmount)
@@ -165,7 +173,6 @@ public class PGPaymentCommandServiceImpl implements PGPaymentCommandService {
         CoinPaymentHistory coinPaymentHistory = coinPaymentHistoryService.createPGSinglePayCoin(member, payment.getId(), paidAmount, coin);
         coinService.setCoinAndCoinPayment(coin, coinPaymentHistory);
 
-        log.info("Verify Payment 완료");
         return true;
     }
 }
