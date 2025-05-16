@@ -125,6 +125,7 @@ public class CoinPaymentController {
         return ApiResponse.onSuccess(response);
     }
 
+    @Operation(summary = "포트원 결제 시작 요청입니다. PaymentId를 반환합니다.")
     @PostMapping("/coin/pay/start")
     public ApiResponse<?> startPayment(
             @CurrentMember Member member,
@@ -154,6 +155,7 @@ public class CoinPaymentController {
         return Mono.empty();
     }
 
+    @Operation(summary = "포트원 결제를 완료합니다. 결제 상태를 검증하고 동기화합니다.")
     @PostMapping("/api/payment/complete")
     public Mono<PaymentDTO> completePayment(
             @CurrentMember Member member,
