@@ -36,12 +36,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 @RestController
-//@RequestMapping("/coin/pay")
+@RequestMapping("/coin/pay")
 @RequiredArgsConstructor
 @Tag(name = "코인 결제 API", description = "코인 결제 API입니다.")
 public class CoinPaymentController {
@@ -126,7 +127,7 @@ public class CoinPaymentController {
     }
 
     @Operation(summary = "포트원 결제 시작 요청입니다. PaymentId를 반환합니다.")
-    @PostMapping("/coin/pay/start")
+    @PostMapping("/start")
     public ApiResponse<?> startPayment(
             @CurrentMember Member member,
             @RequestBody StartPaymentRequest request
@@ -136,7 +137,7 @@ public class CoinPaymentController {
     }
 
     @Operation(summary = "결제 정보를 실시간으로 전달받기 위한 웹훅입니다.")
-    @PostMapping("/api/payment/webhook")
+    @PostMapping("/payment/webhook")
     public Mono<Unit> handleWebhook(
             @RequestBody String body,
             @RequestHeader("webhook-id") String webhookId,
@@ -156,7 +157,7 @@ public class CoinPaymentController {
     }
 
     @Operation(summary = "포트원 결제를 완료합니다. 결제 상태를 검증하고 동기화합니다.")
-    @PostMapping("/api/payment/complete")
+    @PostMapping("/payment/complete")
     public Mono<PaymentDTO> completePayment(
             @CurrentMember Member member,
             @RequestBody CompletePaymentRequest completePaymentRequest
