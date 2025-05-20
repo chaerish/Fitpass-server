@@ -85,7 +85,7 @@ public class Member extends BaseEntity implements LoginUser {
     private Boolean isMarketingAgreed;
 
     @Column(name = "is_personal_information_agreed", nullable = false)
-    private Boolean isPersonalInformaionAgreed;
+    private Boolean isPersonalInformationAgreed;
 
     @Column(name = "profile_image")
     private String profileImage;

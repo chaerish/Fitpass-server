@@ -1,5 +1,6 @@
 package com.example.fitpassserver.global.oauth;
 
+import com.example.fitpassserver.domain.member.converter.MemberConverter;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.domain.member.entity.Role;
 import com.example.fitpassserver.global.oauth.provider.GoogleOAuth2UserInfo;
@@ -57,19 +58,6 @@ public class OAuthAttributes {
     }
 
     public Member toMember(OAuth2UserInfo oauth2UserInfo) {
-        return Member.builder()
-                .provider(oauth2UserInfo.getProvider())
-                .providerId(oauth2UserInfo.getProviderId())
-                .loginId(oauth2UserInfo.getProvider() + "_" + oauth2UserInfo.getProviderId())
-                .name(oauth2UserInfo.getName())
-                .password(UUID.randomUUID().toString())
-                .phoneNumber("temp")
-                .role(Role.GUEST)
-                .isAgree(false)
-                .isTermsAgreed(false)
-                .isLocationAgreed(false)
-                .isThirdPartyAgreed(false)
-                .isMarketingAgreed(false)
-                .build();
+        return MemberConverter.toMember(oauth2UserInfo);
     }
 }
