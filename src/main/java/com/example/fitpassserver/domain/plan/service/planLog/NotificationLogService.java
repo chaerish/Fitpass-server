@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class NotificationLogService {
     private final NotificationLogRepository notificationLogRepository;
 
+
     // 알림톡 동시에 객체 생성
     public NotificationLog createNewNotification(LogType logType) {
         NotificationLog notificationLog = NotificationLog.builder()
@@ -23,7 +24,7 @@ public class NotificationLogService {
         return notificationLog;
     }
 
-    // 실패 알림톡 동시에  생성
+    // 실패 알림톡 동시에 생성
     public NotificationLog createFailNotification(LogType logType) {
         NotificationLog notificationLog = NotificationLog.builder()
                 .sentAt(LocalDateTime.now())

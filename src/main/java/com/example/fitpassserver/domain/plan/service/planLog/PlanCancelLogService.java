@@ -22,7 +22,7 @@ public class PlanCancelLogService {
     private final PlanCancelLogRepository planCancelLogRepository;
     private final PlanTypeRepository planTypeRepository;
 
-    public void create(PlanAttemptLog planAttemptLog, CancelType cancelType) {
+    public PlanCancelLog create(PlanAttemptLog planAttemptLog, CancelType cancelType) {
         Plan plan = planAttemptLog.getPlan();
         PlanTypeEntity planTypeEntity = planTypeRepository.findByPlanType(plan.getPlanType())
                 .orElseThrow(() -> new PlanException(PlanErrorCode.PLAN_NOT_FOUND));
@@ -34,7 +34,7 @@ public class PlanCancelLogService {
                 .planAttemptLog(planAttemptLog)
                 .cancelAmount(planTypeEntity.getPrice())
                 .build();
-        planCancelLogRepository.save(planCancelLog);
+        return planCancelLogRepository.save(planCancelLog);
     }
 
     public List<PlanCancelLog> findCancelNotificationTarget() {

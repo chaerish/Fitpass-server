@@ -5,13 +5,19 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.Headers;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.util.IOUtils;
 import com.example.fitpassserver.domain.profile.entity.Profile;
 import com.example.fitpassserver.domain.profile.exception.ProfileErrorCode;
 import com.example.fitpassserver.domain.profile.exception.ProfileException;
 import com.example.fitpassserver.domain.profile.repositroy.ProfileRepository;
 import com.example.fitpassserver.global.aws.s3.dto.S3UrlResponseDTO;
+import com.example.fitpassserver.global.aws.s3.exception.S3ErrorCode;
+import com.example.fitpassserver.global.aws.s3.exception.S3Exception;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -179,4 +185,14 @@ public class S3Service {
                 .build();
     }
 
+    public byte[] downloadFileFromS3(String key) {
+        try {
+            S3Object s3Object = amazonS3Client.getObject(new GetObjectRequest(bucket, key));
+            try (S3ObjectInputStream inputStream = s3Object.getObjectContent()) {
+                return IOUtils.toByteArray(inputStream);
+            }
+        } catch (Exception e) {
+            throw new S3Exception(S3ErrorCode.DOWNLOAD_FAILED);
+        }
+    }
 }

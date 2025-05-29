@@ -44,6 +44,17 @@ public class FitnessAdminController {
         return ApiResponse.onSuccess(fitnessId);
     }
 
+
+    @Operation(
+            summary = "Fitness 조회",
+            description = "fitnessId에 해당하는 시설 정보를 조회합니다."
+    )
+    @GetMapping("/{fitnessId}")
+    public ApiResponse<FitnessAdminResponseDTO.FitnessAdminPreviewDTO> getFitness(@PathVariable Long fitnessId) {
+        return ApiResponse.onSuccess(fitnessAdminService.getFitness(fitnessId));
+    }
+
+
     @Operation(
             summary = "Fitness 목록 조회",
             description = "페이지네이션, 정렬, 검색 기능을 포함한 Fitness 목록을 조회합니다."
@@ -68,10 +79,10 @@ public class FitnessAdminController {
             summary = "Fitness 수정",
             description = "주어진 fitnessId에 해당하는 Fitness 정보를 업데이트합니다."
     )
-    @PutMapping("/{fitnessId}")
+    @PutMapping(value = "/{fitnessId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ApiResponse<FitnessAdminResponseDTO.FitnessInfoDTO> updateFitness(
             @Parameter(description = "수정할 Fitness 정보", required = true)
-            @RequestBody FitnessAdminRequestDTO.FitnessReqDTO request,
+            @RequestPart FitnessAdminRequestDTO.FitnessReqDTO request,
             @Parameter(description = "수정할 Fitness ID", required = true, example = "1")
             @PathVariable Long fitnessId){
         FitnessAdminResponseDTO.FitnessInfoDTO result = fitnessAdminService.updateFitness(fitnessId, request);
