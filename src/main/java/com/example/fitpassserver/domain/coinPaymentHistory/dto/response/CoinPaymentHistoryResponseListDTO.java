@@ -1,6 +1,5 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.dto.response;
 
-import com.example.fitpassserver.domain.coin.entity.Coin;
 import com.example.fitpassserver.domain.coinPaymentHistory.entity.CoinPaymentHistory;
 import com.example.fitpassserver.domain.plan.entity.PlanType;
 import java.time.LocalDateTime;
@@ -24,12 +23,11 @@ public record CoinPaymentHistoryResponseListDTO(
             Integer price,
             LocalDateTime createdAt
     ) {
-        public static CoinPaymentHistoryResponseDTO toCoinPaymentHistoryResponseDTO(Coin coin) {
-            CoinPaymentHistory coinPaymentHistory = coin.getHistory();
+        public static CoinPaymentHistoryResponseDTO toCoinPaymentHistoryResponseDTO(CoinPaymentHistory coinPaymentHistory) {
             return CoinPaymentHistoryResponseDTO.builder()
                     .id(coinPaymentHistory.getId())
-                    .planType(coin.getPlanType())
-                    .createdAt(coin.getCreatedAt())
+                    .planType(coinPaymentHistory.getCoin().getPlanType())
+                    .createdAt(coinPaymentHistory.getCreatedAt())
                     .isAgree(coinPaymentHistory.isAgree())
                     .coinCount(coinPaymentHistory.getCoinCount())
                     .price(coinPaymentHistory.getPaymentPrice())

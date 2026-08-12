@@ -106,7 +106,7 @@ public class CoinPaymentHistoryService {
 
     public CoinPaymentHistoryResponseListDTO getCoinHistory(Member member, String query, Long cursor, int size) {
         Pageable pageable = PageRequest.of(0, size);
-        Slice<Coin> coinPaymentHistories;
+        Slice<CoinPaymentHistory> coinPaymentHistories;
         LocalDateTime createdAt = LocalDateTime.now();
         if (cursor != 0) {
             createdAt = coinPaymentRepository.findById(cursor).orElseThrow(() ->
@@ -115,26 +115,23 @@ public class CoinPaymentHistoryService {
         }
 
         if (query.toLowerCase().equals("all")) {
-            coinPaymentHistories = coinRepository.findAllByHistoryCreatedAtLessThanAndMemberIsOrderByCreatedAtDesc(
-                    createdAt, member, pageable);
+            coinPaymentHistories = coinPaymentRepository
+                    .findAllByMemberAndCreatedAtLessThanAndCoinIsNotNullAndPaymentStatusOrderByCreatedAtDesc(
+                            member, createdAt, PaymentStatus.SUCCESS, pageable);
         } else {
-            coinPaymentHistories = coinRepository.findAllByQueryIsCreatedAtLessThanOrderByCreatedAtDesc(query,
-                    createdAt, member, pageable);
+            coinPaymentHistories = coinPaymentRepository.findAllByQueryAndCreatedAtLessThanOrderByCreatedAtDesc(
+                    query.toLowerCase(), createdAt, member, PaymentStatus.SUCCESS, pageable);
         }
         boolean isSubscribing = planRepository.existsByMemberAndPlanTypeNotAndPlanTypeIsNotNull(member, PlanType.NONE);
-        List<Coin> coins = coinPaymentHistories.getContent();
+        List<CoinPaymentHistory> histories = coinPaymentHistories.getContent();
         return CoinPaymentHistoryResponseListDTO.builder()
-                .items(coins.stream()
+                .items(histories.stream()
                         .map(CoinPaymentHistoryResponseListDTO.CoinPaymentHistoryResponseDTO::toCoinPaymentHistoryResponseDTO)
                         .toList())
                 .isSubscribing(isSubscribing)
                 .hasNext(coinPaymentHistories.hasNext())
                 .cursor(coinPaymentHistories.hasNext() ?
-                        Optional.ofNullable(
-                                        coinPaymentHistories.getContent().get(coinPaymentHistories.getNumberOfElements() - 1)
-                                                .getHistory())
-                                .map(CoinPaymentHistory::getId)
-                                .orElse(null)
+                        histories.get(coinPaymentHistories.getNumberOfElements() - 1).getId()
                         : null)
                 .size(coinPaymentHistories.getNumberOfElements())
                 .build();
