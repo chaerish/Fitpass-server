@@ -54,8 +54,8 @@ public class CoinPaymentHistory extends BaseEntity {
 
     @Column(name = "coin_count", nullable = false)
     private Integer coinCount;
-    @OneToOne
-    @JoinColumn(name = "coin_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coin_id", unique = true)
     private Coin coin;
 
     public void setCoin(Coin coin) {

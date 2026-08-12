@@ -40,6 +40,10 @@ public class CoinService {
         return createNewCoin(member, dto.amount().total());
     }
 
+    public Coin createNewCoinByKakaoPay(Member member, int price) {
+        return createNewCoin(member, price);
+    }
+
     public Coin createNewCoinByPg(Member member, String paymentId, int price) {
         return createNewCoin(member, price);
     }
@@ -53,8 +57,8 @@ public class CoinService {
 
     @Transactional
     public void setCoinAndCoinPayment(Coin coin, CoinPaymentHistory history) {
-        coin.setHistory(history);
-        coinRepository.save(coin);
+        history.setCoin(coin);
+        coinPaymentRepository.save(history);
         eventPublisher.publishEvent(
                 new CoinPaymentAllSuccessEvent(coin.getMember().getPhoneNumber(),
                         history.getCoinCount(),
@@ -63,10 +67,9 @@ public class CoinService {
 
     @Transactional
     public void setCoinAndCoinPaymentByScheduler(Coin coin, CoinPaymentHistory history) {
-        coin.setHistory(history);
-        coinRepository.save(coin);
+        history.setCoin(coin);
+        coinPaymentRepository.save(history);
     }
-
 
     public Coin createSubscriptionNewCoin(Member member, Plan plan) {
         PlanType planType = plan.getPlanType();
