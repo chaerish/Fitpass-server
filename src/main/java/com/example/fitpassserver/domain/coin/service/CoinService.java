@@ -40,6 +40,10 @@ public class CoinService {
         return createNewCoin(member, dto.amount().total());
     }
 
+    public Coin createNewCoinByKakaoPay(Member member, int price) {
+        return createNewCoin(member, price);
+    }
+
     public Coin createNewCoinByPg(Member member, String paymentId, int price) {
         return createNewCoin(member, price);
     }

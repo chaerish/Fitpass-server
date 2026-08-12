@@ -11,9 +11,7 @@ import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPay
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PGResponseDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PaymentIdResponse;
-import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneErrorCode;
-import com.example.fitpassserver.domain.coinPaymentHistory.exception.PortOneException;
-import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryRedisService;
+import com.example.fitpassserver.domain.coinPaymentHistory.service.redis.CoinPaymentHistoryRedisService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.CoinPaymentHistoryService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.KakaoPaymentService;
 import com.example.fitpassserver.domain.coinPaymentHistory.service.NewCoinPaymentHistoryRedisService;
@@ -22,20 +20,15 @@ import com.example.fitpassserver.domain.coinPaymentHistory.service.query.PGPayme
 import com.example.fitpassserver.domain.member.annotation.CurrentMember;
 import com.example.fitpassserver.domain.member.entity.Member;
 import com.example.fitpassserver.global.apiPayload.ApiResponse;
-import io.portone.sdk.server.webhook.Webhook;
-import io.portone.sdk.server.webhook.WebhookTransaction;
-import io.portone.sdk.server.webhook.WebhookVerifier;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import kotlin.Unit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,8 +45,6 @@ public class CoinPaymentController {
     private final CoinPaymentHistoryRedisService coinPaymentHistoryRedisService;
     private final PGPaymentCommandService pgPaymentCommandService;
     private final PGPaymentQueryService pgPaymentQueryService;
-
-    private final WebhookVerifier portoneWebhook;
     private final NewCoinPaymentHistoryRedisService newCoinPaymentHistoryRedisService;
 
     @Operation(summary = "코인 단건 결제 요청", description = "코인 단건 결제를 요청합니다.")
@@ -61,6 +52,7 @@ public class CoinPaymentController {
     public ApiResponse<KakaoPaymentResponseDTO> requestSinglePay(@CurrentMember Member member,
                                                                  @RequestBody @Valid CoinSinglePayRequestDTO body) {
         KakaoPaymentResponseDTO response = paymentService.ready(body);
+        coinPaymentHistoryService.createReadyKakaoPayment(member, body, response.tid());
         coinPaymentHistoryRedisService.saveTid(member.getId().toString(), response.tid());
         return ApiResponse.onSuccess(response);
     }
@@ -71,24 +63,31 @@ public class CoinPaymentController {
                                                                 @RequestParam("pg_token") String pgToken) {
         String memberId = member.getId().toString();
         String tid = coinPaymentHistoryRedisService.getTid(memberId);
+        coinPaymentHistoryService.getReadyKakaoPayment(member, tid); //ready내역이 있는 결제만 승인 처리.
         KakaoPaymentApproveDTO dto = paymentService.approve(member, pgToken, tid);  //카카오 페이 결제 요청
         coinPaymentHistoryRedisService.deleteTid(memberId); //레디스에 저장되어있던 tid 삭제
         return ApiResponse.onSuccess(dto);
     }
 
-    @Operation(summary = "코인 단건 결제 실패", description = "결제 실패시 실행되는 API")
     @PostMapping("/fail")
     public ApiResponse<?> failSinglePay(@CurrentMember Member member) {
-        coinPaymentHistoryService.fail(member);
+        String memberId = member.getId().toString();
+        String tid = coinPaymentHistoryRedisService.getTid(memberId);
+        coinPaymentHistoryService.fail(member, tid);
+        coinPaymentHistoryRedisService.deleteTid(memberId);
         return ApiResponse.onSuccess("결제가 실패되었습니다.");
     }
 
-    @Operation(summary = "코인 단건 결제 취소", description = "결제 취소시 실행되는 API")
+
     @PostMapping("/cancel")
     public ApiResponse<?> cancelSinglePay(@CurrentMember Member member) {
-        coinPaymentHistoryService.cancel(member);
+        String memberId = member.getId().toString();
+        String tid = coinPaymentHistoryRedisService.getTid(memberId);
+        coinPaymentHistoryService.cancel(member, tid);
+        coinPaymentHistoryRedisService.deleteTid(memberId);
         return ApiResponse.onSuccess("결제가 취소되었습니다.");
     }
+
 
     @Operation(summary = "코인 결제 내역 조회 API", description = "결제 내역 조회 API")
     @Parameters({
@@ -135,26 +134,26 @@ public class CoinPaymentController {
         PaymentIdResponse response = pgPaymentCommandService.createPaymentId(member, request);
         return ApiResponse.onSuccess(response);
     }
-
-    @Operation(summary = "결제 정보를 실시간으로 전달받기 위한 웹훅입니다.")
-    @PostMapping("/payment/webhook")
-    public Mono<Unit> handleWebhook(
-            @RequestBody String body,
-            @RequestHeader("webhook-id") String webhookId,
-            @RequestHeader("webhook-timestamp") String webhookTimestamp,
-            @RequestHeader("webhook-signature") String webhookSignature
-    ) throws PortOneException {
-        Webhook webhook;
-        try {
-            webhook = portoneWebhook.verify(body, webhookId, webhookSignature, webhookTimestamp);
-        } catch (Exception e) {
-            throw new PortOneException(PortOneErrorCode.PORT_ONE_ERROR_CODE);
-        }
-        if (webhook instanceof WebhookTransaction transaction) {
-            return pgPaymentCommandService.syncPayment(transaction.getData().getPaymentId(), null).map(payment -> Unit.INSTANCE);
-        }
-        return Mono.empty();
-    }
+//
+//    @Operation(summary = "결제 정보를 실시간으로 전달받기 위한 웹훅입니다.")
+//    @PostMapping("/payment/webhook")
+//    public Mono<Unit> handleWebhook(
+//            @RequestBody String body,
+//            @RequestHeader("webhook-id") String webhookId,
+//            @RequestHeader("webhook-timestamp") String webhookTimestamp,
+//            @RequestHeader("webhook-signature") String webhookSignature
+//    ) throws PortOneException {
+//        Webhook webhook;
+//        try {
+//            webhook = portoneWebhook.verify(body, webhookId, webhookSignature, webhookTimestamp);
+//        } catch (Exception e) {
+//            throw new PortOneException(PortOneErrorCode.PORT_ONE_ERROR_CODE);
+//        }
+//        if (webhook instanceof WebhookTransaction transaction) {
+//            return pgPaymentCommandService.syncPayment(transaction.getData().getPaymentId(), null).map(payment -> Unit.INSTANCE);
+//        }
+//        return Mono.empty();
+//    }
 
     @Operation(summary = "포트원 결제를 완료합니다. 결제 상태를 검증하고 동기화합니다.")
     @PostMapping("/payment/complete")

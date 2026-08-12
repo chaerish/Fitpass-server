@@ -14,6 +14,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface CoinPaymentRepository extends JpaRepository<CoinPaymentHistory, Long> {
     Optional<CoinPaymentHistory> findFirst1ByMemberOrderByCreatedAtDesc(Member member);
+    Optional<CoinPaymentHistory> findByMemberAndTidAndPaymentStatus(
+            Member member,
+            String tid,
+            PaymentStatus paymentStatus
+    );
+    Optional<CoinPaymentHistory> findByIdAndPaymentStatus(Long id, PaymentStatus paymentStatus);
 
     Page<CoinPaymentHistory> findAllByMemberIn(Pageable pageable, List<Member> member);
 

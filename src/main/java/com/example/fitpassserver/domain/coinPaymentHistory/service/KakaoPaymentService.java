@@ -1,6 +1,5 @@
 package com.example.fitpassserver.domain.coinPaymentHistory.service;
 
-import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinSuccessEvent;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.KakaoPaymentRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.PlanSubScriptionRequestDTO;
@@ -46,6 +45,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class KakaoPaymentService {
     private final PlanTypeRepository planTypeRepository;
+    private final CoinPaymentHistoryService coinPaymentHistoryService;
 
     @Value("${kakaopay.secret-key}")
     private String secretKey;
@@ -193,8 +193,7 @@ public class KakaoPaymentService {
                     log.error("API Error {}", e.getMessage());
                 });
         KakaoPaymentApproveDTO dto = response.block();
-        eventPublisher.publishEvent(
-                new CoinSuccessEvent(member, dto));
+        coinPaymentHistoryService.approveKakaoPayment(member, tid, dto);
         return dto;
     }
 

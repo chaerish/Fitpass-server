@@ -6,6 +6,8 @@ import com.example.fitpassserver.domain.coin.exception.CoinErrorCode;
 import com.example.fitpassserver.domain.coin.exception.CoinException;
 import com.example.fitpassserver.domain.coin.repository.CoinRepository;
 import com.example.fitpassserver.domain.coin.repository.CoinTypeRepository;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.event.CoinApprovedEvent;
+import com.example.fitpassserver.domain.coinPaymentHistory.dto.request.CoinSinglePayRequestDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.CoinPaymentHistoryResponseListDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.KakaoPaymentApproveDTO;
 import com.example.fitpassserver.domain.coinPaymentHistory.dto.response.PortOneResponseDTO;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -41,12 +44,52 @@ public class CoinPaymentHistoryService {
     private final CoinTypeRepository coinTypeRepository;
     private final CoinRepository coinRepository;
     private final PlanRepository planRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final String KAKAOPAY = "kakaopay";
     private final String PGPAY = "PG";
 
     public CoinPaymentHistory createNewCoinPayment(Member member, KakaoPaymentApproveDTO dto, Coin coin) {
         return createSinglePayCoin(member, dto.tid(), dto.amount().total(), coin, KAKAOPAY);
     }
+
+    @Transactional
+    public CoinPaymentHistory createReadyKakaoPayment(Member member, CoinSinglePayRequestDTO dto, String tid) {
+        CoinTypeEntity coinType = coinTypeRepository.findByPrice(dto.totalAmount())
+                .orElseThrow(() -> new CoinException(CoinErrorCode.COIN_NOT_FOUND));
+
+        return coinPaymentRepository.save(CoinPaymentHistory.builder()
+                .paymentMethod(KAKAOPAY)
+                .isAgree(true)
+                .paymentStatus(PaymentStatus.READY)
+                .tid(tid)
+                .member(member)
+                .coinCount(coinType.getCoinQuantity())
+                .paymentPrice(dto.totalAmount())
+                .build());
+    }
+
+    //READY인 TID 조회
+    public CoinPaymentHistory getReadyKakaoPayment(Member member, String tid){
+        return coinPaymentRepository.findByMemberAndTidAndPaymentStatus(member, tid, PaymentStatus.READY)
+                .orElseThrow(()-> new KakaoPayException(KakaoPayErrorCode.NO_TID_ERROR));
+    }
+    //결제 승인 확정 메서드
+    @Transactional
+    public void approveKakaoPayment(Member member, String tid, KakaoPaymentApproveDTO dto){
+        CoinPaymentHistory history = getReadyKakaoPayment(member,tid);
+        if(!history.getPaymentPrice().equals(dto.amount().total())) {
+            throw new KakaoPayException(KakaoPayErrorCode.PAYMENT_AMOUNT_MISMATCH);
+        }
+
+        history.changeStatus(PaymentStatus.PAY_SUCCESS);
+        eventPublisher.publishEvent(new CoinApprovedEvent(history.getId()));
+    }
+
+    public CoinPaymentHistory getPaySuccessPayment(Long historyId) {
+        return coinPaymentRepository.findByIdAndPaymentStatus(historyId, PaymentStatus.PAY_SUCCESS)
+                .orElseThrow(() -> new KakaoPayException(KakaoPayErrorCode.NO_TID_ERROR));
+    }
+
 
     public CoinPaymentHistory createNewCoinPaymentByScheduler(Member member, SubscriptionResponseDTO dto, Coin coin) {
         return createPlanCoin(member, dto.item_name(), dto.tid(), dto.amount().total(), coin, KAKAOPAY);
@@ -109,18 +152,19 @@ public class CoinPaymentHistoryService {
     }
 
     @Transactional
-    public void cancel(Member member) {
-        CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
+    public void cancel(Member member, String tid) {
+        CoinPaymentHistory history = getReadyKakaoPayment(member, tid);
         history.changeStatus(PaymentStatus.CANCEL);
         coinPaymentRepository.save(history);
     }
 
     @Transactional
-    public void fail(Member member) {
-        CoinPaymentHistory history = getCurrentTidCoinPaymentHistory(member);
+    public void fail(Member member, String tid) {
+        CoinPaymentHistory history = getReadyKakaoPayment(member, tid);
         history.changeStatus(PaymentStatus.FAIL);
         coinPaymentRepository.save(history);
     }
+
 
     public CoinPaymentHistory createPGSinglePayCoin(Member member, String paymentId, int price, Coin coin) {
         return this.createSinglePayCoin(member, paymentId, price, coin, PGPAY);
